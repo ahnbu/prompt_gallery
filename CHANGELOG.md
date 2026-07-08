@@ -4,6 +4,7 @@
 
 | 일시 | 유형 | 범위 | 변경내용 | 변경사유 | 작성AI |
 |---|---|---|---|---|---|
+| 2026-07-08 15:43 | docs | repo | GitHub 원격 초기 LICENSE 이력 병합 | - | Unknown |
 | 2026-07-08 15:40 | docs | evidence | Wave 0 보안 QA 로그 증거 추가 | - | Unknown |
 | 2026-07-08 15:35 | chore | app | Cloudflare Workers React scaffold와 Wave 0 QA 검증 기반 추가 | - | Unknown |
 | 2026-07-08 14:58 | docs | cost-management | R2 비용관리 판단 문서와 이미지 업로드 비용 방어 백로그 정리 | - | Codex |
