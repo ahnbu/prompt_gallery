@@ -4,5 +4,6 @@
 
 | 일시 | 유형 | 범위 | 변경내용 | 변경사유 | 작성AI |
 |---|---|---|---|---|---|
+| 2026-07-08 13:35 | docs | specs | Prompt Gallery 요구사항 SPEC 추가 | - | Unknown |
 | 2026-07-08 13:35 | chore | repo | 초기 레포 제외 규칙 추가 | - | Unknown |
 | YYYY-MM-DD HH:MM | feat/fix/refactor/docs/chore | area-or-folder | 변경 요약 | 변경 이유·목적 | Claude/Codex/Gemini |
