@@ -4,6 +4,7 @@
 
 | 일시 | 유형 | 범위 | 변경내용 | 변경사유 | 작성AI |
 |---|---|---|---|---|---|
+| 2026-07-08 15:49 | docs | cost-management | 비용관리 문서 참조를 wikilink로 정리하고 Budget Alert 설정 완료 기록 | - | Codex |
 | 2026-07-08 15:43 | docs | repo | GitHub 원격 초기 LICENSE 이력 병합 | - | Unknown |
 | 2026-07-08 15:40 | docs | evidence | Wave 0 보안 QA 로그 증거 추가 | - | Unknown |
 | 2026-07-08 15:35 | chore | app | Cloudflare Workers React scaffold와 Wave 0 QA 검증 기반 추가 | - | Unknown |
