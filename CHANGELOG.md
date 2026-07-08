@@ -4,6 +4,7 @@
 
 | 일시 | 유형 | 범위 | 변경내용 | 변경사유 | 작성AI |
 |---|---|---|---|---|---|
+| 2026-07-08 14:13 | docs | implementation-plan | Prompt Gallery 구현 계획과 Cloudflare 환경세팅 값 반영 | - | Unknown |
 | 2026-07-08 13:39 | docs | 저장-배포-리서치 | Prompt Gallery 저장·배포 리서치의 Workers+D1+R2 권장안과 초보자용 용어 설명을 보강 | - | Unknown |
 | 2026-07-08 13:35 | docs | research-artifacts | 저장·배포 리서치 근거 로그 추가 | - | Unknown |
 | 2026-07-08 13:35 | docs | research | Prompt Gallery 저장·배포 리서치와 검수 보고서 추가 | - | Unknown |
