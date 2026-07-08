@@ -158,7 +158,7 @@ Your next move: 이 계획을 실행하려면 `$omo:start-work` 또는 동등한
 ## Todos
 > Implementation + Test = ONE todo. Never separate.
 <!-- APPEND TASK BATCHES BELOW THIS LINE WITH edit/apply_patch - never rewrite the headers above. -->
-- [ ] 1. Wave 0 - Scaffold Cloudflare Workers React app
+- [x] 1. Wave 0 - Scaffold Cloudflare Workers React app
   What to do / Must NOT do: Create the minimal app structure, not product features yet. Add `package.json`, `pnpm-lock.yaml`, `vite.config.ts`, `wrangler.jsonc`, `tsconfig*.json`, `src/client/*`, `src/worker/*`, and a visible home shell. Use `@cloudflare/vite-plugin`, React, TypeScript, lucide-react, Vitest, Playwright, and Wrangler. Do not create `_docs` plan duplicates.
   Parallelization: Wave 0 | Blocked by: none | Blocks: 2, 3, 4
   References: `_docs/20260708_02_prompt-gallery_저장-배포-리서치.md:47`, `_docs/specs/20260708_01_prompt-gallery_요구사항_SPEC.md:54`, Context7 `/cloudflare/workers-sdk` Vite plugin docs.
@@ -168,7 +168,7 @@ Your next move: 이 계획을 실행하려면 `$omo:start-work` 또는 동등한
   - Happy path: start `pnpm dev -- --host 127.0.0.1`, run `curl -i http://127.0.0.1:5173/api/health`, capture output, then stop the dev server; expected `HTTP/1.1 200` and JSON containing `"ok":true`. Append output to `.omo/evidence/wave-0-scaffold.txt`.
   Commit: No, commit at Wave 0 gate.
 
-- [ ] 2. Wave 0 - Configure D1/R2 bindings and local migrations directory
+- [x] 2. Wave 0 - Configure D1/R2 bindings and local migrations directory
   What to do / Must NOT do: Add `migrations/0001_initial.sql`, typed Worker `Env`, and `wrangler.jsonc` bindings for the existing Cloudflare resources: D1 binding `DB` -> `prompt-gallery-db` with database id `138200be-9d3b-4acf-bb71-42d5ca7e43b7`, and R2 binding `PREVIEWS` -> bucket `prompt-gallery-previews`. Do not create new Cloudflare resources in this task. Do not use `color-db`.
   Parallelization: Wave 0 | Blocked by: 1 | Blocks: 5, 6, 7, 8, 9
   References: `_docs/20260708_02_prompt-gallery_저장-배포-리서치.md:56`, `_docs/20260708_02_prompt-gallery_저장-배포-리서치.md:60`, `_docs/20260708_03_cloudflare-환경세팅-구현착수.md`, Context7 `/cloudflare/workers-sdk` D1/R2 binding docs.
@@ -178,7 +178,7 @@ Your next move: 이 계획을 실행하려면 `$omo:start-work` 또는 동등한
   - Happy path: rerun `pnpm test:worker -- --run src/worker/db-migration.test.ts`; expected PASS and output listing `items`, `tags`, `tag_keywords`, `item_tags`, `workflows`, `workflow_steps`, `assets`. Evidence `.omo/evidence/wave-0-scaffold.txt`.
   Commit: No, commit at Wave 0 gate.
 
-- [ ] 3. Wave 0 - Add repeatable QA, fixture, and evidence scripts
+- [x] 3. Wave 0 - Add repeatable QA, fixture, and evidence scripts
   What to do / Must NOT do: Add `scripts/qa/api-smoke.mjs`, `scripts/qa/browser-smoke.mjs`, `scripts/qa/create-fixtures.mjs`, `scripts/qa/verify-plan.mjs`, `scripts/qa/verify-scope.mjs`, `scripts/qa/verify-cleanup.mjs`, and package scripts `qa:api`, `qa:browser`, `qa:fixtures`, `verify:plan`, `verify:scope`, `verify:cleanup`, `deploy:check`. Scripts must write evidence under `.omo/evidence/`, generate `test/fixtures/preview.png`, and must not require manual browser action.
   Parallelization: Wave 0 | Blocked by: 1 | Blocks: all browser/API QA
   References: `_docs/specs/20260708_01_prompt-gallery_요구사항_SPEC.md:43`, `.omo/plans/prompt-gallery-implementation.md:Verification strategy`
@@ -188,7 +188,7 @@ Your next move: 이 계획을 실행하려면 `$omo:start-work` 또는 동등한
   - Happy path: run `pnpm qa:api -- --output .omo/evidence/wave-0-api-smoke.txt`; expected auto-start/stop and PASS with health JSON.
   Commit: No, commit at Wave 0 gate.
 
-- [ ] 4. Wave 0 - Establish visual baseline without product scope creep
+- [x] 4. Wave 0 - Establish visual baseline without product scope creep
   What to do / Must NOT do: Implement only the app shell placeholder needed for Playwright to confirm nonblank render: app title, search input disabled/placeholder, tab bar placeholders, empty content area. Do not implement CRUD in this todo.
   Parallelization: Wave 0 | Blocked by: 1 | Blocks: all UI todos
   References: `_docs/specs/20260708_01_prompt-gallery_요구사항_SPEC.md:87`, `_docs/specs/20260708_01_prompt-gallery_요구사항_SPEC.md:102`
@@ -198,7 +198,7 @@ Your next move: 이 계획을 실행하려면 `$omo:start-work` 또는 동등한
   - Happy path: run browser QA after shell implementation; expected PASS and screenshot paths recorded in `.omo/evidence/wave-0-browser-smoke.md`.
   Commit: No, commit at Wave 0 gate.
 
-- [ ] 5. Wave 0 gate - Verify and commit scaffold
+- [x] 5. Wave 0 gate - Verify and commit scaffold
   What to do / Must NOT do: Run the full Wave 0 verification bundle, update this plan todo checkboxes only after evidence exists, then commit through `cp`. Do not use raw git commit.
   Parallelization: Wave 0 gate | Blocked by: 1, 2, 3, 4 | Blocks: Wave 1
   References: `.gitignore`, `CHANGELOG.md`, global Git rule requiring cp skill.

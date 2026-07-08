@@ -1,0 +1,41 @@
+{
+  "name": "prompt-gallery",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.7.0",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "test": "vitest --exclude src/worker/db-migration.test.ts",
+    "test:worker": "vitest --config vitest.worker.config.ts",
+    "qa:api": "node scripts/qa/api-smoke.mjs",
+    "qa:browser": "node scripts/qa/browser-smoke.mjs",
+    "qa:fixtures": "node scripts/qa/create-fixtures.mjs",
+    "verify:plan": "node scripts/qa/verify-plan.mjs",
+    "verify:scope": "node scripts/qa/verify-scope.mjs",
+    "verify:cleanup": "node scripts/qa/verify-cleanup.mjs",
+    "deploy:check": "node scripts/qa/deploy-check.mjs"
+  },
+  "dependencies": {
+    "lucide-react": "^0.468.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@cloudflare/vite-plugin": "^1.13.6",
+    "@cloudflare/vitest-pool-workers": "^0.12.21",
+    "@cloudflare/workers-types": "^5.20260708.1",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "playwright": "^1.55.0",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5",
+    "vitest": "^3.2.4",
+    "wrangler": "^4.24.3"
+  }
+}

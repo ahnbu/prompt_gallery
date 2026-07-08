@@ -4,6 +4,7 @@
 
 | 일시 | 유형 | 범위 | 변경내용 | 변경사유 | 작성AI |
 |---|---|---|---|---|---|
+| 2026-07-08 15:35 | chore | app | Cloudflare Workers React scaffold와 Wave 0 QA 검증 기반 추가 | - | Unknown |
 | 2026-07-08 14:58 | docs | cost-management | R2 비용관리 판단 문서와 이미지 업로드 비용 방어 백로그 정리 | - | Codex |
 | 2026-07-08 14:13 | docs | implementation-plan | Prompt Gallery 구현 계획과 Cloudflare 환경세팅 값 반영 | - | Unknown |
 | 2026-07-08 13:39 | docs | 저장-배포-리서치 | Prompt Gallery 저장·배포 리서치의 Workers+D1+R2 권장안과 초보자용 용어 설명을 보강 | - | Unknown |

@@ -1,0 +1,24 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "prompt-gallery",
+  "main": "src/worker/index.ts",
+  "compatibility_date": "2026-07-08",
+  "assets": {
+    "directory": "./dist/client",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "prompt-gallery-db",
+      "database_id": "138200be-9d3b-4acf-bb71-42d5ca7e43b7"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "PREVIEWS",
+      "bucket_name": "prompt-gallery-previews"
+    }
+  ]
+}

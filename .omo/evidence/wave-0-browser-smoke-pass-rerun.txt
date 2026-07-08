@@ -1,0 +1,43 @@
+{
+  "ok": true,
+  "baseUrl": "http://127.0.0.1:5173",
+  "expectMissingShell": false,
+  "artifacts": [
+    {
+      "viewport": "desktop",
+      "path": ".omo\\evidence\\wave-0-browser-desktop.png",
+      "screenshotBytes": 18430,
+      "titleVisible": true,
+      "tabsVisible": [
+        "즐겨찾기",
+        "All",
+        "프롬프트",
+        "이미지 프롬프트",
+        "Workflow",
+        "레포"
+      ],
+      "emptyRegion": {
+        "width": 1072,
+        "height": 420
+      }
+    },
+    {
+      "viewport": "mobile",
+      "path": ".omo\\evidence\\wave-0-browser-mobile.png",
+      "screenshotBytes": 16275,
+      "titleVisible": true,
+      "tabsVisible": [
+        "즐겨찾기",
+        "All",
+        "프롬프트",
+        "이미지 프롬프트",
+        "Workflow",
+        "레포"
+      ],
+      "emptyRegion": {
+        "width": 358,
+        "height": 420
+      }
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+# Wave 0 API Smoke
+
+Base URL: http://127.0.0.1:5999
+Local app started: no
+Result: FAIL
+
+## Failure
+fetch failed
+
+## Binary Observable
+Nonzero CLI exit with captured connection or health failure
