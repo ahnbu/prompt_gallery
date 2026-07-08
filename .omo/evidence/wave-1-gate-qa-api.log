@@ -1,0 +1,10 @@
+SURFACE: CLI
+INVOCATION: pnpm qa:api -- --output .omo/evidence/wave-1-api-smoke.txt
+START_KST: 2026-07-08 21:39:32 +09:00
+--- OUTPUT ---
+$ node scripts/qa/api-smoke.mjs "--" "--output" ".omo/evidence/wave-1-api-smoke.txt"
+PASS api smoke: D:\vibe-coding\prompt-gallery\.omo\evidence\wave-1-api-smoke.txt
+--- EXIT ---
+EXIT_CODE: 0
+END_KST: 2026-07-08 21:39:37 +09:00
+DURATION_SECONDS: 4.8

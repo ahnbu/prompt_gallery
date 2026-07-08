@@ -1,0 +1,140 @@
+# Wave 1 RED transcript recovery: items
+
+sourceSession: C:/Users/ahnbu/.codex/sessions/2026/07/08/rollout-2026-07-08T15-41-59-019f4076-2200-7aa2-8c03-58e65ab307b0.jsonl
+sourceLine: 86
+timestampUtc: 2026-07-08T06:43:49.753Z
+payloadKind: function_call_output
+callId: call_CYJk2wlhtDbHD9kx2xqXSeWm
+invocationLine: 85
+invocationTool: shell_command
+invocationArguments:
+```json
+{"command":"$evidence = '.omo/evidence/wave-1-data-api.txt'\nNew-Item -ItemType Directory -Force -Path (Split-Path $evidence) | Out-Null\n$stamp = Get-Date -Format 'yyyy-MM-dd HH:mm:ss KST'\n@(\"\", \"## RED items.test.ts\", \"Time: $stamp\", \"Command: pnpm test:worker -- --run src/worker/items.test.ts\", \"Expected: FAIL before item API implementation\", \"\") | Add-Content -Path $evidence\npnpm test:worker -- --run src/worker/items.test.ts *>&1 | Tee-Object -FilePath $evidence -Append\nexit $LASTEXITCODE","workdir":"D:/vibe-coding/prompt-gallery","timeout_ms":120000}
+```
+
+rawOutput:
+```markdown
+Exit code: 1
+Wall time: 4.6 seconds
+Output:
+$ vitest --config vitest.worker.config.ts "--" "--run" "src/worker/items.test.ts"
+
+ RUN  v3.2.7 D:/vibe-coding/prompt-gallery
+
+[vpw:debug] Adding `enable_nodejs_tty_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_fs_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_http_modules` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_perf_hooks_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:info] Starting isolated runtimes for vitest.worker.config.ts...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+stdout | src/worker/db-migration.test.ts > D1 migrations > creates every required table when migrations are applied
+required tables: assets, item_tags, items, tag_keywords, tags, workflow_steps, workflows
+
+ ✓ src/worker/health.test.ts (1 test) 89ms
+ ✓ src/worker/db-migration.test.ts (1 test) 102ms
+ ❯ src/worker/items.test.ts (4 tests | 4 failed) 168ms
+   × items API > creates a prompt with fallback title when only body is supplied 19ms
+     → expected 404 to be 201 // Object.is equality
+   × items API > rejects prompt-like items when body is missing 15ms
+     → expected 404 to be 400 // Object.is equality
+   × items API > lists items latest-first by updated time 13ms
+     → expected 404 to be 201 // Object.is equality
+   × items API > gets, updates, and deletes an item by id 13ms
+     → expected 404 to be 201 // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/worker/items.test.ts > items API > creates a prompt with fallback title when only body is supplied
+AssertionError: expected 404 to be 201 // Object.is equality
+
+- Expected
++ Received
+
+- 201
++ 404
+
+ ❯ src/worker/items.test.ts:44:55
+     44| }
+     45| 
+     46| describe("items API", () => {
+       |                                                    ^
+     47|   beforeEach(async () => {
+     48|     await env.DB.prepare("DELETE FROM items").run()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/worker/items.test.ts > items API > rejects prompt-like items when body is missing
+AssertionError: expected 404 to be 400 // Object.is equality
+
+- Expected
++ Received
+
+- 400
++ 404
+
+ ❯ src/worker/items.test.ts:57:55
+     56|     const response = await itemRequest("POST", "/api/items", body)
+     57| 
+     58|     // Then: the prompt is persisted with a body-derived title
+       |                                                      ^
+     59|     expect(response.status).toBe(201)
+     60|     await expect(response.json()).resolves.toMatchObject({
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/worker/items.test.ts > items API > lists items latest-first by updated time
+AssertionError: expected 404 to be 201 // Object.is equality
+
+- Expected
++ Received
+
+- 201
++ 404
+
+ ❯ createItem src/worker/items.test.ts:29:53
+     28|   }
+     29| 
+     30|   return readString(Reflect.get(value, parentKey), childKey)
+       |                                                    ^
+     31| }
+     32| 
+ ❯ src/worker/items.test.ts:66:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/worker/items.test.ts > items API > gets, updates, and deletes an item by id
+AssertionError: expected 404 to be 201 // Object.is equality
+
+- Expected
++ Received
+
+- 201
++ 404
+
+ ❯ createItem src/worker/items.test.ts:29:53
+     28|   }
+     29| 
+     30|   return readString(Reflect.get(value, parentKey), childKey)
+       |                                                    ^
+     31| }
+     32| 
+ ❯ src/worker/items.test.ts:77:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  4 failed | 2 passed (6)
+   Start at  15:43:47
+   Duration  1.52s (transform 58ms, setup 130ms, collect 70ms, tests 359ms, environment 0ms, prepare 779ms)
+
+[vpw:debug] Shutting down runtimes...
+[vpw:debug] Disposing remote proxy sessions...
+[ELIFECYCLE] Command failed with exit code 1.
+
+```

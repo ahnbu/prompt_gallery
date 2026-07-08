@@ -1,0 +1,37 @@
+# Wave 1 API Smoke
+
+Base URL: http://127.0.0.1:5173
+Local app started: yes
+Result: PASS
+
+## Coverage
+- GET /api/health -> 200 ok:true
+- POST /api/items body-only -> 201 fallback title/body id=ffea49e9-dd6f-4921-9179-1028f8042e60
+- POST /api/tags -> 201 research=9fd920ea-13b5-4563-9800-8198da54288e, slides=20600ec4-f511-4080-b57f-229434162f79
+- GET /api/items?tags=research,slides -> AND matched 2ce3fbfb-99ca-4373-89a5-3d0c25806998 and excluded 95fe3876-1806-4a4f-8020-520d45a755b1
+- POST favorite + GET favorite=true -> included id=2ce3fbfb-99ca-4373-89a5-3d0c25806998
+- POST /api/workflows -> 201 ordered positions 1,2,3,4 id=04ab9fe0-b8cb-4f9a-94d3-034b282e9a40
+- POST malformed favorite body -> JSON 400 invalid_item
+
+## Cleanup
+- workflows/04ab9fe0-b8cb-4f9a-94d3-034b282e9a40: 200
+- items/a9c7444b-205b-4432-8a1e-8b4554cfe9bb: 200
+- items/114601e7-d851-4003-bcf1-a452bc90a694: 200
+- items/95fe3876-1806-4a4f-8020-520d45a755b1: 200
+- items/2ce3fbfb-99ca-4373-89a5-3d0c25806998: 200
+- items/ffea49e9-dd6f-4921-9179-1028f8042e60: 200
+- tags/20600ec4-f511-4080-b57f-229434162f79: 200
+- tags/9fd920ea-13b5-4563-9800-8198da54288e: 200
+
+## Health
+Status: 200
+Content-Type: application/json
+Body:
+{"ok":true}
+
+## Dev Logs
+stdout: D:\vibe-coding\prompt-gallery\.omo\evidence\wave-1-api-smoke-security-env-fix-dev.stdout.log
+stderr: D:\vibe-coding\prompt-gallery\.omo\evidence\wave-1-api-smoke-security-env-fix-dev.stderr.log
+
+## Binary Observable
+Health, item fallback, tags filter, favorite, workflow, malformed JSON 400, and cleanup assertions passed.

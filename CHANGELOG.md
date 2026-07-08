@@ -4,6 +4,7 @@
 
 | 일시 | 유형 | 범위 | 변경내용 | 변경사유 | 작성AI |
 |---|---|---|---|---|---|
+| 2026-07-08 22:24 | feat | api | D1 기반 항목·태그·즐겨찾기·워크플로우 API와 Wave 1 검증 smoke 추가 | - | Unknown |
 | 2026-07-08 15:49 | docs | cost-management | 비용관리 문서 참조를 wikilink로 정리하고 Budget Alert 설정 완료 기록 | - | Codex |
 | 2026-07-08 15:43 | docs | repo | GitHub 원격 초기 LICENSE 이력 병합 | - | Unknown |
 | 2026-07-08 15:40 | docs | evidence | Wave 0 보안 QA 로그 증거 추가 | - | Unknown |

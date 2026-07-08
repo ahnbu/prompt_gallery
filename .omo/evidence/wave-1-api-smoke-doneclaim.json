@@ -1,0 +1,138 @@
+{
+  "status": "done",
+  "repo": "D:/vibe-coding/prompt-gallery",
+  "recordedAtKst": "2026-07-08 21:49 KST",
+  "changedFiles": [
+    "scripts/qa/api-smoke.mjs",
+    "scripts/qa/api-smoke-support.mjs",
+    "scripts/qa/api-smoke-wave1.mjs",
+    ".omo/evidence/wave-1-data-api.txt",
+    ".omo/evidence/wave-1-api-smoke.txt",
+    ".omo/evidence/wave-1-api-smoke-dev.stdout.log",
+    ".omo/evidence/wave-1-api-smoke-dev.stderr.log",
+    ".omo/evidence/wave-1-typecheck-after-api-smoke.log",
+    ".omo/evidence/wave-1-lint-after-api-smoke.log",
+    ".omo/evidence/wave-1-test-worker-after-api-smoke.log",
+    ".omo/evidence/wave-1-cleanup-after-api-smoke.md",
+    ".omo/evidence/wave-1-cleanup-after-api-smoke.log"
+  ],
+  "notTouched": [
+    "UI/client files",
+    ".omo/plans/prompt-gallery-implementation.md checkbox state",
+    "product API implementation files"
+  ],
+  "smokeCoverage": [
+    "GET /api/health returned 200 with ok:true",
+    "POST /api/items with prompt body only returned 201 with fallback title/body",
+    "POST /api/tags created research and slides with 201 responses",
+    "GET /api/items?tags=research,slides returned only the smoke marker item among smoke-created rows",
+    "POST /api/items/:id/favorite with favorite:true returned 200",
+    "GET /api/items?favorite=true included the favorited smoke item",
+    "POST /api/workflows created prompt, repo, memo, and link steps with ordered positions 1,2,3,4",
+    "POST malformed favorite body returned JSON 400 invalid_item",
+    "Smoke-created workflow, items, and tags were deleted through API cleanup"
+  ],
+  "commandResults": [
+    {
+      "scenario": "Wave 1 API smoke",
+      "invocation": "pnpm qa:api -- --output .omo/evidence/wave-1-api-smoke.txt",
+      "exitCode": 0,
+      "binaryObservable": "CLI printed PASS api smoke; evidence heading is # Wave 1 API Smoke and coverage includes item/tag/favorite/workflow/malformed-input cleanup",
+      "artifactPath": ".omo/evidence/wave-1-api-smoke.txt"
+    },
+    {
+      "scenario": "TypeScript typecheck",
+      "invocation": "pnpm typecheck",
+      "exitCode": 0,
+      "binaryObservable": "pnpm command exited 0",
+      "artifactPath": ".omo/evidence/wave-1-typecheck-after-api-smoke.log"
+    },
+    {
+      "scenario": "Biome lint",
+      "invocation": "pnpm lint",
+      "exitCode": 0,
+      "binaryObservable": "Checked 39 files in 26ms. No fixes applied.",
+      "artifactPath": ".omo/evidence/wave-1-lint-after-api-smoke.log"
+    },
+    {
+      "scenario": "Worker API regression tests",
+      "invocation": "pnpm test:worker",
+      "exitCode": 0,
+      "binaryObservable": "6 test files passed and 26 tests passed",
+      "artifactPath": ".omo/evidence/wave-1-test-worker-after-api-smoke.log"
+    },
+    {
+      "scenario": "Cleanup verifier after API smoke",
+      "invocation": "pnpm verify:cleanup -- --output .omo/evidence/wave-1-cleanup-after-api-smoke.md",
+      "exitCode": 0,
+      "binaryObservable": "Result PASS; Port 5173 listeners: 0",
+      "artifactPath": ".omo/evidence/wave-1-cleanup-after-api-smoke.md"
+    }
+  ],
+  "evidenceSummary": {
+    "path": ".omo/evidence/wave-1-data-api.txt",
+    "headingsAdded": [
+      "## Wave 1 explicit RED/GREEN summary - items",
+      "## Wave 1 explicit RED/GREEN summary - tags",
+      "## Wave 1 explicit RED/GREEN summary - favorite",
+      "## Wave 1 explicit RED/GREEN summary - workflows"
+    ],
+    "notes": [
+      "Items, tags, and workflows had no original explicit RED headings in the file; the appended summaries state that explicitly and cite existing GREEN worker evidence plus current smoke verification.",
+      "Favorites had existing RED and GREEN sections; the appended summary cites both and current smoke verification."
+    ]
+  },
+  "adversarialQa": [
+    {
+      "case": "stale_state",
+      "result": "PASS",
+      "observable": "Current smoke output was regenerated in this session and starts with # Wave 1 API Smoke",
+      "artifactPath": ".omo/evidence/wave-1-api-smoke.txt"
+    },
+    {
+      "case": "dirty_worktree",
+      "result": "PASS_WITH_EXPECTED_DIRTY_TREE",
+      "observable": "git status --short remained dirty with pre-existing Wave 1 work plus this QA script/evidence; no commit was made and checkbox plan file was not edited",
+      "artifactPath": ".omo/evidence/wave-1-api-smoke-doneclaim.json"
+    },
+    {
+      "case": "misleading_success_output",
+      "result": "PASS",
+      "observable": "PASS is backed by concrete coverage lines for health, items, tags, favorite, workflow, malformed input, and cleanup",
+      "artifactPath": ".omo/evidence/wave-1-api-smoke.txt"
+    },
+    {
+      "case": "malformed_input",
+      "result": "PASS",
+      "observable": "POST malformed favorite body -> JSON 400 invalid_item",
+      "artifactPath": ".omo/evidence/wave-1-api-smoke.txt"
+    },
+    {
+      "case": "generated_cached_artifacts",
+      "result": "PASS",
+      "observable": "Current evidence files were checked as non-empty after rerun",
+      "artifactPath": ".omo/evidence/wave-1-api-smoke-doneclaim.json"
+    },
+    {
+      "case": "hung_or_long_commands",
+      "result": "PASS",
+      "observable": "All required commands completed within bounded tool timeouts; cleanup receipt reports zero port 5173 listeners",
+      "artifactPath": ".omo/evidence/wave-1-cleanup-after-api-smoke.md"
+    },
+    {
+      "case": "flaky_tests",
+      "result": "PASS",
+      "observable": "pnpm test:worker passed after the API smoke rerun",
+      "artifactPath": ".omo/evidence/wave-1-test-worker-after-api-smoke.log"
+    }
+  ],
+  "cleanupReceipt": {
+    "apiCleanup": ".omo/evidence/wave-1-api-smoke.txt",
+    "portCleanup": ".omo/evidence/wave-1-cleanup-after-api-smoke.md",
+    "port5173Listeners": 0
+  },
+  "risks": [
+    "The worktree was dirty before this fix and remains dirty as expected for Wave 1; this task did not separate or commit existing changes.",
+    "The cleanup receipt title still says Wave 0 because verify-cleanup.mjs owns that label; its body records the required post-smoke port state."
+  ]
+}

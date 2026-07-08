@@ -9,7 +9,7 @@
     "build": "vite build",
     "typecheck": "tsc --noEmit",
     "lint": "biome check .",
-    "test": "vitest --exclude src/worker/db-migration.test.ts",
+    "test": "pnpm test:worker",
     "test:worker": "vitest --config vitest.worker.config.ts",
     "qa:api": "node scripts/qa/api-smoke.mjs",
     "qa:browser": "node scripts/qa/browser-smoke.mjs",

@@ -208,7 +208,7 @@ Your next move: 이 계획을 실행하려면 `$omo:start-work` 또는 동등한
   - Failure path: if any command fails, do not commit; append failing command and fix before rerun.
   Commit: Yes | `chore(app): Cloudflare Workers React scaffold 추가`
 
-- [ ] 6. Wave 1 - Implement D1 item repository and item API
+- [x] 6. Wave 1 - Implement D1 item repository and item API
   What to do / Must NOT do: Implement item CRUD, type validation, latest-first sorting, title fallback from body prefix, notes, GitHub URL, image metadata reference, favorite field, and JSON error contract. Do not implement UI here.
   Parallelization: Wave 1 | Blocked by: 2, 5 | Blocks: 10, 11, 12
   References: `_docs/specs/20260708_01_prompt-gallery_요구사항_SPEC.md:23`, `_docs/specs/20260708_01_prompt-gallery_요구사항_SPEC.md:126`, `_docs/20260708_02_prompt-gallery_저장-배포-리서치.md:52`
@@ -218,7 +218,7 @@ Your next move: 이 계획을 실행하려면 `$omo:start-work` 또는 동등한
   - Happy path: start `pnpm dev -- --host 127.0.0.1`, run `curl -i -X POST http://127.0.0.1:5173/api/items -H "content-type: application/json" --data "{\"type\":\"prompt\",\"body\":\"Draft a launch plan\"}"`, capture output, then stop the dev server; expected `201` and title derived from body. Evidence `.omo/evidence/wave-1-data-api.txt`.
   Commit: No, commit at Wave 1 gate.
 
-- [ ] 7. Wave 1 - Implement tags, AND filtering, and auto keyword application
+- [x] 7. Wave 1 - Implement tags, AND filtering, and auto keyword application
   What to do / Must NOT do: Implement tag catalog, item-tag join, tag keyword rules, automatic tag assignment on save, manual tag add/remove, AND filtering in list API, tag color, rename, delete foundation, and merge foundation. Do not build the tag management UI yet.
   Parallelization: Wave 1 | Blocked by: 6 | Blocks: 10, 16
   References: `_docs/specs/20260708_01_prompt-gallery_요구사항_SPEC.md:30`, `_docs/specs/20260708_01_prompt-gallery_요구사항_SPEC.md:137`, `_docs/specs/20260708_01_prompt-gallery_요구사항_SPEC.md:171`
@@ -228,7 +228,7 @@ Your next move: 이 계획을 실행하려면 `$omo:start-work` 또는 동등한
   - Happy path: start `pnpm dev -- --host 127.0.0.1`, create two tagged items, run `curl -i "http://127.0.0.1:5173/api/items?tags=research,slides"`, capture output, then stop the dev server; expected only items with both tags. Evidence `.omo/evidence/wave-1-data-api.txt`.
   Commit: No, commit at Wave 1 gate.
 
-- [ ] 8. Wave 1 - Implement favorite API and special favorite filter
+- [x] 8. Wave 1 - Implement favorite API and special favorite filter
   What to do / Must NOT do: Implement favorite toggle endpoint and list filter that returns favorite items across all item types. Do not make favorite a normal item type.
   Parallelization: Wave 1 | Blocked by: 6 | Blocks: 10, 12
   References: `_docs/specs/20260708_01_prompt-gallery_요구사항_SPEC.md:41`, `_docs/specs/20260708_01_prompt-gallery_요구사항_SPEC.md:62`
@@ -238,7 +238,7 @@ Your next move: 이 계획을 실행하려면 `$omo:start-work` 또는 동등한
   - Happy path: start `pnpm dev -- --host 127.0.0.1`; Git Bash command `ITEM_ID=$(curl -s -X POST http://127.0.0.1:5173/api/items -H "content-type: application/json" --data "{\"type\":\"prompt\",\"body\":\"Favorite body\"}" | jq -r '.item.id'); curl -i -X POST "http://127.0.0.1:5173/api/items/$ITEM_ID/favorite" -H "content-type: application/json" --data "{\"favorite\":true}"; curl -i "http://127.0.0.1:5173/api/items?favorite=true"`; capture output, then stop the dev server. Expected favorite POST `200` and favorite listing includes `Favorite body`. Evidence `.omo/evidence/wave-1-data-api.txt`.
   Commit: No, commit at Wave 1 gate.
 
-- [ ] 9. Wave 1 - Implement workflow and repo API foundation
+- [x] 9. Wave 1 - Implement workflow and repo API foundation
   What to do / Must NOT do: Implement repo item validation and workflow CRUD with ordered steps. Steps may reference existing item IDs, repo IDs, memo text, and external links. Enforce workflow name plus at least one step. Do not implement drag/drop unless trivial; ordered numeric positions are enough.
   Parallelization: Wave 1 | Blocked by: 6 | Blocks: 15
   References: `_docs/specs/20260708_01_prompt-gallery_요구사항_SPEC.md:32`, `_docs/specs/20260708_01_prompt-gallery_요구사항_SPEC.md:150`, `_docs/20260708_02_prompt-gallery_저장-배포-리서치.md:54`
@@ -248,7 +248,7 @@ Your next move: 이 계획을 실행하려면 `$omo:start-work` 또는 동등한
   - Happy path: start `pnpm dev -- --host 127.0.0.1`; Git Bash command `PROMPT_ID=$(curl -s -X POST http://127.0.0.1:5173/api/items -H "content-type: application/json" --data "{\"type\":\"prompt\",\"body\":\"Research prompt\"}" | jq -r '.item.id'); REPO_ID=$(curl -s -X POST http://127.0.0.1:5173/api/items -H "content-type: application/json" --data "{\"type\":\"repo\",\"title\":\"Repo\",\"githubUrl\":\"https://github.com/example/example\"}" | jq -r '.item.id'); curl -i -X POST http://127.0.0.1:5173/api/workflows -H "content-type: application/json" --data "{\"name\":\"Research flow\",\"steps\":[{\"kind\":\"prompt\",\"itemId\":\"$PROMPT_ID\",\"position\":1},{\"kind\":\"repo\",\"itemId\":\"$REPO_ID\",\"position\":2},{\"kind\":\"memo\",\"memo\":\"Check sources\",\"position\":3},{\"kind\":\"link\",\"url\":\"https://example.com\",\"position\":4}]}"`; capture output, then stop the dev server. Expected `201` and steps returned in positions 1-4. Evidence `.omo/evidence/wave-1-data-api.txt`.
   Commit: No, commit at Wave 1 gate.
 
-- [ ] 10. Wave 1 gate - Verify and commit data/API foundation
+- [x] 10. Wave 1 gate - Verify and commit data/API foundation
   What to do / Must NOT do: Run full tests and API smoke for created endpoints. Commit only after evidence is updated. Do not add UI work into this commit.
   Parallelization: Wave 1 gate | Blocked by: 6, 7, 8, 9 | Blocks: Wave 2
   References: `.omo/evidence/wave-1-data-api.txt`

@@ -1,0 +1,10 @@
+SURFACE: CLI
+INVOCATION: pnpm lint
+START_KST: 2026-07-08 21:39:20 +09:00
+--- OUTPUT ---
+$ biome check .
+Checked 37 files in 24ms. No fixes applied.
+--- EXIT ---
+EXIT_CODE: 0
+END_KST: 2026-07-08 21:39:21 +09:00
+DURATION_SECONDS: 0.7

@@ -1,0 +1,164 @@
+{
+  "status": "done",
+  "task": "Fix Wave 1 API smoke upgrade code review blockers",
+  "repo": "D:/vibe-coding/prompt-gallery",
+  "committed": false,
+  "plan_checkboxes_updated": false,
+  "changed_files": [
+    "package.json",
+    "scripts/qa/api-smoke.mjs",
+    "scripts/qa/api-smoke-support.mjs",
+    "scripts/qa/api-smoke-wave1.mjs",
+    ".omo/evidence/wave-1-api-smoke.txt",
+    ".omo/evidence/wave-1-api-smoke-remote-refusal.txt",
+    ".omo/evidence/wave-1-api-smoke-malformed-base-url.txt",
+    ".omo/evidence/wave-1-cleanup-after-api-smoke-fix.md",
+    ".omo/evidence/wave-1-api-smoke-fix-typecheck.log",
+    ".omo/evidence/wave-1-api-smoke-fix-lint.log",
+    ".omo/evidence/wave-1-api-smoke-fix-test.log",
+    ".omo/evidence/wave-1-api-smoke-fix-test-worker.log",
+    ".omo/evidence/wave-1-api-smoke-fix-verify-cleanup.log",
+    ".omo/evidence/wave-1-api-smoke-fix-port-5173.txt",
+    ".omo/evidence/wave-1-api-smoke-fix-doneclaim.json"
+  ],
+  "blocker_resolution_mapping": [
+    {
+      "blocker": "Remote --base-url could run mutating smoke remotely",
+      "resolution": "Mutating Wave 1 smoke now parses --base-url before startup and only allows http localhost, 127.0.0.1, or loopback IPv6.",
+      "code_observable": "scripts/qa/api-smoke.mjs:14,27-40",
+      "scenario": "Remote URL refusal",
+      "invocation": "pnpm qa:api -- --base-url https://example.com --output .omo/evidence/wave-1-api-smoke-remote-refusal.txt",
+      "binary_observable": "exit 1 with 'Refusing mutating Wave 1 API smoke for non-local --base-url: https://example.com'; evidence contains no Coverage or Health section.",
+      "artifact": ".omo/evidence/wave-1-api-smoke-remote-refusal.txt"
+    },
+    {
+      "blocker": "Cleanup DELETE status was not asserted",
+      "resolution": "Cleanup DELETE now calls expectStatus(result, 200, label), so non-200 cleanup responses throw SmokeError and make the smoke fail.",
+      "code_observable": "scripts/qa/api-smoke-wave1.mjs:16-19",
+      "scenario": "Local Wave 1 cleanup success path",
+      "invocation": "pnpm qa:api -- --output .omo/evidence/wave-1-api-smoke.txt",
+      "binary_observable": "Result PASS and every workflow/item/tag cleanup row records status 200.",
+      "artifact": ".omo/evidence/wave-1-api-smoke.txt"
+    },
+    {
+      "blocker": "Tags filter smoke did not prove AND semantics",
+      "resolution": "Smoke now creates a both-tags item and a research-only control item, then asserts the both-tags query returns only the both-tags item and excludes the control.",
+      "code_observable": "scripts/qa/api-smoke-wave1.mjs:77-97",
+      "scenario": "Tags AND filter smoke",
+      "invocation": "pnpm qa:api -- --output .omo/evidence/wave-1-api-smoke.txt",
+      "binary_observable": "Coverage includes 'AND matched <id> and excluded <id>'.",
+      "artifact": ".omo/evidence/wave-1-api-smoke.txt"
+    },
+    {
+      "blocker": "package.json pnpm test became zero-test success",
+      "resolution": "Default pnpm test now delegates to pnpm test:worker, preserving the worker command while making the default test gate execute real tests.",
+      "code_observable": "package.json:scripts.test",
+      "scenario": "Default test gate",
+      "invocation": "pnpm test",
+      "binary_observable": "exit 0 with 6 test files and 26 tests passed.",
+      "artifact": ".omo/evidence/wave-1-api-smoke-fix-test.log"
+    },
+    {
+      "blocker": "Dev server child process forwarded broad process.env",
+      "resolution": "Dev server child env now uses an explicit OS/runtime allowlist plus BROWSER and NO_UPDATE_NOTIFIER, without spreading process.env.",
+      "code_observable": "scripts/qa/api-smoke-support.mjs:9-29,101-109",
+      "scenario": "Local dev server startup under allowlisted env",
+      "invocation": "pnpm qa:api -- --output .omo/evidence/wave-1-api-smoke.txt",
+      "binary_observable": "local Vite server started and smoke passed; dev stderr log is empty.",
+      "artifact": ".omo/evidence/wave-1-api-smoke.txt"
+    }
+  ],
+  "command_results": [
+    {
+      "scenario": "Red probe before fix",
+      "invocation": "pnpm qa:api -- --base-url https://example.com --output .omo/evidence/wave-1-api-smoke-remote-refusal-red.txt",
+      "exit_code": 1,
+      "binary_observable": "failed by remote HTML JSON parse, proving there was no explicit local-only refusal yet",
+      "artifact": ".omo/evidence/wave-1-api-smoke-remote-refusal-red.txt"
+    },
+    {
+      "scenario": "Remote refusal after fix",
+      "invocation": "pnpm qa:api -- --base-url https://example.com --output .omo/evidence/wave-1-api-smoke-remote-refusal.txt",
+      "exit_code": 1,
+      "binary_observable": "explicit non-local refusal before health, POST, or DELETE coverage",
+      "artifact": ".omo/evidence/wave-1-api-smoke-remote-refusal.txt"
+    },
+    {
+      "scenario": "Malformed base-url",
+      "invocation": "pnpm qa:api -- --base-url not-a-url --output .omo/evidence/wave-1-api-smoke-malformed-base-url.txt",
+      "exit_code": 1,
+      "binary_observable": "Invalid --base-url failure before local app startup",
+      "artifact": ".omo/evidence/wave-1-api-smoke-malformed-base-url.txt"
+    },
+    {
+      "scenario": "Local mutating Wave 1 API smoke",
+      "invocation": "pnpm qa:api -- --output .omo/evidence/wave-1-api-smoke.txt",
+      "exit_code": 0,
+      "binary_observable": "PASS with health, item fallback, tags AND, favorite, workflow, malformed JSON 400, and cleanup 200 rows",
+      "artifact": ".omo/evidence/wave-1-api-smoke.txt"
+    },
+    {
+      "scenario": "TypeScript typecheck",
+      "invocation": "pnpm typecheck",
+      "exit_code": 0,
+      "binary_observable": "tsc --noEmit exited 0",
+      "artifact": ".omo/evidence/wave-1-api-smoke-fix-typecheck.log"
+    },
+    {
+      "scenario": "Biome lint",
+      "invocation": "pnpm lint",
+      "exit_code": 0,
+      "binary_observable": "Checked 39 files. No fixes applied.",
+      "artifact": ".omo/evidence/wave-1-api-smoke-fix-lint.log"
+    },
+    {
+      "scenario": "Default test script",
+      "invocation": "pnpm test",
+      "exit_code": 0,
+      "binary_observable": "6 test files passed, 26 tests passed",
+      "artifact": ".omo/evidence/wave-1-api-smoke-fix-test.log"
+    },
+    {
+      "scenario": "Worker test script",
+      "invocation": "pnpm test:worker",
+      "exit_code": 0,
+      "binary_observable": "6 test files passed, 26 tests passed",
+      "artifact": ".omo/evidence/wave-1-api-smoke-fix-test-worker.log"
+    },
+    {
+      "scenario": "Cleanup verifier",
+      "invocation": "pnpm verify:cleanup -- --output .omo/evidence/wave-1-cleanup-after-api-smoke-fix.md",
+      "exit_code": 0,
+      "binary_observable": "PASS verify cleanup and Port 5173 listeners: 0",
+      "artifact": ".omo/evidence/wave-1-cleanup-after-api-smoke-fix.md"
+    },
+    {
+      "scenario": "Direct port listener probe",
+      "invocation": "netstat -ano -p tcp | Select-String ':5173' | Select-String 'LISTENING'",
+      "exit_code": 0,
+      "binary_observable": "NO_LISTENER_5173",
+      "artifact": ".omo/evidence/wave-1-api-smoke-fix-port-5173.txt"
+    }
+  ],
+  "adversarial_qa": {
+    "stale_state": "Reran remote refusal, local smoke, typecheck, lint, pnpm test, pnpm test:worker, cleanup, and port probe after the last source edit.",
+    "dirty_worktree": "Initial worktree was dirty; only scoped files were edited and no commit was made.",
+    "misleading_success_output": "pnpm test now executes pnpm test:worker and reports 6 files / 26 tests instead of zero-test success.",
+    "malformed_input": "not-a-url base URL exits 1 with Invalid --base-url evidence.",
+    "generated_cached_artifacts": "Existing evidence was treated as untrusted; final artifacts were regenerated in this turn.",
+    "hung_or_long_commands": "All commands completed within bounded tool timeouts; requestJson and readiness probes retain AbortSignal timeouts.",
+    "flaky_tests": "Worker tests passed through both pnpm test and pnpm test:worker in separate invocations.",
+    "secret_exposure_env_forwarding": "Child env now uses explicit allowlist; smoke dev stderr is empty and broad process.env spread was removed."
+  },
+  "cleanup": {
+    "debug_journal": "Removed with safe-trash",
+    "debug_exclude_entry": "Removed from git info exclude",
+    "port_5173": "NO_LISTENER_5173",
+    "artifact": ".omo/evidence/wave-1-api-smoke-fix-port-5173.txt"
+  },
+  "risks": [
+    "Cleanup failure was code-audited rather than safely forced because deliberately breaking DELETE against the real local smoke would create leftover data risk.",
+    "The cleanup verifier heading still says Wave 0; left unchanged because it is outside the requested blockers and the body contains the Wave 1 evidence path and listener result.",
+    "Worktree had pre-existing Wave 1 product/evidence changes outside this fix scope; they were preserved."
+  ]
+}

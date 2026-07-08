@@ -1,0 +1,11 @@
+# Wave 1 API Smoke
+
+Base URL: not-a-url
+Local app started: no
+Result: FAIL
+
+## Failure
+Invalid --base-url: not-a-url
+
+## Binary Observable
+Nonzero CLI exit with captured API assertion failure.

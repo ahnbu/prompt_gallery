@@ -1,0 +1,6 @@
+[2mPM 3:54:52[22m [31m[1m[vite][22m[39m [31mInternal server error: D1_ERROR: no such table: items: SQLITE_ERROR[39m
+      at D1DatabaseSessionAlwaysPrimary._sendOrThrow (cloudflare-internal:d1-api:139:19)
+      at null.<anonymous> (cloudflare-internal:d1-api:353:41)
+      at ItemRepository.create (D:/vibe-coding/prompt-gallery/src/worker/item-repository.ts:43:5)
+      at handleItemsRequest (D:/vibe-coding/prompt-gallery/src/worker/item-routes.ts:28:40)
+      at maybeCaptureError (workers/runner-worker/index.js:51:10)

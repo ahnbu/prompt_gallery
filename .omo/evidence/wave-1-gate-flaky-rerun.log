@@ -1,0 +1,46 @@
+SURFACE: CLI
+INVOCATION: pnpm test:worker
+START_KST: 2026-07-08 21:40:16 +09:00
+--- OUTPUT ---
+$ vitest --config vitest.worker.config.ts
+
+[1m[46m RUN [49m[22m [36mv3.2.7 [39m[90mD:/vibe-coding/prompt-gallery[39m
+
+[vpw:debug] Adding `enable_nodejs_tty_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_fs_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_http_modules` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_perf_hooks_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:info] Starting isolated runtimes for vitest.worker.config.ts...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[90mstdout[2m | src/worker/db-migration.test.ts[2m > [22m[2mD1 migrations[2m > [22m[2mcreates every required table when migrations are applied
+[22m[39mrequired tables: assets, item_tags, items, tag_keywords, tags, workflow_steps, workflows
+
+ [32m✓[39m src/worker/health.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 99[2mms[22m[39m
+ [32m✓[39m src/worker/db-migration.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 126[2mms[22m[39m
+ [32m✓[39m src/worker/items.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 349[2mms[22m[39m
+ [32m✓[39m src/worker/favorites.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 444[2mms[22m[39m
+ [32m✓[39m src/worker/workflows.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 503[2mms[22m[39m
+ [32m✓[39m src/worker/tags.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 922[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m6 passed[39m[22m[90m (6)[39m
+[2m      Tests [22m [1m[32m26 passed[39m[22m[90m (26)[39m
+[2m   Start at [22m 21:40:18
+[2m   Duration [22m 3.67s[2m (transform 174ms, setup 1.35s, collect 189ms, tests 2.44s, environment 0ms, prepare 2.56s)[22m
+
+[vpw:debug] Shutting down runtimes...
+[vpw:debug] Disposing remote proxy sessions...
+--- EXIT ---
+EXIT_CODE: 0
+END_KST: 2026-07-08 21:40:21 +09:00
+DURATION_SECONDS: 5.4

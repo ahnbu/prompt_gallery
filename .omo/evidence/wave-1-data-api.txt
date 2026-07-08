@@ -1,0 +1,767 @@
+# Wave 1 checkbox 8 favorite API evidence
+Recorded: 2026-07-08 17:15:11 +09:00ST
+Scope: POST /api/items/:id/favorite and GET /api/items?favorite=true
+
+## RED - favorites worker test before implementation
+Command: pnpm test:worker -- --run src/worker/favorites.test.ts
+$ vitest --config vitest.worker.config.ts "--" "--run" "src/worker/favorites.test.ts"
+
+[1m[46m RUN [49m[22m [36mv3.2.7 [39m[90mD:/vibe-coding/prompt-gallery[39m
+
+[vpw:debug] Adding `enable_nodejs_tty_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_fs_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_http_modules` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_perf_hooks_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:info] Starting isolated runtimes for vitest.worker.config.ts...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[90mstdout[2m | src/worker/db-migration.test.ts[2m > [22m[2mD1 migrations[2m > [22m[2mcreates every required table when migrations are applied
+[22m[39mrequired tables: assets, item_tags, items, tag_keywords, tags, workflow_steps, workflows
+
+ [32m✓[39m src/worker/health.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 460[2mms[22m[39m
+ [32m✓[39m src/worker/db-migration.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 456[2mms[22m[39m
+ [31m❯[39m src/worker/favorites.test.ts [2m([22m[2m4 tests[22m[2m | [22m[31m4 failed[39m[2m)[22m[33m 2804[2mms[22m[39m
+[31m   [31m×[31m favorites API[2m > [22mtoggles an item favorite on and off through the dedicated endpoint[39m[32m 115[2mms[22m[39m
+[31m     → expected 404 to be 200 // Object.is equality[39m
+[31m   [31m×[31m favorites API[2m > [22mlists favorite prompts, image prompts, and repos across all item types[39m[32m 231[2mms[22m[39m
+[31m     → expected [ 'Ordinary prompt', …(3) ] to deeply equal [ 'Favorite repo', …(2) ][39m
+[31m   [31m×[31m favorites API[2m > [22mreturns a JSON 404 for an unknown favorite target[39m[32m 100[2mms[22m[39m
+[31m     → promise rejected "SyntaxError: Unexpected token 'N', "Not f…" instead of resolving[39m
+[31m   [31m×[31m favorites API[2m > [22mrejects malformed favorite bodies with JSON 400 responses[39m[32m 129[2mms[22m[39m
+[31m     → expected 404 to be 400 // Object.is equality[39m
+ [32m✓[39m src/worker/items.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 2835[2mms[22m[39m
+   [33m[2m✓[22m[39m items API[2m > [22mrejects prompt-like items when body is missing [33m 323[2mms[22m[39m
+   [33m[2m✓[22m[39m items API[2m > [22mlists items latest-first by updated time [33m 697[2mms[22m[39m
+   [33m[2m✓[22m[39m items API[2m > [22mgets, updates, and deletes an item by id [33m 1212[2mms[22m[39m
+ [32m✓[39m src/worker/workflows.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 3503[2mms[22m[39m
+   [33m[2m✓[22m[39m workflows API[2m > [22mcreates a valid workflow with prompt, repo, memo, and link steps [33m 350[2mms[22m[39m
+   [33m[2m✓[22m[39m workflows API[2m > [22mreturns a workflow when a referenced prompt item was deleted [33m 484[2mms[22m[39m
+   [33m[2m✓[22m[39m workflows API[2m > [22mrejects a workflow when name is missing [33m 569[2mms[22m[39m
+   [33m[2m✓[22m[39m workflows API[2m > [22mrejects a workflow with zero steps [33m 1065[2mms[22m[39m
+ [32m✓[39m src/worker/tags.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 4655[2mms[22m[39m
+   [33m[2m✓[22m[39m tags API[2m > [22mreturns only items containing every selected tag when listing with tags query [33m 573[2mms[22m[39m
+   [33m[2m✓[22m[39m tags API[2m > [22mapplies keyword tags automatically when an item is saved without manual tags [33m 684[2mms[22m[39m
+   [33m[2m✓[22m[39m tags API[2m > [22mlets manual tags override automatic keyword tags on create and update [33m 1213[2mms[22m[39m
+   [33m[2m✓[22m[39m tags API[2m > [22mrejects unknown manual tags on update without changing fields or tags [33m 361[2mms[22m[39m
+   [33m[2m✓[22m[39m tags API[2m > [22mrenames a tag and preserves its keywords [33m 463[2mms[22m[39m
+   [33m[2m✓[22m[39m tags API[2m > [22mmerges a source tag into a target tag and moves item assignments [33m 487[2mms[22m[39m
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/worker/favorites.test.ts > favorites API > toggles an item favorite on and off through the dedicated endpoint
+AssertionError: expected 404 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 404
+
+ ❯ src/worker/favorites.test.ts:64:57
+     62| 
+     63| function itemTitles(value: unknown): readonly string[] {
+     64|   return arrayField(value, "items").map((item) =>
+       |                                                         ^
+     65|     stringField(objectField({ item }, "item"), "title"),
+     66|   )
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/worker/favorites.test.ts > favorites API > lists favorite prompts, image prompts, and repos across all item types
+AssertionError: expected [ 'Ordinary prompt', …(3) ] to deeply equal [ 'Favorite repo', …(2) ]
+
+- Expected
++ Received
+
+  [
++   "Ordinary prompt",
+    "Favorite repo",
+    "Favorite image prompt",
+    "Favorite prompt",
+  ]
+
+ ❯ src/worker/favorites.test.ts:87:73
+     87| 
+     88|     // Then: each response returns the updated item state
+     89|     expect(onResponse.status).toBe(200)
+       |    ^
+     90|     await expect(onResponse.json()).resolves.toMatchObject({
+     91|       item: { id: itemId, favorite: true },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/worker/favorites.test.ts > favorites API > returns a JSON 404 for an unknown favorite target
+AssertionError: promise rejected "SyntaxError: Unexpected token 'N', "Not f…" instead of resolving
+ ❯ Assertion.propertyGetter node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/deps_ssr/vitest___@vitest_expect___chai.js:1484:27
+ ❯ Object.proxyGetter [as get] node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/deps_ssr/vitest___@vitest_expect___chai.js:1566:22
+ ❯ src/worker/favorites.test.ts:99:60
+     97|   })
+     98| 
+     99|   it("lists favorite prompts, image prompts, and repos across all item…
+       |                                                            ^
+    100|     // Given: favorite items across every supported item type plus one…
+    101|     const promptId = await createItem({ type: "prompt", body: "Favorit…
+
+Caused by: SyntaxError: Unexpected token 'N', "Not found" is not valid JSON
+ ❯ src/worker/favorites.test.ts:99:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/worker/favorites.test.ts > favorites API > rejects malformed favorite bodies with JSON 400 responses
+AssertionError: expected 404 to be 400 // Object.is equality
+
+- Expected
++ Received
+
+- 400
++ 404
+
+ ❯ src/worker/favorites.test.ts:112:67
+    111|     await apiRequest("POST", `/api/items/${repoId}/favorite`, { favori…
+    112| 
+    113|     // When: the special favorite list filter is applied
+       |                                                                  ^
+    114|     const response = await apiRequest("GET", "/api/items?favorite=true…
+    115| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m5 passed[39m[22m[90m (6)[39m
+[2m      Tests [22m [1m[31m4 failed[39m[22m[2m | [22m[1m[32m22 passed[39m[22m[90m (26)[39m
+[2m   Start at [22m 17:15:14
+[2m   Duration [22m 14.05s[2m (transform 898ms, setup 10.27s, collect 863ms, tests 14.71s, environment 1ms, prepare 23.63s)[22m
+
+[vpw:debug] Shutting down runtimes...
+[vpw:debug] Disposing remote proxy sessions...
+[ELIFECYCLE] Command failed with exit code 1.
+
+## GREEN - favorites worker test after implementation
+Command: pnpm test:worker -- --run src/worker/favorites.test.ts
+$ vitest --config vitest.worker.config.ts "--" "--run" "src/worker/favorites.test.ts"
+
+[1m[46m RUN [49m[22m [36mv3.2.7 [39m[90mD:/vibe-coding/prompt-gallery[39m
+
+[vpw:debug] Adding `enable_nodejs_tty_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_fs_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_http_modules` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_perf_hooks_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:info] Starting isolated runtimes for vitest.worker.config.ts...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[90mstdout[2m | src/worker/db-migration.test.ts[2m > [22m[2mD1 migrations[2m > [22m[2mcreates every required table when migrations are applied
+[22m[39mrequired tables: assets, item_tags, items, tag_keywords, tags, workflow_steps, workflows
+
+ [32m✓[39m src/worker/health.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 103[2mms[22m[39m
+ [32m✓[39m src/worker/db-migration.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 136[2mms[22m[39m
+ [32m✓[39m src/worker/items.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 380[2mms[22m[39m
+ [32m✓[39m src/worker/favorites.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 492[2mms[22m[39m
+ [32m✓[39m src/worker/workflows.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 519[2mms[22m[39m
+ [32m✓[39m src/worker/tags.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 919[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m6 passed[39m[22m[90m (6)[39m
+[2m      Tests [22m [1m[32m26 passed[39m[22m[90m (26)[39m
+[2m   Start at [22m 17:17:17
+[2m   Duration [22m 8.36s[2m (transform 356ms, setup 2.45s, collect 247ms, tests 2.55s, environment 1ms, prepare 14.83s)[22m
+
+[vpw:debug] Shutting down runtimes...
+[vpw:debug] Disposing remote proxy sessions...
+
+## VERIFY - pnpm test:worker -- --run src/worker/favorites.test.ts
+Command: pnpm test:worker -- --run src/worker/favorites.test.ts
+
+[1m[46m RUN [49m[22m [36mv3.2.7 [39m[90mD:/vibe-coding/prompt-gallery[39m
+
+[vpw:debug] Adding `enable_nodejs_tty_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_fs_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_http_modules` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_perf_hooks_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:info] Starting isolated runtimes for vitest.worker.config.ts...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[90mstdout[2m | src/worker/db-migration.test.ts[2m > [22m[2mD1 migrations[2m > [22m[2mcreates every required table when migrations are applied
+[22m[39mrequired tables: assets, item_tags, items, tag_keywords, tags, workflow_steps, workflows
+
+ [32m✓[39m src/worker/health.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 108[2mms[22m[39m
+ [32m✓[39m src/worker/db-migration.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 123[2mms[22m[39m
+ [32m✓[39m src/worker/items.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 469[2mms[22m[39m
+ [32m✓[39m src/worker/favorites.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 573[2mms[22m[39m
+ [32m✓[39m src/worker/workflows.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 686[2mms[22m[39m
+ [32m✓[39m src/worker/tags.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 1097[2mms[22m[39m
+   [33m[2m✓[22m[39m tags API[2m > [22mreturns only items containing every selected tag when listing with tags query [33m 319[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m6 passed[39m[22m[90m (6)[39m
+[2m      Tests [22m [1m[32m26 passed[39m[22m[90m (26)[39m
+[2m   Start at [22m 17:18:13
+[2m   Duration [22m 4.08s[2m (transform 185ms, setup 1.49s, collect 192ms, tests 3.06s, environment 2ms, prepare 2.61s)[22m
+
+[vpw:debug] Shutting down runtimes...
+[vpw:debug] Disposing remote proxy sessions...
+
+## VERIFY - pnpm test:worker -- --run src/worker/items.test.ts
+Command: pnpm test:worker -- --run src/worker/items.test.ts
+
+[1m[46m RUN [49m[22m [36mv3.2.7 [39m[90mD:/vibe-coding/prompt-gallery[39m
+
+[vpw:debug] Adding `enable_nodejs_tty_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_fs_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_http_modules` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_perf_hooks_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:info] Starting isolated runtimes for vitest.worker.config.ts...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[90mstdout[2m | src/worker/db-migration.test.ts[2m > [22m[2mD1 migrations[2m > [22m[2mcreates every required table when migrations are applied
+[22m[39mrequired tables: assets, item_tags, items, tag_keywords, tags, workflow_steps, workflows
+
+ [32m✓[39m src/worker/health.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 96[2mms[22m[39m
+ [32m✓[39m src/worker/db-migration.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 134[2mms[22m[39m
+ [32m✓[39m src/worker/items.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 377[2mms[22m[39m
+ [32m✓[39m src/worker/favorites.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 462[2mms[22m[39m
+ [32m✓[39m src/worker/workflows.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 500[2mms[22m[39m
+ [32m✓[39m src/worker/tags.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 916[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m6 passed[39m[22m[90m (6)[39m
+[2m      Tests [22m [1m[32m26 passed[39m[22m[90m (26)[39m
+[2m   Start at [22m 17:18:19
+[2m   Duration [22m 3.51s[2m (transform 157ms, setup 1.31s, collect 195ms, tests 2.48s, environment 0ms, prepare 2.47s)[22m
+
+[vpw:debug] Shutting down runtimes...
+[vpw:debug] Disposing remote proxy sessions...
+
+## VERIFY - pnpm test:worker -- --run src/worker/tags.test.ts
+Command: pnpm test:worker -- --run src/worker/tags.test.ts
+
+[1m[46m RUN [49m[22m [36mv3.2.7 [39m[90mD:/vibe-coding/prompt-gallery[39m
+
+[vpw:debug] Adding `enable_nodejs_tty_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_fs_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_http_modules` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_perf_hooks_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:info] Starting isolated runtimes for vitest.worker.config.ts...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[90mstdout[2m | src/worker/db-migration.test.ts[2m > [22m[2mD1 migrations[2m > [22m[2mcreates every required table when migrations are applied
+[22m[39mrequired tables: assets, item_tags, items, tag_keywords, tags, workflow_steps, workflows
+
+ [32m✓[39m src/worker/db-migration.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 125[2mms[22m[39m
+ [32m✓[39m src/worker/health.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 102[2mms[22m[39m
+ [32m✓[39m src/worker/items.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 361[2mms[22m[39m
+ [32m✓[39m src/worker/favorites.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 462[2mms[22m[39m
+ [32m✓[39m src/worker/workflows.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 493[2mms[22m[39m
+ [32m✓[39m src/worker/tags.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 1038[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m6 passed[39m[22m[90m (6)[39m
+[2m      Tests [22m [1m[32m26 passed[39m[22m[90m (26)[39m
+[2m   Start at [22m 17:18:24
+[2m   Duration [22m 4.03s[2m (transform 212ms, setup 1.54s, collect 254ms, tests 2.58s, environment 3ms, prepare 2.73s)[22m
+
+[vpw:debug] Shutting down runtimes...
+[vpw:debug] Disposing remote proxy sessions...
+
+## VERIFY - pnpm test:worker -- --run src/worker/workflows.test.ts
+Command: pnpm test:worker -- --run src/worker/workflows.test.ts
+
+[1m[46m RUN [49m[22m [36mv3.2.7 [39m[90mD:/vibe-coding/prompt-gallery[39m
+
+[vpw:debug] Adding `enable_nodejs_tty_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_fs_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_http_modules` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_perf_hooks_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:info] Starting isolated runtimes for vitest.worker.config.ts...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[90mstdout[2m | src/worker/db-migration.test.ts[2m > [22m[2mD1 migrations[2m > [22m[2mcreates every required table when migrations are applied
+[22m[39mrequired tables: assets, item_tags, items, tag_keywords, tags, workflow_steps, workflows
+
+ [32m✓[39m src/worker/health.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 156[2mms[22m[39m
+ [32m✓[39m src/worker/db-migration.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 169[2mms[22m[39m
+ [32m✓[39m src/worker/items.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 419[2mms[22m[39m
+ [32m✓[39m src/worker/favorites.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 505[2mms[22m[39m
+ [32m✓[39m src/worker/workflows.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 554[2mms[22m[39m
+ [32m✓[39m src/worker/tags.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 968[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m6 passed[39m[22m[90m (6)[39m
+[2m      Tests [22m [1m[32m26 passed[39m[22m[90m (26)[39m
+[2m   Start at [22m 17:18:31
+[2m   Duration [22m 4.07s[2m (transform 177ms, setup 1.45s, collect 268ms, tests 2.77s, environment 0ms, prepare 3.32s)[22m
+
+[vpw:debug] Shutting down runtimes...
+[vpw:debug] Disposing remote proxy sessions...
+
+## VERIFY - pnpm typecheck
+Command: pnpm typecheck
+
+## VERIFY - pnpm lint
+Command: pnpm lint
+Checked 37 files in 27ms. No fixes applied.
+
+## VERIFY - pnpm test:worker
+Command: pnpm test:worker
+
+[1m[46m RUN [49m[22m [36mv3.2.7 [39m[90mD:/vibe-coding/prompt-gallery[39m
+
+[vpw:debug] Adding `enable_nodejs_tty_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_fs_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_http_modules` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_perf_hooks_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:info] Starting isolated runtimes for vitest.worker.config.ts...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[90mstdout[2m | src/worker/db-migration.test.ts[2m > [22m[2mD1 migrations[2m > [22m[2mcreates every required table when migrations are applied
+[22m[39mrequired tables: assets, item_tags, items, tag_keywords, tags, workflow_steps, workflows
+
+ [32m✓[39m src/worker/health.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 103[2mms[22m[39m
+ [32m✓[39m src/worker/db-migration.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 128[2mms[22m[39m
+ [32m✓[39m src/worker/items.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 394[2mms[22m[39m
+ [32m✓[39m src/worker/favorites.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 434[2mms[22m[39m
+ [32m✓[39m src/worker/workflows.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 491[2mms[22m[39m
+ [32m✓[39m src/worker/tags.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 889[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m6 passed[39m[22m[90m (6)[39m
+[2m      Tests [22m [1m[32m26 passed[39m[22m[90m (26)[39m
+[2m   Start at [22m 17:18:42
+[2m   Duration [22m 4.06s[2m (transform 203ms, setup 1.38s, collect 246ms, tests 2.44s, environment 1ms, prepare 2.54s)[22m
+
+[vpw:debug] Shutting down runtimes...
+[vpw:debug] Disposing remote proxy sessions...
+
+## VERIFY - pnpm test:worker -- --run src/worker/favorites.test.ts
+Command: pnpm test:worker -- --run src/worker/favorites.test.ts
+
+[1m[46m RUN [49m[22m [36mv3.2.7 [39m[90mD:/vibe-coding/prompt-gallery[39m
+
+[vpw:debug] Adding `enable_nodejs_tty_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_fs_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_http_modules` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_perf_hooks_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:info] Starting isolated runtimes for vitest.worker.config.ts...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[90mstdout[2m | src/worker/db-migration.test.ts[2m > [22m[2mD1 migrations[2m > [22m[2mcreates every required table when migrations are applied
+[22m[39mrequired tables: assets, item_tags, items, tag_keywords, tags, workflow_steps, workflows
+
+ [32m✓[39m src/worker/db-migration.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 121[2mms[22m[39m
+ [32m✓[39m src/worker/health.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 106[2mms[22m[39m
+ [32m✓[39m src/worker/items.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 371[2mms[22m[39m
+ [32m✓[39m src/worker/favorites.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 453[2mms[22m[39m
+ [32m✓[39m src/worker/workflows.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 505[2mms[22m[39m
+ [32m✓[39m src/worker/tags.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 941[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m6 passed[39m[22m[90m (6)[39m
+[2m      Tests [22m [1m[32m26 passed[39m[22m[90m (26)[39m
+[2m   Start at [22m 17:18:49
+[2m   Duration [22m 4.62s[2m (transform 255ms, setup 1.86s, collect 262ms, tests 2.50s, environment 2ms, prepare 3.37s)[22m
+
+[vpw:debug] Shutting down runtimes...
+[vpw:debug] Disposing remote proxy sessions...
+
+## VERIFY SUMMARY
+All requested automated verification commands exited 0. Final favorite test rerun exited 0 for flaky_tests probe.
+
+## MANUAL QA - preflight port 5173
+Command: Get-NetTCPConnection -LocalPort 5173 -State Listen
+No listener on 127.0.0.1:5173 before manual QA.
+
+## MANUAL QA - dev server start
+PID: 32028
+stdout: .omo/evidence/wave-1-checkbox-8-dev.stdout.log
+stderr: .omo/evidence/wave-1-checkbox-8-dev.stderr.log
+Health check returned 200.
+
+## MANUAL QA - Git Bash favorite scenario
+Command: plan curl scenario plus malformed_input probe
+  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+                                 Dload  Upload  Total   Spent   Left   Speed
+
+  0      0   0      0   0      0      0      0                              0
+100    284 100    267 100     17   9917    631                              0
+100    284 100    267 100     17   9897    630                              0
+100    284 100    267 100     17   9882    629                              0
+HTTP/1.1 200 OK
+Vary: Origin
+content-length: 267
+content-type: application/json
+Date: Wed, 08 Jul 2026 08:19:56 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+                                 Dload  Upload  Total   Spent   Left   Speed
+
+  0      0   0      0   0      0      0      0                              0
+100    270 100    270   0      0  13573      0                              0
+100    270 100    270   0      0  13535      0                              0
+{"item":{"id":"617fc163-240a-4e90-8d77-d92c6cc4bb42","type":"prompt","title":"Favorite body","body":"Favorite body","notes":null,"githubUrl":null,"imageKey":null,"favorite":true,"tags":[],"createdAt":"2026-07-08T08:19:56.903Z","updatedAt":"2026-07-08T08:19:56.984Z"}}HTTP/1.1 200 OK
+Vary: Origin
+content-length: 270
+content-type: application/json
+Date: Wed, 08 Jul 2026 08:19:57 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+100    270 100    270   0      0  13414      0                              0
+{"items":[{"id":"617fc163-240a-4e90-8d77-d92c6cc4bb42","type":"prompt","title":"Favorite body","body":"Favorite body","notes":null,"githubUrl":null,"imageKey":null,"favorite":true,"tags":[],"createdAt":"2026-07-08T08:19:56.903Z","updatedAt":"2026-07-08T08:19:56.984Z"}]}
+
+## malformed_input curl
+  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+                                 Dload  Upload  Total   Spent   Left   Speed
+
+  0      0   0      0   0      0      0      0                              0
+100     91 100     73 100     18   3571    880                              0
+100     91 100     73 100     18   3556    876                              0
+100     91 100     73 100     18   3539    872                              0
+HTTP/1.1 400 Bad Request
+Vary: Origin
+content-length: 73
+content-type: application/json
+Date: Wed, 08 Jul 2026 08:19:57 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"error":{"code":"invalid_item","message":"favorite must be a boolean."}}
+
+## MANUAL QA - local D1 migration retry
+Initial scenario failed; applying local migrations only, then retrying.
+
+ ⛅️ wrangler 4.107.0
+────────────────────
+Resource location: local 
+
+Use --remote if you want to access the remote instance.
+
+✅ No migrations to apply!
+Retry dev server PID: 22184
+
+## MANUAL QA - Git Bash favorite scenario
+Command: plan curl scenario plus malformed_input probe
+  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+                                 Dload  Upload  Total   Spent   Left   Speed
+
+  0      0   0      0   0      0      0      0                              0
+100    284 100    267 100     17  10028    638                              0
+100    284 100    267 100     17  10007    637                              0
+HTTP/1.1 200 OK
+Vary: Origin
+content-length: 267
+content-type: application/json
+Date: Wed, 08 Jul 2026 08:20:02 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+100    284 100    267 100     17   9954    633                              0
+  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+                                 Dload  Upload  Total   Spent   Left   Speed
+
+  0      0   0      0   0      0      0      0                              0
+100    529 100    529   0      0  27530      0                              0
+100    529 100    529   0      0  27440      0                              0
+100    529 100    529   0      0  27382      0                              0
+{"item":{"id":"01368f85-8671-4654-ad8c-2a44ee7e03eb","type":"prompt","title":"Favorite body","body":"Favorite body","notes":null,"githubUrl":null,"imageKey":null,"favorite":true,"tags":[],"createdAt":"2026-07-08T08:20:02.617Z","updatedAt":"2026-07-08T08:20:02.710Z"}}HTTP/1.1 200 OK
+Vary: Origin
+content-length: 529
+content-type: application/json
+Date: Wed, 08 Jul 2026 08:20:02 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"items":[{"id":"01368f85-8671-4654-ad8c-2a44ee7e03eb","type":"prompt","title":"Favorite body","body":"Favorite body","notes":null,"githubUrl":null,"imageKey":null,"favorite":true,"tags":[],"createdAt":"2026-07-08T08:20:02.617Z","updatedAt":"2026-07-08T08:20:02.710Z"},{"id":"617fc163-240a-4e90-8d77-d92c6cc4bb42","type":"prompt","title":"Favorite body","body":"Favorite body","notes":null,"githubUrl":null,"imageKey":null,"favorite":true,"tags":[],"createdAt":"2026-07-08T08:19:56.903Z","updatedAt":"2026-07-08T08:19:56.984Z"}]}
+
+## malformed_input curl
+  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+                                 Dload  Upload  Total   Spent   Left   Speed
+
+  0      0   0      0   0      0      0      0                              0
+100     91 100     73 100     18   3718    916                              0
+100     91 100     73 100     18   3703    913                              0
+100     91 100     73 100     18   3681    907                              0
+HTTP/1.1 400 Bad Request
+Vary: Origin
+content-length: 73
+content-type: application/json
+Date: Wed, 08 Jul 2026 08:20:02 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"error":{"code":"invalid_item","message":"favorite must be a boolean."}}
+
+## MANUAL QA - cleanup receipt
+Stopped the dev server process started for this QA run.
+Command: Get-NetTCPConnection -LocalPort 5173 -State Listen
+
+LocalAddress LocalPort RemoteAddress RemotePort State  AppliedSetting OwningProcess
+------------ --------- ------------- ---------- -----  -------------- -------------
+127.0.0.1    5173      0.0.0.0       0          Listen                26776
+
+
+
+## MANUAL QA - dev server logs
+stdout log: .omo/evidence/wave-1-checkbox-8-dev.stdout.log
+stderr log: .omo/evidence/wave-1-checkbox-8-dev.stderr.log
+
+## MANUAL QA - cleanup repair
+The curl proof met the expected 200/listing/400 behavior. The retry section was triggered by shell pipeline exit handling after successful output; local migration reported no migrations to apply. Cleaning manual QA items and stopping the remaining dev-server child process now.
+Command: delete Favorite body items through API, then stop port 5173 owner
+curl: (3) URL rejected: Malformed input to a URL function
+
+## MANUAL QA - final port cleanup check
+Command: Get-NetTCPConnection -LocalPort 5173 -State Listen
+No listener remains on port 5173 after cleanup repair.
+
+## MANUAL QA - local D1 data cleanup
+Command: pnpm wrangler d1 execute prompt-gallery-db --local --command "DELETE FROM items WHERE body = 'Favorite body';"
+
+ ⛅️ wrangler 4.107.0 (update available 4.108.0)
+───────────────────────────────────────────────
+Resource location: local 
+
+Use --remote if you want to access the remote instance.
+
+🌀 Executing on local database prompt-gallery-db (138200be-9d3b-4acf-bb71-42d5ca7e43b7) from .wrangler\state\v3\d1:
+🌀 To execute on your remote database, add a --remote flag to your wrangler command.
+🚣 1 command executed successfully.
+[
+  {
+    "results": [],
+    "success": true,
+    "meta": {
+      "duration": 1
+    }
+  }
+]
+
+## MANUAL QA - post-D1-cleanup port check
+Command: Get-NetTCPConnection -LocalPort 5173 -State Listen
+No listener remains on port 5173 after local D1 cleanup.
+
+## ADVERSARIAL QA - stale_state and dirty_worktree
+Commands: Get-Content plan/item/tag/workflow files was run before edits; git status --short captured below after verification.
+ M .omo/plans/prompt-gallery-implementation.md
+ M .omo/start-work/ledger.jsonl
+ M package.json
+ M src/worker/health.test.ts
+ M src/worker/index.ts
+?? .omo/evidence/wave-1-checkbox-6-code-review.md
+?? .omo/evidence/wave-1-checkbox-6-gate-review.md
+?? .omo/evidence/wave-1-checkbox-7-code-review.md
+?? .omo/evidence/wave-1-checkbox-7-dev-20260708_165055.stderr.log
+?? .omo/evidence/wave-1-checkbox-7-dev-20260708_165055.stdout.log
+?? .omo/evidence/wave-1-checkbox-7-dev-20260708_165126.stderr.log
+?? .omo/evidence/wave-1-checkbox-7-dev-20260708_165126.stdout.log
+?? .omo/evidence/wave-1-checkbox-7-tags-api-gate-review.md
+?? .omo/evidence/wave-1-checkbox-8-dev.stderr.log
+?? .omo/evidence/wave-1-checkbox-8-dev.stdout.log
+?? .omo/evidence/wave-1-checkbox-9-after-code-review-gate-review.md
+?? .omo/evidence/wave-1-checkbox-9-code-review.md
+?? .omo/evidence/wave-1-checkbox-9-dev-20260708_162822.stderr.log
+?? .omo/evidence/wave-1-checkbox-9-dev-20260708_162822.stdout.log
+?? .omo/evidence/wave-1-checkbox-9-manual-dev-retry.stderr.log
+?? .omo/evidence/wave-1-checkbox-9-manual-dev-retry.stdout.log
+?? .omo/evidence/wave-1-checkbox-9-manual-dev.stderr.log
+?? .omo/evidence/wave-1-checkbox-9-manual-dev.stdout.log
+?? .omo/evidence/wave-1-checkbox-9-workflow-repo-api-gate-review.md
+?? .omo/evidence/wave-1-checkbox-9-workflow-repo-api-regate-gate-review.md
+?? .omo/evidence/wave-1-data-api.txt
+?? .omo/evidence/wave-1-manual-dev-rerun.stderr.log
+?? .omo/evidence/wave-1-manual-dev-rerun.stdout.log
+?? .omo/evidence/wave-1-manual-dev.stderr.log
+?? .omo/evidence/wave-1-manual-dev.stdout.log
+?? .omo/evidence/wave-1-manual-tags-dev.stderr.log
+?? .omo/evidence/wave-1-manual-tags-dev.stdout.log
+?? src/worker/favorites.test.ts
+?? src/worker/item-input.ts
+?? src/worker/item-repository.ts
+?? src/worker/item-routes.ts
+?? src/worker/item-types.ts
+?? src/worker/items.test.ts
+?? src/worker/tag-input.ts
+?? src/worker/tag-repository.ts
+?? src/worker/tag-routes.ts
+?? src/worker/tag-types.ts
+?? src/worker/tags.test.ts
+?? src/worker/workflow-input.ts
+?? src/worker/workflow-repository.ts
+?? src/worker/workflow-routes.ts
+?? src/worker/workflow-types.ts
+?? src/worker/workflows.test.ts
+
+## ADVERSARIAL QA - generated_cached_artifacts
+Worker tests used the Cloudflare worker test pool migrations. Manual QA touched only local D1; wrangler local migration check reported no migrations to apply; local Favorite body rows were deleted with wrangler d1 execute --local.
+
+## ADVERSARIAL QA - misleading_success_output and flaky_tests
+All verification commands were rerun in this session and appended above. Favorite worker test was rerun after the full worker suite and exited 0.
+
+## ADVERSARIAL QA - hung_or_long_commands
+Dev server was bounded by health timeout and cleanup checks. Final port checks report no listener on 5173.
+
+## POST-WRITE REVIEW - pure LOC
+src/worker/favorites.test.ts	131 pure LOC
+src/worker/item-input.ts	182 pure LOC
+src/worker/item-repository.ts	174 pure LOC
+src/worker/item-routes.ts	93 pure LOC
+src/worker/index.ts	52 pure LOC
+
+## POST-WRITE REVIEW - notes
+Single responsibility: route/input/repository/test boundaries stayed separate. Boundary purity: favorite body is parsed at API boundary before repository update. Escape hatches: no any/ts-ignore/non-null assertion added. Favorite toggle does not reuse PATCH tag auto-application path. Tests lock all requested favorite behaviors.
+
+## Wave 1 explicit RED/GREEN summary - items
+
+- Existing evidence in this file: items tests were already present in the initial failing favorites run and the later targeted verify section `## VERIFY - pnpm test:worker -- --run src/worker/items.test.ts`; the visible items cases include missing body rejection, latest-first listing, and get/update/delete by id.
+- Original RED/GREEN status: no explicit `RED - items` heading exists in this file. The original item API evidence here is GREEN-only worker output, not a separate failing-first section.
+- Current PASS command: `pnpm qa:api -- --output .omo/evidence/wave-1-api-smoke.txt` passed and recorded `POST /api/items body-only -> 201 fallback title/body` in `.omo/evidence/wave-1-api-smoke.txt`.
+- Current PASS command: `pnpm test:worker` passed after the API smoke; captured at `.omo/evidence/wave-1-test-worker-after-api-smoke.log`.
+
+## Wave 1 explicit RED/GREEN summary - tags
+
+- Existing evidence in this file: tags tests were already present in the initial run and targeted verify section `## VERIFY - pnpm test:worker -- --run src/worker/tags.test.ts`; visible cases include `GET /api/items?tags=research,slides`, keyword tagging, manual tag override, unknown tag rejection, rename, and merge.
+- Original RED/GREEN status: no explicit `RED - tags` heading exists in this file. The original tag API evidence here is GREEN-only worker output, not a separate failing-first section.
+- Current PASS command: `pnpm qa:api -- --output .omo/evidence/wave-1-api-smoke.txt` passed and recorded `POST /api/tags -> 201 research=..., slides=...` plus `GET /api/items?tags=research,slides -> marker matched only ...` in `.omo/evidence/wave-1-api-smoke.txt`.
+- Current PASS command: `pnpm test:worker` passed after the API smoke; captured at `.omo/evidence/wave-1-test-worker-after-api-smoke.log`.
+
+## Wave 1 explicit RED/GREEN summary - favorite
+
+- Existing RED evidence in this file: `## RED - favorites worker test before implementation` shows four failing favorites cases, including dedicated favorite endpoint 404, favorite list leakage, non-JSON 404, and malformed favorite 404 instead of JSON 400.
+- Existing GREEN evidence in this file: `## GREEN - favorites worker test after implementation` and `## VERIFY - pnpm test:worker -- --run src/worker/favorites.test.ts` show the favorites worker tests passing.
+- Current PASS command: `pnpm qa:api -- --output .omo/evidence/wave-1-api-smoke.txt` passed and recorded `POST favorite + GET favorite=true -> included ...` and `POST malformed favorite body -> JSON 400 invalid_item` in `.omo/evidence/wave-1-api-smoke.txt`.
+- Current PASS command: `pnpm test:worker` passed after the API smoke; captured at `.omo/evidence/wave-1-test-worker-after-api-smoke.log`.
+
+## Wave 1 explicit RED/GREEN summary - workflows
+
+- Existing evidence in this file: workflow tests were already present in the initial run and targeted verify section `## VERIFY - pnpm test:worker -- --run src/worker/workflows.test.ts`; visible cases include creating prompt/repo/memo/link steps, deleted prompt reference handling, missing name rejection, and zero-step rejection.
+- Original RED/GREEN status: no explicit `RED - workflows` heading exists in this file. The original workflow API evidence here is GREEN-only worker output, not a separate failing-first section.
+- Current PASS command: `pnpm qa:api -- --output .omo/evidence/wave-1-api-smoke.txt` passed and recorded `POST /api/workflows -> 201 ordered positions 1,2,3,4 ...` in `.omo/evidence/wave-1-api-smoke.txt`.
+- Current PASS command: `pnpm test:worker` passed after the API smoke; captured at `.omo/evidence/wave-1-test-worker-after-api-smoke.log`.
+
+## Wave 1 corrected RED/GREEN evidence index
+
+Audit artifact: `.omo/evidence/wave-1-red-green-evidence-audit.md`
+
+## Wave 1 recovered RED evidence index
+
+Recovery artifact: `.omo/evidence/wave-1-red-evidence-recovery.md`
+
+### items RED recovered
+
+- Raw source: `C:/Users/ahnbu/.codex/sessions/2026/07/08/rollout-2026-07-08T15-41-59-019f4076-2200-7aa2-8c03-58e65ab307b0.jsonl:86`
+- Extracted artifact: `.omo/evidence/wave-1-red-recovery/items-red-transcript.txt`
+- Invocation: `pnpm test:worker -- --run src/worker/items.test.ts`
+- Observable RED: `Exit code: 1`; `src/worker/items.test.ts (4 tests | 4 failed)`; failures include `expected 404 to be 201` and `expected 404 to be 400`.
+
+### tags RED recovered
+
+- Raw source: `C:/Users/ahnbu/.codex/sessions/2026/07/08/rollout-2026-07-08T16-16-02-019f4095-58ed-7531-894c-bb37fc7b2b77.jsonl:108`
+- Extracted artifact: `.omo/evidence/wave-1-red-recovery/tags-red-transcript.txt`
+- Invocation: `pnpm test:worker -- --run src/worker/tags.test.ts`
+- Observable RED: `Exit code: 1`; `src/worker/tags.test.ts (6 tests | 6 failed)`; `/api/tags` creation-dependent tests failed with `expected 404 to be 201`.
+
+### workflows RED recovered
+
+- Raw source: `C:/Users/ahnbu/.codex/sessions/2026/07/08/rollout-2026-07-08T16-16-30-019f4095-c8aa-7e82-999e-a30342096f7a.jsonl:113`
+- Extracted artifact: `.omo/evidence/wave-1-red-recovery/workflows-red-transcript.txt`
+- Invocation: `pnpm test:worker -- --run src/worker/workflows.test.ts`
+- Observable RED: `Exit code: 1`; `src/worker/workflows.test.ts (6 tests | 6 failed)`; `/api/workflows` tests failed with `expected 404 to be 201` / `expected 404 to be 400`; invalid repo URL failed with `expected 201 to be 400`.
+
+Recovered verdict: checkbox 10 can proceed on RED evidence for Wave 1 items/tags/workflows.
+
+### items
+
+- RED: insufficient. Current `.omo/evidence/wave-1-data-api.txt:689` says no explicit `RED - items` heading exists and item evidence is GREEN-only. `.omo/evidence/wave-1-checkbox-6-code-review.md:114` claims pre-implementation item tests failed with 404s, but the underlying item 404 transcript was not found in current `.omo/evidence/`.
+- GREEN: `.omo/evidence/wave-1-data-api.txt:231-258`, command `pnpm test:worker -- --run src/worker/items.test.ts`; `.omo/evidence/wave-1-test-worker-after-api-smoke.log:27`; `.omo/evidence/wave-1-api-smoke.txt:9`.
+- Manual proof: `.omo/evidence/wave-1-checkbox-6-gate-review.md:81` records a local `curl.exe -i -X POST http://127.0.0.1:5173/api/items ...` returning `201 Created`.
+
+### tags
+
+- RED: insufficient. Current `.omo/evidence/wave-1-data-api.txt:696` says no explicit `RED - tags` heading exists and tag evidence is GREEN-only. No `/api/tags` 404 RED transcript was found in current `.omo/evidence/`.
+- GREEN: `.omo/evidence/wave-1-data-api.txt:271-301`, command `pnpm test:worker -- --run src/worker/tags.test.ts`; `.omo/evidence/wave-1-test-worker-after-api-smoke.log:30`; `.omo/evidence/wave-1-api-smoke.txt:10-11`.
+- Manual proof: `.omo/evidence/wave-1-api-smoke.txt:10-11` records `POST /api/tags -> 201 ...` and `GET /api/items?tags=research,slides -> marker matched only ...`.
+
+### favorite
+
+- RED: sufficient. `.omo/evidence/wave-1-data-api.txt:5-7` records `## RED - favorites worker test before implementation`, command `pnpm test:worker -- --run src/worker/favorites.test.ts`; `.omo/evidence/wave-1-data-api.txt:33-41` records 4 failing favorite tests; `.omo/evidence/wave-1-data-api.txt:61-68` records expected 200 received 404.
+- GREEN: `.omo/evidence/wave-1-data-api.txt:149-183`, command `pnpm test:worker -- --run src/worker/favorites.test.ts`; `.omo/evidence/wave-1-test-worker-after-api-smoke.log:28`; `.omo/evidence/wave-1-api-smoke.txt:12,14`.
+- Manual proof: `.omo/evidence/wave-1-data-api.txt:451-501` records favorite toggle/listing and malformed favorite body curl proof.
+
+### workflows
+
+- RED: insufficient for the full workflow area. Later stale-reference RED exists in `.omo/evidence/wave-1-checkbox-9-workflow-repo-api-gate-review.md:47-50`, observed `STALE_REFERENCE_GET_STATUS=500`. Initial `/api/workflows` 404 and invalid repo URL RED evidence was not found in current `.omo/evidence/`.
+- GREEN: `.omo/evidence/wave-1-data-api.txt:311-340`, command `pnpm test:worker -- --run src/worker/workflows.test.ts`; `.omo/evidence/wave-1-test-worker-after-api-smoke.log:29`; `.omo/evidence/wave-1-api-smoke.txt:13`.
+- Manual proof: `.omo/evidence/wave-1-api-smoke.txt:13` records `POST /api/workflows -> 201 ordered positions 1,2,3,4`. Stale-reference GREEN is claimed in `.omo/evidence/wave-1-checkbox-9-after-code-review-gate-review.md:29`, but the cited raw lines are not present in current `.omo/evidence/wave-1-data-api.txt`.

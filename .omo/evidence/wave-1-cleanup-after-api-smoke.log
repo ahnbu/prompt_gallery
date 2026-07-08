@@ -1,0 +1,2 @@
+$ node scripts/qa/verify-cleanup.mjs "--" "--output" ".omo/evidence/wave-1-cleanup-after-api-smoke.md"
+PASS verify cleanup: D:\vibe-coding\prompt-gallery\.omo\evidence\wave-1-cleanup-after-api-smoke.md
