@@ -1,0 +1,52 @@
+@media (max-width: 680px) {
+  .app-shell {
+    padding: var(--space-4);
+  }
+
+  .topbar {
+    grid-template-columns: 1fr;
+  }
+
+  .add-button,
+  .search-control {
+    width: 100%;
+  }
+
+  h1 {
+    font-size: 28px;
+  }
+
+  .tab-button {
+    flex: 1 1 30%;
+    justify-content: center;
+  }
+
+  .tag-chip {
+    max-width: min(100%, 168px);
+  }
+
+  .gallery-card {
+    min-height: 190px;
+  }
+
+  .modal-backdrop {
+    align-items: end;
+    padding: var(--space-3);
+  }
+
+  .item-modal {
+    max-height: calc(100dvh - var(--space-6));
+  }
+
+  .modal-actions {
+    flex-wrap: wrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tab-button,
+  .tag-chip,
+  .card-open-button {
+    transition: none;
+  }
+}

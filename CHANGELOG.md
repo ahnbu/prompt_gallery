@@ -4,6 +4,7 @@
 
 | 일시 | 유형 | 범위 | 변경내용 | 변경사유 | 작성AI |
 |---|---|---|---|---|---|
+| 2026-07-09 01:10 | feat | ui | 갤러리 검색·필터·모달 CRUD·본문 복사·즐겨찾기 UX와 Wave 2 브라우저 QA 추가 | - | Unknown |
 | 2026-07-08 22:24 | feat | api | D1 기반 항목·태그·즐겨찾기·워크플로우 API와 Wave 1 검증 smoke 추가 | - | Unknown |
 | 2026-07-08 15:49 | docs | cost-management | 비용관리 문서 참조를 wikilink로 정리하고 Budget Alert 설정 완료 기록 | - | Codex |
 | 2026-07-08 15:43 | docs | repo | GitHub 원격 초기 LICENSE 이력 병합 | - | Unknown |

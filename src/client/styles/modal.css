@@ -1,0 +1,113 @@
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: var(--space-6);
+  background: rgba(0, 0, 0, 0.64);
+}
+
+.item-modal {
+  display: grid;
+  width: min(100%, 620px);
+  max-height: min(760px, calc(100dvh - var(--space-8)));
+  margin: auto;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  overflow: auto;
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  background: var(--surface-raised);
+  color: var(--text-primary);
+}
+
+.item-modal::backdrop {
+  background: rgba(0, 0, 0, 0.64);
+}
+
+.modal-header,
+.modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 20px;
+  font-weight: 590;
+  line-height: 1.25;
+}
+
+.form-grid,
+.detail-stack {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.form-grid label,
+.readonly-field {
+  display: grid;
+  gap: var(--space-2);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 510;
+  line-height: 1.4;
+}
+
+.readonly-field strong,
+.form-grid input,
+.form-grid select,
+.form-grid textarea {
+  width: 100%;
+  min-width: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  background: var(--surface-control);
+  color: var(--text-primary);
+  font: inherit;
+}
+
+.form-grid input,
+.form-grid select,
+.form-grid textarea {
+  outline: 0;
+}
+
+.form-grid textarea {
+  resize: vertical;
+}
+
+.form-grid input:focus,
+.form-grid select:focus,
+.form-grid textarea:focus {
+  border-color: color-mix(in srgb, var(--accent-primary) 48%, transparent);
+}
+
+.detail-body,
+.detail-notes,
+.form-error,
+.delete-warning {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.detail-notes {
+  color: var(--text-muted);
+}
+
+.form-error,
+.delete-warning {
+  padding: var(--space-3);
+  border: 1px solid color-mix(in srgb, var(--accent-primary) 40%, transparent);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--accent-primary) 12%, transparent);
+  color: var(--text-primary);
+}

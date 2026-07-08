@@ -1,15 +1,108 @@
-import { FileText, Github, Image, Layers, Search, Star, Workflow } from "lucide-react"
+import { FileText, Github, Image, Layers, Plus, Search, Star, Workflow } from "lucide-react"
+import { useEffect, useMemo, useState } from "react"
+import { GalleryResults } from "./GalleryList"
+import { ItemModal, type ItemModalState, defaultTypeForTab } from "./ItemModal"
+import { type GalleryData, type Item, fetchGalleryData } from "./gallery-data"
+import {
+  type GalleryTab,
+  allCardEntries,
+  filteredCardEntries,
+  shouldShowUnifiedResults,
+} from "./gallery-model"
+import { updateItemFavorite } from "./item-mutations"
 
-const tabs = [
-  { label: "즐겨찾기", shortLabel: "즐겨찾기", icon: Star, active: false },
-  { label: "All", shortLabel: "All", icon: Layers, active: true },
-  { label: "프롬프트", shortLabel: "프롬프트", icon: FileText, active: false },
-  { label: "이미지 프롬프트", shortLabel: "이미지", icon: Image, active: false },
-  { label: "Workflow", shortLabel: "Workflow", icon: Workflow, active: false },
-  { label: "레포", shortLabel: "레포", icon: Github, active: false },
-] as const
+type GalleryStatus = "loading" | "ready" | "error"
+
+const tabs: readonly {
+  readonly value: GalleryTab
+  readonly label: string
+  readonly shortLabel: string
+  readonly icon: typeof Layers
+}[] = [
+  { value: "favorite", label: "즐겨찾기", shortLabel: "즐겨찾기", icon: Star },
+  { value: "all", label: "All", shortLabel: "All", icon: Layers },
+  { value: "prompt", label: "프롬프트", shortLabel: "프롬프트", icon: FileText },
+  { value: "image_prompt", label: "이미지 프롬프트", shortLabel: "이미지", icon: Image },
+  { value: "workflow", label: "Workflow", shortLabel: "Workflow", icon: Workflow },
+  { value: "repo", label: "레포", shortLabel: "레포", icon: Github },
+]
+
+const emptyData: GalleryData = { items: [], tags: [], workflows: [] }
 
 export function App() {
+  const [galleryData, setGalleryData] = useState<GalleryData>(emptyData)
+  const [status, setStatus] = useState<GalleryStatus>("loading")
+  const [activeTab, setActiveTab] = useState<GalleryTab>("all")
+  const [searchText, setSearchText] = useState("")
+  const [selectedTags, setSelectedTags] = useState<readonly string[]>([])
+  const [modalState, setModalState] = useState<ItemModalState | null>(null)
+
+  useEffect(() => {
+    const controller = new AbortController()
+    setStatus("loading")
+    fetchGalleryData(controller.signal).then(
+      (data) => {
+        setGalleryData(data)
+        setStatus("ready")
+      },
+      () => {
+        if (!controller.signal.aborted) {
+          setStatus("error")
+        }
+      },
+    )
+
+    return () => {
+      controller.abort()
+    }
+  }, [])
+
+  const allEntries = useMemo(() => allCardEntries(galleryData), [galleryData])
+  const filteredEntries = filteredCardEntries({
+    activeTab,
+    entries: allEntries,
+    searchText,
+    selectedTags,
+  })
+  const showUnified = shouldShowUnifiedResults({ activeTab, searchText, selectedTags })
+
+  function toggleTag(name: string): void {
+    setSelectedTags((current) =>
+      current.includes(name) ? current.filter((tag) => tag !== name) : [...current, name],
+    )
+  }
+
+  async function refreshGalleryData(): Promise<GalleryData> {
+    setStatus("loading")
+    const data = await fetchGalleryData(new AbortController().signal)
+    setGalleryData(data)
+    setStatus("ready")
+    return data
+  }
+
+  async function refreshAfterMutation(): Promise<void> {
+    await refreshGalleryData()
+  }
+
+  async function toggleFavorite(item: Item): Promise<void> {
+    await updateItemFavorite(item.id, !item.favorite)
+    const data = await refreshGalleryData()
+    const updatedItem = data.items.find((candidate) => candidate.id === item.id)
+    setModalState((current) =>
+      current?.kind === "detail" && updatedItem !== undefined && current.item.id === item.id
+        ? { kind: "detail", item: updatedItem }
+        : current,
+    )
+  }
+
+  function openAddModal(): void {
+    setModalState({ kind: "add", defaultType: defaultTypeForTab(activeTab) })
+  }
+
+  function openDetailModal(item: Item): void {
+    setModalState({ kind: "detail", item })
+  }
+
   return (
     <main className="app-shell" aria-labelledby="app-title">
       <header className="topbar">
@@ -17,22 +110,34 @@ export function App() {
           <p className="eyebrow">Personal workspace</p>
           <h1 id="app-title">Prompt Gallery</h1>
         </div>
+        <button className="add-button" onClick={openAddModal} type="button">
+          <Plus aria-hidden="true" size={17} strokeWidth={1.8} />
+          <span>추가</span>
+        </button>
         <label className="search-control">
           <Search aria-hidden="true" size={16} strokeWidth={1.8} />
-          <input type="search" placeholder="검색 준비 중" disabled aria-label="검색 준비 중" />
+          <input
+            aria-label="통합검색"
+            onChange={(event) => setSearchText(event.currentTarget.value)}
+            placeholder="검색어, 본문, 메모, 태그"
+            type="search"
+            value={searchText}
+          />
         </label>
       </header>
 
       <nav className="tabbar" aria-label="Prompt Gallery sections">
         {tabs.map((tab) => {
           const Icon = tab.icon
+          const active = tab.value === activeTab
 
           return (
             <button
-              aria-current={tab.active ? "page" : undefined}
+              aria-current={active ? "page" : undefined}
               aria-label={tab.label}
-              className={tab.active ? "tab-button active" : "tab-button"}
-              key={tab.label}
+              className={active ? "tab-button active" : "tab-button"}
+              key={tab.value}
+              onClick={() => setActiveTab(tab.value)}
               title={tab.label}
               type="button"
             >
@@ -43,7 +148,47 @@ export function App() {
         })}
       </nav>
 
-      <section className="content-empty" aria-label="빈 콘텐츠 영역" />
+      <section className="tag-filter" aria-label="태그 필터">
+        {galleryData.tags.map((tag) => {
+          const selected = selectedTags.includes(tag.name)
+          return (
+            <button
+              aria-pressed={selected}
+              className={selected ? "tag-chip selected" : "tag-chip"}
+              key={tag.id}
+              onClick={() => toggleTag(tag.name)}
+              title={tag.name}
+              type="button"
+            >
+              {tag.name}
+            </button>
+          )
+        })}
+      </section>
+
+      {status === "loading" ? <section className="content-panel">불러오는 중</section> : null}
+      {status === "error" ? (
+        <section className="content-panel">데이터를 불러오지 못했습니다</section>
+      ) : null}
+      {status === "ready" ? (
+        <GalleryResults
+          allEntries={allEntries}
+          filteredEntries={filteredEntries}
+          onFavoriteChange={toggleFavorite}
+          onOpenItem={openDetailModal}
+          showUnified={showUnified}
+        />
+      ) : null}
+      {modalState !== null ? (
+        <ItemModal
+          onClose={() => setModalState(null)}
+          onDeleted={refreshAfterMutation}
+          onFavoriteChange={toggleFavorite}
+          onSaved={refreshAfterMutation}
+          state={modalState}
+          tags={galleryData.tags}
+        />
+      ) : null}
     </main>
   )
 }

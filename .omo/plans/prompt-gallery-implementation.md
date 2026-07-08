@@ -258,7 +258,7 @@ Your next move: 이 계획을 실행하려면 `$omo:start-work` 또는 동등한
   - Failure path: if API smoke receives non-2xx or missing JSON keys, fix before commit.
   Commit: Yes | `feat(api): D1 기반 항목과 태그 API 추가`
 
-- [ ] 11. Wave 2 - Implement gallery shell, search, tabs, tag filters, and cards
+- [x] 11. Wave 2 - Implement gallery shell, search, tabs, tag filters, and cards
   What to do / Must NOT do: Build the main browser experience over real API data. Implement compact icon tabs with tooltip/accessibility labels, search behavior, All sections, unified search results, AND tag chips, latest-first cards, type badges, and max 10 visible tags. Do not use fake static data after API is available.
   Parallelization: Wave 2 | Blocked by: 10 | Blocks: 12, 14, 15, 16
   References: `_docs/specs/20260708_01_prompt-gallery_요구사항_SPEC.md:61`, `_docs/specs/20260708_01_prompt-gallery_요구사항_SPEC.md:87`, `_docs/specs/20260708_01_prompt-gallery_요구사항_SPEC.md:102`
@@ -266,9 +266,10 @@ Your next move: 이 계획을 실행하려면 `$omo:start-work` 또는 동등한
   QA scenarios:
   - Failure first: run `gallery-search` before UI is wired to API; expected FAIL on missing seeded cards.
   - Happy path: run `gallery-search`; expected PASS with screenshots for All, search result, and filtered result. Evidence `.omo/evidence/wave-2-core-ui.md`.
+  Result: PASS. Evidence `.omo/evidence/wave-2-core-ui-red.md`, `.omo/evidence/wave-2-core-ui.md`, `.omo/evidence/wave-2-task-11-code-review.md`, `.omo/evidence/wave-2-task-11-gate-review.md`. Gate review approved after `pnpm qa:browser`, `pnpm qa:browser -- --scenario gallery-search --output .omo/evidence/wave-2-core-ui-gate.md`, `pnpm verify:cleanup -- --output .omo/evidence/wave-2-cleanup-gallery-search-gate.md`, `pnpm typecheck`, `pnpm lint`, `pnpm test`, and `pnpm build` passed. The scenario now verifies type badges, latest-first cards, visible tag limit, all tab filters, search, AND tag filtering, and section/unified result switching.
   Commit: No, commit at Wave 2 gate.
 
-- [ ] 12. Wave 2 - Implement add/detail modal CRUD with explicit save and delete confirmation
+- [x] 12. Wave 2 - Implement add/detail modal CRUD with explicit save and delete confirmation
   What to do / Must NOT do: Implement `+ 추가`, type selection from All, current-tab default type, body-only required rule for prompts, optional title/tags/notes/image fields, card click detail modal, edit mode, explicit save, and one-step delete confirmation. Do not auto-save.
   Parallelization: Wave 2 | Blocked by: 11 | Blocks: 14, 15, final browser QA
   References: `_docs/specs/20260708_01_prompt-gallery_요구사항_SPEC.md:38`, `_docs/specs/20260708_01_prompt-gallery_요구사항_SPEC.md:117`, `_docs/specs/20260708_01_prompt-gallery_요구사항_SPEC.md:126`
@@ -276,9 +277,10 @@ Your next move: 이 계획을 실행하려면 `$omo:start-work` 또는 동등한
   QA scenarios:
   - Failure first: run `pnpm qa:browser -- --scenario modal-crud --output .omo/evidence/wave-2-modal-crud-fail.md`; expected auto-start/stop and FAIL before modal implementation.
   - Happy path: rerun same scenario after implementation; expected PASS and screenshots for add, detail, edit, delete confirm. Evidence `.omo/evidence/wave-2-core-ui.md`.
+  Result: PASS. Evidence `.omo/evidence/wave-2-modal-crud-fail.md`, `.omo/evidence/wave-2-modal-crud.md`, `.omo/evidence/wave-2-modal-crud-review.md`, `.omo/evidence/wave-2-task-12-modal-crud-code-review.md`, `.omo/evidence/wave-2-task-12-modal-crud-gate-review.md`. Gate review approved after `modal-crud`, `gallery-search`, cleanup, typecheck, lint, test, and build passed. The final scenario verifies add flow, type selection/defaults, body-only fallback title, card detail modal, edit explicit save, unsaved edit cancel, read-only edit type, delete cancel/confirm, and modal focus return.
   Commit: No, commit at Wave 2 gate.
 
-- [ ] 13. Wave 2 - Implement copy body only and favorite UX
+- [x] 13. Wave 2 - Implement copy body only and favorite UX
   What to do / Must NOT do: Add card and modal copy buttons for prompt/image prompt bodies only. Add favorite star toggle on cards and detail modal, and favorite tab showing all favorite types. Do not copy title, tags, notes, or metadata.
   Parallelization: Wave 2 | Blocked by: 11, 12 | Blocks: final browser QA
   References: `_docs/specs/20260708_01_prompt-gallery_요구사항_SPEC.md:27`, `_docs/specs/20260708_01_prompt-gallery_요구사항_SPEC.md:41`, `_docs/specs/20260708_01_prompt-gallery_요구사항_SPEC.md:78`
@@ -286,9 +288,10 @@ Your next move: 이 계획을 실행하려면 `$omo:start-work` 또는 동등한
   QA scenarios:
   - Failure first: scenario expects clipboard body-only before copy implementation; expected FAIL.
   - Happy path: `pnpm qa:browser -- --scenario copy-favorite --output .omo/evidence/wave-2-copy-favorite.md`; expected auto-start/stop and PASS with clipboard assertion.
+  Result: PASS. Evidence `.omo/evidence/wave-2-copy-favorite-fail.md`, `.omo/evidence/wave-2-copy-favorite-review-red.md`, `.omo/evidence/wave-2-copy-favorite.md`, `.omo/evidence/wave-2-task-13-copy-favorite-code-review.md`, `.omo/evidence/wave-2-task-13-copy-favorite-gate-review.md`. Gate review approved after `copy-favorite`, `modal-crud`, `gallery-search`, cleanup, typecheck, lint, test, and build passed. The final scenario verifies body-only clipboard content, keyboard-safe copy/favorite controls, copy status output, card and modal favorite toggles, and favorite tab coverage for prompt, image prompt, and repo items.
   Commit: No, commit at Wave 2 gate.
 
-- [ ] 14. Wave 2 gate - Verify and commit core UI
+- [x] 14. Wave 2 gate - Verify and commit core UI
   What to do / Must NOT do: Run full checks and browser QA for Wave 2. Commit only UI/API integration work from Wave 2. Do not include R2/workflow/tag management features unless already required by the completed Wave 2 tasks.
   Parallelization: Wave 2 gate | Blocked by: 11, 12, 13 | Blocks: Wave 3
   References: `.omo/evidence/wave-2-core-ui.md`
@@ -296,6 +299,7 @@ Your next move: 이 계획을 실행하려면 `$omo:start-work` 또는 동등한
   QA scenarios:
   - Happy path: browser QA scenarios `gallery-search`, `modal-crud`, and `copy-favorite` all PASS.
   - Failure path: any screenshot with overlapping text, blank content, or broken modal blocks commit.
+  Result: PASS. Evidence `.omo/evidence/wave-2-gate-gallery-search-final.md`, `.omo/evidence/wave-2-gate-modal-crud-final.md`, `.omo/evidence/wave-2-gate-copy-favorite-final.md`, `.omo/evidence/wave-2-gate-cleanup-final.md`, `.omo/evidence/wave-2-final-code-review.md`, `.omo/evidence/wave-2-final-gate-review.md`. Final gate approved after typecheck, lint, unit tests, worker tests, build, all three Wave 2 browser scenarios, cleanup, CSS split review, long tag chip screenshot review, and scope review passed. `.omo/evidence/wave-1-checkbox-8-dev.stdout.log` is a pre-existing Wave 1 dev-log contamination and is excluded from the Wave 2 commit.
   Commit: Yes | `feat(ui): 핵심 갤러리 탐색과 편집 UX 추가`
 
 - [ ] 15. Wave 3 - Implement R2 asset API and consistency handling
