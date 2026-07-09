@@ -175,8 +175,12 @@ function CardGrid(props: {
     return <p className="empty-copy">{props.emptyLabel}</p>
   }
 
+  const isImageOnly = props.entries.every(
+    (entry) => entry.kind === "item" && entry.item.type === "image_prompt",
+  )
+
   return (
-    <div className="card-grid">
+    <div className={isImageOnly ? "card-grid image-masonry-grid" : "card-grid"}>
       {props.entries.map((entry) => (
         <GalleryCard
           entry={entry}

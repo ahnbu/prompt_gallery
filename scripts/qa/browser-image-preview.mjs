@@ -3,107 +3,21 @@ import { chromium } from "playwright"
 import {
   assert,
   activeDialog,
+  assertBoundedPreviewFrame,
   assertHidden,
   assertNoInternalItemKeys,
-  assertNoPublicStorage,
-  assertResizedThumbnail,
-  assertSquarePreviewFrame,
   assertVisible,
   cleanupTask16Fixtures,
-  imagePreviewSrc,
   itemCard,
-  previewImage,
-  publicStoragePattern,
+  openEdit,
   screenshot,
   setGeneratedImage,
+  uploadDraftImage,
   viewports,
+  waitForAssetContentStatus,
+  waitForCardNoImage,
+  waitForCardThumbnail,
 } from "./browser-image-preview-support.mjs"
-
-async function openEdit(page, title) {
-  await itemCard(page, title)
-    .getByRole("button", { name: `${title} 상세 열기` })
-    .click()
-  await assertVisible(page.getByRole("dialog", { name: title }), "Detail modal missing")
-  await page.getByRole("button", { name: "수정", exact: true }).click()
-  await assertVisible(page.getByRole("dialog", { name: "항목 수정" }), "Edit modal missing")
-}
-
-async function uploadDraftImage(page, filename, width, height) {
-  const previousSrc = await imagePreviewSrc(page).catch(() => null)
-  await setGeneratedImage(page, filename, width, height)
-  const responsePromise = page.waitForResponse(
-    (response) => response.request().method() === "POST" && response.url().includes("/api/assets"),
-  )
-  await activeDialog(page).locator('[data-qa="image-preview-upload"]').click()
-  const response = await responsePromise
-  const bodyText = await response.text()
-  assert(!bodyText.includes("objectKey"), `Asset response exposed objectKey: ${bodyText}`)
-  assert(!bodyText.includes("previews/"), `Asset response exposed internal key: ${bodyText}`)
-  assert(!publicStoragePattern.test(bodyText), `Asset response exposed public URL: ${bodyText}`)
-  const assetId = assetIdFromResponse(bodyText)
-  await assertVisible(previewImage(page), "Draft thumbnail missing")
-  if (previousSrc !== null) {
-    await page.waitForFunction(
-      (src) =>
-        document
-          .querySelector('[data-qa="item-modal"] [data-qa="image-preview-img"]')
-          ?.getAttribute("src") !== src,
-      previousSrc,
-    )
-  }
-  const src = await imagePreviewSrc(page)
-  assertNoPublicStorage(src, "Draft thumbnail src")
-  assert(src?.startsWith("/api/assets/") === true, `Thumbnail must use worker proxy: ${src}`)
-  await assertResizedThumbnail(page)
-  return { assetId, src }
-}
-
-function assetIdFromResponse(bodyText) {
-  const payload = JSON.parse(bodyText)
-  const assetId = payload?.asset?.id
-  assert(typeof assetId === "string", `Asset response did not include asset.id: ${bodyText}`)
-  return assetId
-}
-
-async function waitForAssetContentStatus(page, assetId, expectedStatus) {
-  await page.waitForFunction(
-    async ({ id, status }) => {
-      const response = await fetch(`/api/assets/${id}/content`, { cache: "no-store" })
-      return response.status === status
-    },
-    { id: assetId, status: expectedStatus },
-  )
-}
-
-async function waitForItemImageAsset(page, title, expectedPresent) {
-  await page.waitForFunction(
-    async ({ itemTitle, present }) => {
-      const response = await fetch("/api/items", { cache: "no-store" })
-      const payload = await response.json()
-      const item = Array.isArray(payload.items)
-        ? payload.items.find((candidate) => candidate.title === itemTitle)
-        : undefined
-      return present ? typeof item?.imageAssetId === "string" : item?.imageAssetId === null
-    },
-    { itemTitle: title, present: expectedPresent },
-  )
-}
-
-async function waitForCardThumbnail(page, title) {
-  await waitForItemImageAsset(page, title, true)
-  await assertVisible(
-    itemCard(page, title).locator('[data-qa="image-preview-img"]'),
-    "Saved thumbnail missing",
-  )
-}
-
-async function waitForCardNoImage(page, title) {
-  await waitForItemImageAsset(page, title, false)
-  await assertVisible(
-    itemCard(page, title).locator('[data-qa="image-preview-empty"]'),
-    "No-image did not return",
-  )
-}
 
 async function runViewport(baseUrl, outputPath, viewport) {
   const browser = await chromium.launch()
@@ -130,7 +44,7 @@ async function runViewport(baseUrl, outputPath, viewport) {
     const card = itemCard(page, title)
     await assertVisible(card, "Created image prompt card missing")
     await assertVisible(card.locator('[data-qa="image-preview-empty"]'), "Card no-image missing")
-    await assertSquarePreviewFrame(card.locator(".image-preview-frame"), "Created card")
+    await assertBoundedPreviewFrame(card.locator(".image-preview-frame"), "Created card")
     await assertNoInternalItemKeys(page)
     artifacts.push(await screenshot(page, screenshotStem, viewport.name, "no-image"))
 
@@ -164,7 +78,7 @@ async function runViewport(baseUrl, outputPath, viewport) {
     artifacts.push(await screenshot(page, screenshotStem, viewport.name, "uploaded-thumbnail"))
     await page.getByRole("button", { name: "저장", exact: true }).click()
     await waitForCardThumbnail(page, title)
-    await assertSquarePreviewFrame(
+    await assertBoundedPreviewFrame(
       itemCard(page, title).locator(".image-preview-frame"),
       "Saved card",
     )
@@ -179,7 +93,7 @@ async function runViewport(baseUrl, outputPath, viewport) {
     artifacts.push(await screenshot(page, screenshotStem, viewport.name, "replaced-thumbnail"))
     await page.getByRole("button", { name: "저장", exact: true }).click()
     await waitForCardThumbnail(page, title)
-    await assertSquarePreviewFrame(
+    await assertBoundedPreviewFrame(
       itemCard(page, title).locator(".image-preview-frame"),
       "Replaced card",
     )
@@ -193,7 +107,7 @@ async function runViewport(baseUrl, outputPath, viewport) {
     )
     await page.getByRole("button", { name: "저장", exact: true }).click()
     await waitForCardNoImage(page, title)
-    await assertSquarePreviewFrame(
+    await assertBoundedPreviewFrame(
       itemCard(page, title).locator(".image-preview-frame"),
       "Removed card",
     )
@@ -241,7 +155,7 @@ export function renderImagePreviewEvidence(result) {
     "## Assertions",
     "- Image prompt can be created with no image.",
     "- Card and detail modal show a lucide no-image state without placeholder files.",
-    "- Compact gallery image prompt preview frames stay square after create, upload, replace, and remove.",
+    "- Compact gallery image prompt preview frames stay visible and bounded after create, upload, replace, and remove.",
     "- Invalid file upload exposes an accessible error state.",
     "- Browser-side canvas resize/compress keeps uploaded preview content at 1200px max edge.",
     "- Unsaved preview/title edits are discarded on cancel.",
@@ -278,7 +192,7 @@ export function renderImagePreviewEvidence(result) {
   lines.push(
     "## Binary Observable",
     result.ok
-      ? "Playwright invalid upload, square preview, resize, explicit-save preview, protected thumbnail, and screenshot assertions passed."
+      ? "Playwright invalid upload, bounded preview, resize, explicit-save preview, protected thumbnail, and screenshot assertions passed."
       : "Scenario failed before all assertions completed.",
     "",
   )

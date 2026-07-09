@@ -55,9 +55,9 @@
 }
 
 .primary-button {
-  border-color: color-mix(in srgb, var(--accent-primary) 52%, transparent);
-  background: color-mix(in srgb, var(--accent-primary) 20%, transparent);
-  color: var(--text-primary);
+  border-color: var(--accent-primary);
+  background: var(--accent-primary);
+  color: var(--surface-panel);
 }
 
 .danger-button {
@@ -87,7 +87,7 @@
 .gallery-card a:focus-visible,
 .card-open-button:focus-visible,
 .star-indicator:focus-visible {
-  outline: 2px solid var(--accent-hover);
+  outline: 2px solid var(--accent-focus);
   outline-offset: 2px;
 }
 
@@ -123,13 +123,14 @@
 }
 
 .tab-button.active {
-  border-color: color-mix(in srgb, var(--accent-primary) 54%, transparent);
-  color: var(--text-primary);
+  border-color: color-mix(in srgb, var(--accent-primary) 44%, transparent);
+  background: var(--accent-soft);
+  color: var(--accent-hover);
 }
 
 .tab-button:hover {
   border-color: color-mix(in srgb, var(--accent-hover) 45%, transparent);
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--accent-soft);
 }
 
 .tag-filter {
@@ -164,5 +165,6 @@
 }
 
 .tag-chip.selected {
-  background: color-mix(in srgb, var(--accent-primary) 18%, transparent);
+  background: var(--accent-soft);
+  color: var(--accent-hover);
 }

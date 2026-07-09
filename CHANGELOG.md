@@ -4,6 +4,7 @@
 
 | 일시 | 유형 | 범위 | 변경내용 | 변경사유 | 작성AI |
 |---|---|---|---|---|---|
+| 2026-07-09 17:13 | feat | ui | 디자인 계약 기반 카드 갤러리와 QA 보강 | - | Unknown |
 | 2026-07-09 15:55 | feat | favicon | Gallery Grid favicon과 미리보기 HTML 추가 | 브라우저 탭 식별성 개선 | Codex |
 | 2026-07-09 15:51 | docs | agents | 계층형 AGENTS 지식베이스 추가 | init-deep 결과 보존 | Codex |
 | 2026-07-09 15:42 | docs | plans | 디자인 적용 계획 본문과 evidence 경로 정리 | - | Unknown |

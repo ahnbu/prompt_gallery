@@ -66,10 +66,10 @@ Your next move: 이 계획으로 실행을 시작할지, 실행 전 고정밀 �
 | --- | --- | --- | --- |
 | 1 | None | 2, 3, 4, 5, 6, 7 | None |
 | 2 | 1 | 5, 6, 7 | 3 |
-| 3 | 1 | 4, 5, 6, 7 | 2 |
+| 3 | 1 | 4, 6, 7 | 2 |
 | 4 | 3 | 7 | 5 |
 | 5 | 1, 2 | 6, 7 | 4 |
-| 6 | 1, 2, 3 | 7 | 5 |
+| 6 | 1, 2, 3, 4 | 7 | 5 |
 | 7 | 4, 5, 6 | Final verification | None |
 
 ## Todos
@@ -83,29 +83,29 @@ Your next move: 이 계획으로 실행을 시작할지, 실행 전 고정밀 �
   QA scenarios (name the exact tool + invocation): happy: `git status --short --branch --untracked-files=all > .omo/evidence/ui-1-prompt-gallery-design-application.status.txt`; failure: if files outside this plan would need edits, stop and record the blocker in `.omo/evidence/ui-1-prompt-gallery-design-application.md`.
   Commit: N | docs(plan): no commit in execution plan
 
-- [ ] 2. Correct `DESIGN.md` so the contract matches the latest card decision.
-  What to do / Must NOT do: Update only the relevant Grid, Gallery Card, Image Prompt Card, and Reference Translation Notes sections. Replace square-forward image prompt rules with natural-ratio masonry rules. Encode desktop max-four non-image columns and square prompt/workflow/repo cards. Do not reintroduce dark Linear design or marketing-page language.
+- [ ] 2. Correct `DESIGN.md` and `src/client/AGENTS.md` so the contract matches the latest card decision.
+  What to do / Must NOT do: Update only the relevant Grid, Gallery Card, Image Prompt Card, Reference Translation Notes, and client design rules sections. Replace square-forward image prompt rules with natural-ratio masonry rules. Encode desktop max-four non-image columns and square prompt/workflow/repo cards. Do not reintroduce dark Linear design or marketing-page language.
   Parallelization: Wave 1 | Blocked by: 1 | Blocks: 5, 6, 7
   References (executor has NO interview context - be exhaustive): `DESIGN.md:5-21`, `DESIGN.md:59-67`, `DESIGN.md:115-132`, `DESIGN.md:200-239`, `DESIGN.md:279-287`, `_temp/preview-design-main_20260709_01.html`
-  Acceptance criteria (agent-executable): `rg -n "max-four|maximum 4|masonry|natural aspect|actual image|aspect-ratio: 1 / 1|square-forward" DESIGN.md` shows explicit max-four/masonry/natural-ratio rules and no remaining instruction that compact image prompt gallery cards must be fixed square.
-  QA scenarios (name the exact tool + invocation): happy: `rg -n "masonry|actual image ratio|maximum 4|square" DESIGN.md > .omo/evidence/ui-2-prompt-gallery-design-application.txt`; failure: `rg -n "Image prompt media: square|gallery cards stay square-forward" DESIGN.md` must return no active requirement.
-  Commit: Y | docs(design): clarify prompt gallery card layout contract
+  Acceptance criteria (agent-executable): `rg -n "masonry|actual image aspect ratio|natural-ratio|capped at 4|square card grid" DESIGN.md src/client/AGENTS.md` shows explicit max-four/masonry/natural-ratio rules and no remaining instruction that compact image prompt gallery cards must be fixed square.
+  QA scenarios (name the exact tool + invocation): happy: `rg -n "masonry|actual image aspect ratio|natural-ratio|capped at 4|square card grid" DESIGN.md src/client/AGENTS.md > .omo/evidence/ui-2-prompt-gallery-design-application.txt`; failure: `rg -n "Image prompt media: square|gallery cards stay square-forward|thumbnails stay square" DESIGN.md src/client/AGENTS.md` must return no active requirement.
+  Commit: N | only if later requested: docs(design): clarify prompt gallery card layout contract
 
 - [ ] 3. Add or extend real fixture-backed browser assertions for the target layout.
   What to do / Must NOT do: Extend existing QA scripts or add a focused script under `scripts/qa/` that creates/uses real saved fixture data: at least 4 prompt cards, 2 workflow cards, 2 repo cards, and at least 3 image prompt cards with wide, square, and tall preview images. Do not validate fake DOM-only cards.
   Parallelization: Wave 1 | Blocked by: 1 | Blocks: 4, 6, 7
   References (executor has NO interview context - be exhaustive): `package.json:6-18`, `scripts/qa/browser-gallery-search.mjs`, `scripts/qa/browser-gallery-fixtures.mjs`, `scripts/qa/browser-image-preview.mjs`, `scripts/qa/browser-image-preview-support.mjs`, `src/client/GalleryList.tsx:140-190`, `src/client/GalleryCard.tsx:63-163`
-  Acceptance criteria (agent-executable): A browser QA command fails before implementation or logs current mismatch, and after implementation verifies: first desktop row has at most 4 non-image cards, prompt/workflow/repo cards are square, and image cards have distinct heights according to fixture ratios.
-  QA scenarios (name the exact tool + invocation): happy: `pnpm qa:fixtures && node scripts/qa/<new-or-updated-layout-script>.mjs --output .omo/evidence/ui-3-prompt-gallery-design-application.md`; failure: temporarily force the assertion threshold to an impossible value in local review or document the pre-implementation mismatch output in the evidence file.
-  Commit: Y | test(ui): cover prompt gallery card layout
+  Acceptance criteria (agent-executable): `node scripts/qa/browser-design-layout.mjs --output .omo/evidence/ui-3-prompt-gallery-design-application-red.md` fails before implementation for a real rendered mismatch; after implementation `node scripts/qa/browser-design-layout.mjs --output .omo/evidence/ui-3-prompt-gallery-design-application.md` verifies: first desktop row has at most 4 non-image cards, prompt/workflow/repo cards are square across mobile/tablet/desktop, and image cards have distinct heights according to fixture ratios. Section add buttons are verified by `pnpm qa:browser -- --scenario gallery-search --output .omo/evidence/f3-gallery-search.md`.
+  QA scenarios (name the exact tool + invocation): happy: `node scripts/qa/browser-design-layout.mjs --output .omo/evidence/ui-3-prompt-gallery-design-application.md`; failure: pre-change real browser run `node scripts/qa/browser-design-layout.mjs --output .omo/evidence/ui-3-prompt-gallery-design-application-red.md` must fail and record the old dark/square mismatch.
+  Commit: N | only if later requested: test(ui): cover prompt gallery card layout
 
 - [ ] 4. Add image masonry-specific assertions.
   What to do / Must NOT do: Verify the image prompt section independently from the general card grid. Assertions must compare rendered card/image bounding boxes for wide, square, and tall images. Do not accept a test that only checks the presence of `<img>`.
   Parallelization: Wave 1 | Blocked by: 3 | Blocks: 7
   References (executor has NO interview context - be exhaustive): `src/client/ImagePreviewField.tsx:92-165`, `src/client/styles/cards.css:114-140`, `scripts/qa/browser-image-preview.mjs`, `scripts/qa/browser-image-preview-support.mjs`
   Acceptance criteria (agent-executable): Evidence records `wideHeight < squareHeight < tallHeight` or an equivalent ratio-aware comparison for rendered image prompt cards. It also records that image cards are not all equal height.
-  QA scenarios (name the exact tool + invocation): happy: `node scripts/qa/browser-image-preview.mjs --output .omo/evidence/ui-4-prompt-gallery-design-application.md`; failure: with the current fixed `aspect-ratio: 1 / 1` CSS, the evidence must show equal heights or the script must fail before the implementation step.
-  Commit: Y | test(ui): assert natural-ratio image masonry
+  QA scenarios (name the exact tool + invocation): happy: `node scripts/qa/browser-design-layout.mjs --output .omo/evidence/ui-4-prompt-gallery-design-application.md`; failure: the pre-change real browser run in `.omo/evidence/ui-3-prompt-gallery-design-application-red.md` must fail before the implementation step.
+  Commit: N | only if later requested: test(ui): assert natural-ratio image masonry
 
 - [ ] 5. Apply the light design tokens and app-shell surfaces.
   What to do / Must NOT do: Replace the current dark CSS tokens with the `DESIGN.md` light palette, add missing tokens such as `--text-faint`, `--accent-focus`, `--accent-soft`, and decorative tokens only if needed. Update shell/panel/control styles to warm paper and white surfaces. Do not alter application state, API calls, or modal behavior.
@@ -113,15 +113,15 @@ Your next move: 이 계획으로 실행을 시작할지, 실행 전 고정밀 �
   References (executor has NO interview context - be exhaustive): `DESIGN.md:23-67`, `DESIGN.md:136-190`, `DESIGN.md:264-287`, `src/client/styles/base.css:1-24`, `src/client/styles/layout.css:1-78`, `src/client/styles/actions.css`, `src/client/styles/modal.css`, `src/client/styles/responsive.css`
   Acceptance criteria (agent-executable): `rg -n "#08090a|#0f1011|#191a1b|#7170ff|color-scheme: dark" src/client/styles` returns no active app-shell token usage. `pnpm lint` and `pnpm typecheck` pass.
   QA scenarios (name the exact tool + invocation): happy: `pnpm lint && pnpm typecheck | tee .omo/evidence/ui-5-prompt-gallery-design-application.txt`; failure: if contrast or focus ring tokens are missing, record the failed grep or browser assertion in the evidence file and fix before continuing.
-  Commit: Y | feat(ui): apply prompt gallery light design tokens
+  Commit: N | only if later requested: feat(ui): apply prompt gallery light design tokens
 
 - [ ] 6. Implement max-four square non-image cards and natural-ratio image masonry.
   What to do / Must NOT do: Introduce a shared card-grid rule that caps desktop columns at 4 and keeps prompt/workflow/repo cards square. Use the existing `.gallery-card` primitive for prompt, workflow, and repo. Add image-section or image-card class/data handling only as needed for masonry. Remove compact image preview's forced fixed square behavior in gallery cards; image cards should let the rendered image determine card height, with only a conservative thumbnail max-height guard for extreme images. Detail/modal image display must remain usable and not inherit card thumbnail cropping.
-  Parallelization: Wave 2 | Blocked by: 1, 2, 3 | Blocks: 7
+  Parallelization: Wave 2 | Blocked by: 1, 2, 3, 4 | Blocks: 7
   References (executor has NO interview context - be exhaustive): `src/client/GalleryList.tsx:77-190`, `src/client/GalleryCard.tsx:63-163`, `src/client/ImagePreviewField.tsx:92-165`, `src/client/styles/cards.css:1-16`, `src/client/styles/cards.css:97-140`, `src/client/styles/layout.css:38-78`, `src/client/styles/responsive.css`
   Acceptance criteria (agent-executable): Browser geometry evidence shows at 1280px: non-image cards per row is `<= 4`; prompt/workflow/repo card width and height differ by no more than the agreed tolerance; image prompt cards with wide/square/tall fixtures have different heights and tall is taller than square. At 390px no horizontal overflow is detected.
-  QA scenarios (name the exact tool + invocation): happy: `pnpm qa:fixtures && node scripts/qa/<new-or-updated-layout-script>.mjs --output .omo/evidence/ui-6-prompt-gallery-design-application.md`; failure: run the same script against the pre-change CSS or force the old `.image-preview.compact .image-preview-frame { aspect-ratio: 1 / 1; }` locally to confirm the masonry assertion fails.
-  Commit: Y | feat(ui): apply square card grid and image masonry
+  QA scenarios (name the exact tool + invocation): happy: `node scripts/qa/browser-design-layout.mjs --output .omo/evidence/ui-6-prompt-gallery-design-application.md`; failure: use the captured pre-change real browser failure at `.omo/evidence/ui-3-prompt-gallery-design-application-red.md`.
+  Commit: N | only if later requested: feat(ui): apply square card grid and image masonry
 
 - [ ] 7. Run full verification and capture screenshots.
   What to do / Must NOT do: Run all static/build/test/browser checks, capture screenshots for desktop/tablet/mobile, and verify the plan's guardrails. Do not deploy and do not commit unless the user separately asks.
@@ -134,13 +134,13 @@ Your next move: 이 계획으로 실행을 시작할지, 실행 전 고정밀 �
 ## Final verification wave
 > Runs in parallel after ALL todos. ALL must APPROVE. Surface results and wait for the user's explicit okay before declaring complete.
 - [ ] F1. Plan compliance audit
-  Verify every Must have is satisfied and every Must NOT have is still untouched. Evidence: `.omo/evidence/f1-prompt-gallery-design-application.md`.
+  Verify every Must have is satisfied and every Must NOT have is still untouched. Command: `node -e "<repo-local plan compliance script>"` or equivalent checked into `scripts/qa/` if needed. Pass observable: evidence lists each must-have as PASS and no must-not-have violation. Evidence: `.omo/evidence/f1-prompt-gallery-design-application.md`.
 - [ ] F2. Code quality review
-  Review changed CSS/TSX for unnecessary abstraction, duplicated layout rules, inaccessible controls, raw color drift, and mobile overflow risk. Evidence: `.omo/evidence/f2-prompt-gallery-design-application.md`.
+  Review changed CSS/TSX for unnecessary abstraction, duplicated layout rules, inaccessible controls, raw color drift, and mobile overflow risk. Command: `git diff -- DESIGN.md src/client/AGENTS.md src/client scripts/qa` plus changed-file LOC checks. Pass observable: no blocking findings. Evidence: `.omo/evidence/f2-prompt-gallery-design-application.md`.
 - [ ] F3. Real manual QA
-  Use Playwright/browser screenshots for All tab, image prompt section, Workflow section, Repo section, search results, and mobile view. Evidence: `.omo/evidence/f3-prompt-gallery-design-application.md` plus screenshots.
+  Use Playwright/browser screenshots for All tab, image prompt section, Workflow section, Repo section, search results, and mobile view. Command: `node scripts/qa/browser-design-layout.mjs --output .omo/evidence/f3-prompt-gallery-design-application.md` plus `pnpm qa:browser -- --scenario gallery-search --output .omo/evidence/f3-gallery-search.md`. Pass observable: both commands exit 0 and screenshot files exist. Evidence: `.omo/evidence/f3-prompt-gallery-design-application.md` plus screenshots.
 - [ ] F4. Scope fidelity
-  Confirm no deploy command, backend/storage migration, dependency install, unrelated file revert, or fake DOM-only sample card was introduced. Evidence: `.omo/evidence/f4-prompt-gallery-design-application.md`.
+  Confirm no deploy command, backend/storage migration, dependency install, unrelated file revert, or fake DOM-only sample card was introduced. Command: `git diff --name-only -- package.json pnpm-lock.yaml src/worker migrations wrangler.jsonc` plus `git diff -- src/client scripts/qa DESIGN.md src/client/AGENTS.md`. Pass observable: no package/backend/deploy/storage files changed, and QA uses real API fixtures. Evidence: `.omo/evidence/f4-prompt-gallery-design-application.md`.
 
 ## Commit strategy
 - Do not commit during execution unless the user explicitly requests it.

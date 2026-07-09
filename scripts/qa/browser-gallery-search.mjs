@@ -1,114 +1,21 @@
 import { chromium } from "playwright"
 import { cleanupTask11Fixtures, seedGalleryData } from "./browser-gallery-fixtures.mjs"
+import {
+  assert,
+  assertBoundedImagePreview,
+  assertCardHidden,
+  assertCardVisible,
+  assertCardWithinSection,
+  assertHidden,
+  assertSectionAddActions,
+  assertSectionAddButton,
+  assertShell,
+  assertVisible,
+  cardByTitle,
+  screenshot,
+  viewports,
+} from "./browser-gallery-search-support.mjs"
 export { renderGallerySearchEvidence } from "./browser-gallery-evidence.mjs"
-
-const viewports = [
-  { name: "mobile", width: 390, height: 844 },
-  { name: "tablet", width: 768, height: 900 },
-  { name: "desktop", width: 1280, height: 800 },
-]
-
-const expectedTabs = ["즐겨찾기", "All", "프롬프트", "이미지 프롬프트", "Workflow", "레포"]
-
-class GallerySearchError extends Error {}
-
-function assert(condition, message) {
-  if (!condition) {
-    throw new GallerySearchError(message)
-  }
-}
-
-async function assertVisible(locator, message) {
-  assert((await locator.count()) > 0 && (await locator.first().isVisible()), message)
-}
-
-async function assertHidden(locator, message) {
-  assert((await locator.count()) === 0 || !(await locator.first().isVisible()), message)
-}
-
-function cardByTitle(page, title) {
-  return page.locator('[data-qa="gallery-card"]').filter({ hasText: title })
-}
-
-async function assertCardVisible(page, title, message) {
-  await assertVisible(cardByTitle(page, title), message)
-}
-
-async function assertCardHidden(page, title, message) {
-  await assertHidden(cardByTitle(page, title), message)
-}
-
-async function assertSectionAddButton(page, sectionQa, label) {
-  const section = page.locator(`[data-qa="${sectionQa}"]`)
-  const button = section.getByRole("button", { name: label, exact: true })
-  await assertVisible(button, `Section add button is missing: ${label}`)
-  const visibleText = (await button.textContent())?.trim() ?? ""
-  assert(visibleText.length === 0, `Section add button should be icon-only: ${label}`)
-}
-
-async function assertItemSectionAddAction(page, sectionQa, label, expectedType) {
-  await page.locator(`[data-qa="${sectionQa}"]`).getByRole("button", { name: label }).click()
-  await assertVisible(page.getByRole("dialog", { name: "항목 추가" }), `${label} modal missing`)
-  const selectedType = await page.locator('[data-qa="item-type-select"]').inputValue()
-  assert(
-    selectedType === expectedType,
-    `${label} selected ${selectedType}, expected ${expectedType}`,
-  )
-  await page.getByRole("button", { name: "닫기", exact: true }).click()
-}
-
-async function assertWorkflowSectionAddAction(page) {
-  await page
-    .locator('[data-qa="section-workflow"]')
-    .getByRole("button", { name: "Workflow 추가" })
-    .click()
-  await assertVisible(
-    page.getByRole("dialog", { name: "Workflow 추가" }),
-    "Workflow add modal missing",
-  )
-  await page.getByRole("button", { name: "닫기", exact: true }).click()
-}
-
-async function assertSectionAddActions(page) {
-  await assertItemSectionAddAction(page, "section-prompt", "프롬프트 추가", "prompt")
-  await assertItemSectionAddAction(
-    page,
-    "section-image_prompt",
-    "이미지 프롬프트 추가",
-    "image_prompt",
-  )
-  await assertWorkflowSectionAddAction(page)
-  await assertItemSectionAddAction(page, "section-repo", "레포 추가", "repo")
-}
-
-async function assertSquareImagePreview(page, title) {
-  const frame = cardByTitle(page, title).locator(".image-preview-frame").first()
-  await assertVisible(frame, `Image preview frame is missing for ${title}`)
-  const box = await frame.boundingBox()
-  assert(box !== null, `Image preview frame has no layout box for ${title}`)
-  const delta = Math.abs(box.width - box.height)
-  assert(delta <= 2, `Image preview should be square for ${title}: ${box.width}x${box.height}`)
-}
-
-async function screenshot(page, screenshotStem, viewportName, stateName) {
-  const screenshotPath = `${screenshotStem}-${viewportName}-${stateName}.png`
-  const image = await page.screenshot({ path: screenshotPath, fullPage: true })
-  assert(image.byteLength > 1000, `Screenshot is unexpectedly small: ${screenshotPath}`)
-  return { viewport: viewportName, state: stateName, path: screenshotPath, bytes: image.byteLength }
-}
-
-async function assertShell(page) {
-  await assertVisible(
-    page.getByRole("heading", { name: "Prompt Gallery" }),
-    "Prompt Gallery heading is missing",
-  )
-  for (const tabName of expectedTabs) {
-    await assertVisible(
-      page.getByRole("button", { name: tabName, exact: true }),
-      `Tab is missing: ${tabName}`,
-    )
-  }
-}
 
 async function assertAllView(page, fixture) {
   await assertVisible(
@@ -136,8 +43,9 @@ async function assertAllView(page, fixture) {
   await assertSectionAddButton(page, "section-image_prompt", "이미지 프롬프트 추가")
   await assertSectionAddButton(page, "section-workflow", "Workflow 추가")
   await assertSectionAddButton(page, "section-repo", "레포 추가")
-  await assertSquareImagePreview(page, fixture.imageTitle)
-  await assertSquareImagePreview(page, fixture.sampleImageTitle)
+  await assertBoundedImagePreview(page, fixture.imageTitle)
+  await assertBoundedImagePreview(page, fixture.sampleImageTitle)
+  await assertCardWithinSection(page, "section-prompt", fixture.overflowTitle)
 }
 
 async function assertTypeBadges(page, fixture) {

@@ -15,7 +15,8 @@ filters, tabs, sections, and cards.
 The design is organized across four separate layers:
 
 - Visual style: warm paper canvas, white surfaces, restrained blue action.
-- Content layout: square-forward card grid for fast scanning.
+- Content layout: square card grid for prompt, workflow, and repo items;
+  natural-ratio masonry for image prompt cards.
 - Information structure: tabs plus sectioned gallery views where useful.
 - Input UX: global add remains available, and section-level add actions are
   allowed when a section has a clear item type.
@@ -116,9 +117,16 @@ compact working rhythm while moving the visual language to a warmer surface.
 
 - Max content width: `1180px`.
 - Page layout: single app shell with topbar, tabbar, tag filter, and gallery.
-- Card grid: `repeat(auto-fit, minmax(220px, 1fr))`.
-- Image prompt media: square or square-forward, with `aspect-ratio: 1 / 1`.
-- Do not use wide banner media for compact image prompt cards.
+- Non-image card grid: fixed-rhythm square cards, capped at 4 columns on
+  desktop wide viewports.
+- Image prompt grid: masonry columns with the same column width rhythm as the
+  non-image grid, but card heights follow the actual image aspect ratio.
+- Image prompt media: do not force `aspect-ratio: 1 / 1` in compact gallery
+  cards. Wide, square, and tall source images must produce visibly different
+  card heights.
+- Do not use wide banner media for compact image prompt cards. Wide images may
+  remain wide inside their masonry card; the card itself should stay compact in
+  column width.
 - Breakpoints: mobile below `640px`, tablet `640px` to `959px`, desktop
   `960px` and above.
 
@@ -126,6 +134,9 @@ compact working rhythm while moving the visual language to a warmer surface.
 
 - The first viewport is the product surface, not a landing page.
 - Cards should feel scan-friendly, not like horizontal banners.
+- Prompt, Workflow, and Repo cards share one square card primitive.
+- Image Prompt cards intentionally diverge from the square primitive only for
+  masonry image preview height.
 - Avoid nested cards. Panels can contain repeated cards, but cards must not
   contain additional card shells.
 - Controls use stable heights so labels, icons, counters, and loading states do
@@ -211,7 +222,11 @@ States:
 - Surface: white card on warm paper canvas.
 - Shape: 8px to 12px radius, depending on density.
 - Border: `--border-default`; shadow is optional and very soft.
-- Minimum height must be stable across item types.
+- Prompt, Workflow, and Repo cards use `aspect-ratio: 1 / 1` so the gallery
+  scans as a square card board. Text inside these cards may clamp, but the card
+  shell must remain square.
+- Desktop wide viewports show at most 4 cards per row. Tablet and mobile may
+  reduce columns according to available width.
 - Content order: type badge/actions, media if relevant, title, preview text,
   tags, footer metadata.
 - Footer metadata should be quiet and scannable.
@@ -224,12 +239,17 @@ States:
 
 ### Image Prompt Card
 
-- Media frame must be square or square-forward (`aspect-ratio: 1 / 1`).
+- Image prompt gallery cards use masonry layout. The media frame width follows
+  the card column; its height follows the actual image aspect ratio.
+- Empty image prompt cards use a compact intentional placeholder with a stable
+  minimum height so an empty upload slot does not collapse.
 - Empty media frame should still look like an intentional example/placeholder,
   not a broken upload slot.
-- Preview images use `object-fit: cover` for card thumbnails.
-- Detail views may show larger images, but gallery cards stay square-forward for
-  scanning.
+- Preview images use `width: 100%` and `height: auto` in compact gallery cards.
+  Do not crop normal gallery thumbnails to a fixed square.
+- Extremely tall images may use a conservative thumbnail max-height guard in the
+  gallery, but the normal case must still show tall images as taller cards than
+  square or wide images. Detail views may show the larger/full image separately.
 
 ### Example and Empty Cards
 
@@ -283,5 +303,7 @@ feel like paper and cards, not glass, neon, or black dashboards.
   whisper borders, restrained layered depth.
 - Rejected: Notion marketing hero, pricing/auth/cart examples, proprietary font
   dependency, negative letter spacing, wide promotional content patterns.
-- Added for this app: square-forward gallery cards, section-level add actions,
-  image prompt empty/example cards, and app-specific topbar/tab/tag/modal rules.
+- Added for this app: square prompt/workflow/repo gallery cards, max-four
+  desktop card rows, natural-ratio masonry image prompt cards, section-level add
+  actions, image prompt empty/example cards, and app-specific topbar/tab/tag/modal
+  rules.

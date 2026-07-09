@@ -175,9 +175,96 @@ export async function assertResizedThumbnail(page) {
   )
 }
 
-export async function assertSquarePreviewFrame(locator, label) {
+export async function assertBoundedPreviewFrame(locator, label) {
   const box = await locator.first().boundingBox()
   assert(box !== null, `${label} preview frame is not visible`)
-  const delta = Math.abs(box.width - box.height)
-  assert(delta <= 2, `${label} preview frame is not square: ${box.width}x${box.height}`)
+  assert(box.width >= 120, `${label} preview frame is too narrow: ${box.width}x${box.height}`)
+  assert(box.height >= 96, `${label} preview frame is too short: ${box.width}x${box.height}`)
+  assert(box.height <= 430, `${label} preview frame is too tall: ${box.width}x${box.height}`)
+}
+
+export async function openEdit(page, title) {
+  await itemCard(page, title)
+    .getByRole("button", { name: `${title} 상세 열기` })
+    .click()
+  await assertVisible(page.getByRole("dialog", { name: title }), "Detail modal missing")
+  await page.getByRole("button", { name: "수정", exact: true }).click()
+  await assertVisible(page.getByRole("dialog", { name: "항목 수정" }), "Edit modal missing")
+}
+
+function assetIdFromResponse(bodyText) {
+  const payload = JSON.parse(bodyText)
+  const assetId = payload?.asset?.id
+  assert(typeof assetId === "string", `Asset response did not include asset.id: ${bodyText}`)
+  return assetId
+}
+
+export async function uploadDraftImage(page, filename, width, height) {
+  const previousSrc = await imagePreviewSrc(page).catch(() => null)
+  await setGeneratedImage(page, filename, width, height)
+  const responsePromise = page.waitForResponse(
+    (response) => response.request().method() === "POST" && response.url().includes("/api/assets"),
+  )
+  await activeDialog(page).locator('[data-qa="image-preview-upload"]').click()
+  const response = await responsePromise
+  const bodyText = await response.text()
+  assert(!bodyText.includes("objectKey"), `Asset response exposed objectKey: ${bodyText}`)
+  assert(!bodyText.includes("previews/"), `Asset response exposed internal key: ${bodyText}`)
+  assert(!publicStoragePattern.test(bodyText), `Asset response exposed public URL: ${bodyText}`)
+  const assetId = assetIdFromResponse(bodyText)
+  await assertVisible(previewImage(page), "Draft thumbnail missing")
+  if (previousSrc !== null) {
+    await page.waitForFunction(
+      (src) =>
+        document
+          .querySelector('[data-qa="item-modal"] [data-qa="image-preview-img"]')
+          ?.getAttribute("src") !== src,
+      previousSrc,
+    )
+  }
+  const src = await imagePreviewSrc(page)
+  assertNoPublicStorage(src, "Draft thumbnail src")
+  assert(src?.startsWith("/api/assets/") === true, `Thumbnail must use worker proxy: ${src}`)
+  await assertResizedThumbnail(page)
+  return { assetId, src }
+}
+
+export async function waitForAssetContentStatus(page, assetId, expectedStatus) {
+  await page.waitForFunction(
+    async ({ id, status }) => {
+      const response = await fetch(`/api/assets/${id}/content`, { cache: "no-store" })
+      return response.status === status
+    },
+    { id: assetId, status: expectedStatus },
+  )
+}
+
+export async function waitForItemImageAsset(page, title, expectedPresent) {
+  await page.waitForFunction(
+    async ({ itemTitle, present }) => {
+      const response = await fetch("/api/items", { cache: "no-store" })
+      const payload = await response.json()
+      const item = Array.isArray(payload.items)
+        ? payload.items.find((candidate) => candidate.title === itemTitle)
+        : undefined
+      return present ? typeof item?.imageAssetId === "string" : item?.imageAssetId === null
+    },
+    { itemTitle: title, present: expectedPresent },
+  )
+}
+
+export async function waitForCardThumbnail(page, title) {
+  await waitForItemImageAsset(page, title, true)
+  await assertVisible(
+    itemCard(page, title).locator('[data-qa="image-preview-img"]'),
+    "Saved thumbnail missing",
+  )
+}
+
+export async function waitForCardNoImage(page, title) {
+  await waitForItemImageAsset(page, title, false)
+  await assertVisible(
+    itemCard(page, title).locator('[data-qa="image-preview-empty"]'),
+    "No-image did not return",
+  )
 }
