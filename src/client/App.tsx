@@ -16,7 +16,14 @@ import { ItemModal, type ItemModalState, defaultTypeForTab } from "./ItemModal"
 import { TagManagementModal } from "./TagManagementModal"
 import { WorkflowModal, type WorkflowModalState } from "./WorkflowModal"
 import { downloadExport } from "./export-data"
-import { type GalleryData, type Item, type WorkflowItem, fetchGalleryData } from "./gallery-data"
+import {
+  type GalleryData,
+  ITEM_TYPES,
+  type Item,
+  type ItemType,
+  type WorkflowItem,
+  fetchGalleryData,
+} from "./gallery-data"
 import {
   type GalleryTab,
   allCardEntries,
@@ -114,10 +121,18 @@ export function App() {
 
   function openAddModal(): void {
     if (activeTab === "workflow") {
-      setWorkflowModalState({ kind: "add" })
+      openAddWorkflowModal()
       return
     }
-    setModalState({ kind: "add", defaultType: defaultTypeForTab(activeTab) })
+    openAddItemModal(defaultTypeForTab(activeTab))
+  }
+
+  function openAddItemModal(defaultType: ItemType | null): void {
+    setModalState({ kind: "add", defaultType })
+  }
+
+  function openAddWorkflowModal(): void {
+    setWorkflowModalState({ kind: "add" })
   }
 
   function openDetailModal(item: Item): void {
@@ -229,6 +244,10 @@ export function App() {
         <GalleryResults
           allEntries={allEntries}
           filteredEntries={filteredEntries}
+          onAddImagePrompt={() => openAddItemModal(ITEM_TYPES.IMAGE_PROMPT)}
+          onAddPrompt={() => openAddItemModal(ITEM_TYPES.PROMPT)}
+          onAddRepo={() => openAddItemModal(ITEM_TYPES.REPO)}
+          onAddWorkflow={openAddWorkflowModal}
           onFavoriteChange={toggleFavorite}
           onOpenItem={openDetailModal}
           onOpenWorkflow={openWorkflowModal}

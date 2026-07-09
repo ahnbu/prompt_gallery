@@ -53,8 +53,11 @@ function appendAssertions(lines, artifacts) {
   lines.push(
     "## Assertions",
     "- API fixture data created through /api/tags, /api/items, and /api/workflows.",
+    "- Real saved image prompt sample data appears as normal gallery cards.",
     "- Compact tabs visible by accessible role/name.",
     "- All default view shows prompt, image prompt, workflow, and repo sections.",
+    "- All view section headers expose icon-only lucide add buttons with correct default add targets.",
+    "- Compact image prompt preview frames are square, not wide banners.",
     "- Search switches All view from sectioned lists to unified results.",
     "- AND tag filtering includes only cards with every selected tag.",
     "- Type badges render for prompt, image prompt, workflow, and repo cards.",

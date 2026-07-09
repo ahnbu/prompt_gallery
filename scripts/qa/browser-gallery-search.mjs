@@ -38,6 +38,58 @@ async function assertCardHidden(page, title, message) {
   await assertHidden(cardByTitle(page, title), message)
 }
 
+async function assertSectionAddButton(page, sectionQa, label) {
+  const section = page.locator(`[data-qa="${sectionQa}"]`)
+  const button = section.getByRole("button", { name: label, exact: true })
+  await assertVisible(button, `Section add button is missing: ${label}`)
+  const visibleText = (await button.textContent())?.trim() ?? ""
+  assert(visibleText.length === 0, `Section add button should be icon-only: ${label}`)
+}
+
+async function assertItemSectionAddAction(page, sectionQa, label, expectedType) {
+  await page.locator(`[data-qa="${sectionQa}"]`).getByRole("button", { name: label }).click()
+  await assertVisible(page.getByRole("dialog", { name: "항목 추가" }), `${label} modal missing`)
+  const selectedType = await page.locator('[data-qa="item-type-select"]').inputValue()
+  assert(
+    selectedType === expectedType,
+    `${label} selected ${selectedType}, expected ${expectedType}`,
+  )
+  await page.getByRole("button", { name: "닫기", exact: true }).click()
+}
+
+async function assertWorkflowSectionAddAction(page) {
+  await page
+    .locator('[data-qa="section-workflow"]')
+    .getByRole("button", { name: "Workflow 추가" })
+    .click()
+  await assertVisible(
+    page.getByRole("dialog", { name: "Workflow 추가" }),
+    "Workflow add modal missing",
+  )
+  await page.getByRole("button", { name: "닫기", exact: true }).click()
+}
+
+async function assertSectionAddActions(page) {
+  await assertItemSectionAddAction(page, "section-prompt", "프롬프트 추가", "prompt")
+  await assertItemSectionAddAction(
+    page,
+    "section-image_prompt",
+    "이미지 프롬프트 추가",
+    "image_prompt",
+  )
+  await assertWorkflowSectionAddAction(page)
+  await assertItemSectionAddAction(page, "section-repo", "레포 추가", "repo")
+}
+
+async function assertSquareImagePreview(page, title) {
+  const frame = cardByTitle(page, title).locator(".image-preview-frame").first()
+  await assertVisible(frame, `Image preview frame is missing for ${title}`)
+  const box = await frame.boundingBox()
+  assert(box !== null, `Image preview frame has no layout box for ${title}`)
+  const delta = Math.abs(box.width - box.height)
+  assert(delta <= 2, `Image preview should be square for ${title}: ${box.width}x${box.height}`)
+}
+
 async function screenshot(page, screenshotStem, viewportName, stateName) {
   const screenshotPath = `${screenshotStem}-${viewportName}-${stateName}.png`
   const image = await page.screenshot({ path: screenshotPath, fullPage: true })
@@ -74,8 +126,18 @@ async function assertAllView(page, fixture) {
   await assertVisible(page.locator('[data-qa="section-repo"]'), "All view repo section is missing")
   await assertVisible(page.getByText(fixture.promptTitle), "Seeded prompt card is missing")
   await assertVisible(page.getByText(fixture.imageTitle), "Seeded image prompt card is missing")
+  await assertVisible(
+    page.getByText(fixture.sampleImageTitle),
+    "Seeded sample image prompt card is missing",
+  )
   await assertVisible(page.getByText(fixture.workflowTitle), "Seeded workflow card is missing")
   await assertVisible(page.getByText(fixture.repoTitle), "Seeded repo card is missing")
+  await assertSectionAddButton(page, "section-prompt", "프롬프트 추가")
+  await assertSectionAddButton(page, "section-image_prompt", "이미지 프롬프트 추가")
+  await assertSectionAddButton(page, "section-workflow", "Workflow 추가")
+  await assertSectionAddButton(page, "section-repo", "레포 추가")
+  await assertSquareImagePreview(page, fixture.imageTitle)
+  await assertSquareImagePreview(page, fixture.sampleImageTitle)
 }
 
 async function assertTypeBadges(page, fixture) {
@@ -144,6 +206,11 @@ async function assertTabFiltering(page, fixture) {
 
   await page.getByRole("button", { name: "이미지 프롬프트", exact: true }).click()
   await assertCardVisible(page, fixture.imageTitle, "Image prompt tab should include image item")
+  await assertCardVisible(
+    page,
+    fixture.sampleImageTitle,
+    "Image prompt tab should include sample image item",
+  )
   await assertCardHidden(page, fixture.promptTitle, "Image prompt tab should hide prompt item")
   await assertCardHidden(page, fixture.workflowTitle, "Image prompt tab should hide workflow item")
   await assertCardHidden(page, fixture.repoTitle, "Image prompt tab should hide repo item")
@@ -203,6 +270,10 @@ async function assertTagView(page, fixture) {
     page.getByText(fixture.promptTitle),
     "AND tag filter should include item with both tags",
   )
+  await assertVisible(
+    page.getByText(fixture.sampleImageTitle),
+    "AND tag filter should include sample image prompt with both tags",
+  )
   await assertHidden(
     page.getByText(fixture.researchOnlyTitle),
     "AND tag filter included item with only one tag",
@@ -222,6 +293,7 @@ async function runViewport(baseUrl, outputPath, fixture, viewport) {
     await assertTypeBadges(page, fixture)
     await assertLatestSort(page, fixture)
     await assertVisibleTagLimit(page, fixture)
+    await assertSectionAddActions(page)
     artifacts.push(await screenshot(page, screenshotStem, viewport.name, "all"))
 
     await assertTabFiltering(page, fixture)

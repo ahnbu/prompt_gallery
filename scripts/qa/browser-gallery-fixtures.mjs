@@ -119,6 +119,14 @@ export async function seedGalleryData(baseUrl) {
     tags: [tagSlides],
   })
   await delay(25)
+  const sampleImagePrompt = await createItem(baseUrl, {
+    type: "image_prompt",
+    title: `Task11 Sample Image Prompt ${suffix}`,
+    body: "Create a square editorial card with a strong focal image and concise Korean caption.",
+    notes: "Actual sample data that can be deleted like any other saved image prompt.",
+    tags: [tagResearch, tagSlides],
+  })
+  await delay(25)
   const repo = await createItem(baseUrl, {
     type: "repo",
     title: `Task11 Repo ${suffix}`,
@@ -148,11 +156,19 @@ export async function seedGalleryData(baseUrl) {
     tagResearch,
     tagSlides,
     overflowTags,
-    itemIds: [prompt.id, researchOnly.id, imagePrompt.id, repo.id, overflow.id],
+    itemIds: [
+      prompt.id,
+      researchOnly.id,
+      imagePrompt.id,
+      sampleImagePrompt.id,
+      repo.id,
+      overflow.id,
+    ],
     workflowIds: [workflow.id],
     promptTitle: prompt.title,
     researchOnlyTitle: researchOnly.title,
     imageTitle: imagePrompt.title,
+    sampleImageTitle: sampleImagePrompt.title,
     repoTitle: repo.title,
     overflowTitle: overflow.title,
     workflowTitle: workflow.name,

@@ -7,6 +7,7 @@ import {
   assertNoInternalItemKeys,
   assertNoPublicStorage,
   assertResizedThumbnail,
+  assertSquarePreviewFrame,
   assertVisible,
   cleanupTask16Fixtures,
   imagePreviewSrc,
@@ -129,6 +130,7 @@ async function runViewport(baseUrl, outputPath, viewport) {
     const card = itemCard(page, title)
     await assertVisible(card, "Created image prompt card missing")
     await assertVisible(card.locator('[data-qa="image-preview-empty"]'), "Card no-image missing")
+    await assertSquarePreviewFrame(card.locator(".image-preview-frame"), "Created card")
     await assertNoInternalItemKeys(page)
     artifacts.push(await screenshot(page, screenshotStem, viewport.name, "no-image"))
 
@@ -162,6 +164,10 @@ async function runViewport(baseUrl, outputPath, viewport) {
     artifacts.push(await screenshot(page, screenshotStem, viewport.name, "uploaded-thumbnail"))
     await page.getByRole("button", { name: "저장", exact: true }).click()
     await waitForCardThumbnail(page, title)
+    await assertSquarePreviewFrame(
+      itemCard(page, title).locator(".image-preview-frame"),
+      "Saved card",
+    )
     await assertNoInternalItemKeys(page)
 
     await openEdit(page, title)
@@ -173,6 +179,10 @@ async function runViewport(baseUrl, outputPath, viewport) {
     artifacts.push(await screenshot(page, screenshotStem, viewport.name, "replaced-thumbnail"))
     await page.getByRole("button", { name: "저장", exact: true }).click()
     await waitForCardThumbnail(page, title)
+    await assertSquarePreviewFrame(
+      itemCard(page, title).locator(".image-preview-frame"),
+      "Replaced card",
+    )
     await assertNoInternalItemKeys(page)
 
     await openEdit(page, title)
@@ -183,6 +193,10 @@ async function runViewport(baseUrl, outputPath, viewport) {
     )
     await page.getByRole("button", { name: "저장", exact: true }).click()
     await waitForCardNoImage(page, title)
+    await assertSquarePreviewFrame(
+      itemCard(page, title).locator(".image-preview-frame"),
+      "Removed card",
+    )
     await assertHidden(
       itemCard(page, title).locator('[data-qa="image-preview-img"]'),
       "Removed thumbnail visible",
@@ -227,6 +241,7 @@ export function renderImagePreviewEvidence(result) {
     "## Assertions",
     "- Image prompt can be created with no image.",
     "- Card and detail modal show a lucide no-image state without placeholder files.",
+    "- Compact gallery image prompt preview frames stay square after create, upload, replace, and remove.",
     "- Invalid file upload exposes an accessible error state.",
     "- Browser-side canvas resize/compress keeps uploaded preview content at 1200px max edge.",
     "- Unsaved preview/title edits are discarded on cancel.",
@@ -263,7 +278,7 @@ export function renderImagePreviewEvidence(result) {
   lines.push(
     "## Binary Observable",
     result.ok
-      ? "Playwright invalid upload, resize, explicit-save preview, protected thumbnail, and screenshot assertions passed."
+      ? "Playwright invalid upload, square preview, resize, explicit-save preview, protected thumbnail, and screenshot assertions passed."
       : "Scenario failed before all assertions completed.",
     "",
   )

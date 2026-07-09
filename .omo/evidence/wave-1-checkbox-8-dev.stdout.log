@@ -4,4 +4,71 @@ Port 5173 is in use, trying another one...
 
   [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m5174[22m/[39m
   [32m➜[39m  [1mDebug[22m:   [2m[33mhttp://127.0.0.1:[1m5174[22m[2m/__debug[39m[22m
-[2m[32m  ➜[39m[22m[2m  press [2[ELIFECYCLE] Command failed with exit code 4294967295.
+[2m[32m  ➜[39m[22m[2m  press [2[ELIFECYCLE] Command failed with exit code [2mPM 10:36:02[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mindex.html[22m
+[2mPM 10:36:03[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mindex.html[22m
+[2mPM 10:36:03[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mindex.html[22m
+[2mPM 10:36:06[22m [36m[1m[vite][22m[39m [35m[2m(prompt_gallery)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[2mPM 10:36:06[22m [36m[1m[vite][22m[39m [35m[2m(prompt_gallery)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[2mPM 10:36:06[22m [36m[1m[vite][22m[39m [35m[2m(prompt_gallery)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[2mPM 10:36:06[22m [36m[1m[vite][22m[39m [35m[2m(prompt_gallery)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[2mPM 10:36:06[22m [36m[1m[vite][22m[39m [35m[2m(prompt_gallery)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[2mPM 10:36:06[22m [36m[1m[vite][22m[39m [35m[2m(prompt_gallery)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[2mPM 10:36:06[22m [36m[1m[vite][22m[39m [35m[2m(prompt_gallery)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[2mPM 10:36:06[22m [36m[1m[vite][22m[39m [35m[2m(prompt_gallery)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[2mPM 10:36:06[22m [36m[1m[vite][22m[39m [35m[2m(prompt_gallery)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[2mPM 10:36:06[22m [36m[1m[vite][22m[39m [35m[2m(prompt_gallery)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[2mPM 10:36:06[22m [36m[1m[vite][22m[39m [35m[2m(prompt_gallery)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[2mPM 10:36:06[22m [36m[1m[vite][22m[39m [35m[2m(prompt_gallery)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[2mPM 10:36:06[22m [36m[1m[vite][22m[39m [35m[2m(prompt_gallery)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[2mPM 10:36:06[22m [36m[1m[vite][22m[39m changed tsconfig file detected: D:/vibe-coding/prompt-gallery/tsconfig.json - Clearing cache and forcing full-reload to ensure TypeScript is compiled with updated config values.
+[2mPM 10:36:06[22m [36m[1m[vite][22m[39m [32mvite.config.ts changed, restarting server...[39m
+[2mPM 10:36:07[22m [36m[1m[vite][22m[39m server restarted.
+[2mAM 1:16:53[22m [36m[1m[vite][22m[39m [35m[2m(prompt_gallery)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[2mAM 1:16:53[22m [36m[1m[vite][22m[39m [35m[2m(prompt_gallery)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[2mAM 1:16:53[22m [36m[1m[vite][22m[39m [35m[2m(prompt_gallery)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[vite] hot updated: virtual:cloudflare/worker-entry
+[vite] hot updated: virtual:cloudflare/worker-entry
+[vite] hot updated: virtual:cloudflare/worker-entry
+[2mAM 1:17:36[22m [36m[1m[vite][22m[39m [35m[2m(prompt_gallery)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[vite] hot updated: virtual:cloudflare/worker-entry
+[2mAM 1:19:31[22m [36m[1m[vite][22m[39m [35m[2m(prompt_gallery)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[vite] hot updated: virtual:cloudflare/worker-entry
+[2mAM 1:22:56[22m [36m[1m[vite][22m[39m [35m[2m(prompt_gallery)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[vite] hot updated: virtual:cloudflare/worker-entry
+[2mAM 1:23:01[22m [36m[1m[vite][22m[39m [35m[2m(prompt_gallery)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[vite] hot updated: virtual:cloudflare/worker-entry
+[2mAM 1:34:14[22m [36m[1m[vite][22m[39m [35m[2m(prompt_gallery)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[2mAM 1:34:14[22m [36m[1m[vite][22m[39m [35m[2m(prompt_gallery)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[2mAM 1:34:14[22m [36m[1m[vite][22m[39m [35m[2m(prompt_gallery)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[vite] hot updated: virtual:cloudflare/worker-entry
+[vite] hot updated: virtual:cloudflare/worker-entry
+[vite] hot updated: virtual:cloudflare/worker-entry
+[2mAM 1:34:37[22m [36m[1m[vite][22m[39m [35m[2m(prompt_gallery)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[vite] hot updated: virtual:cloudflare/worker-entry
+[2mAM 1:35:28[22m [36m[1m[vite][22m[39m [35m[2m(prompt_gallery)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[vite] hot updated: virtual:cloudflare/worker-entry
+[2mAM 1:45:36[22m [36m[1m[vite][22m[39m [35m[2m(prompt_gallery)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[vite] hot updated: virtual:cloudflare/worker-entry
+[2mAM 8:47:34[22m [36m[1m[vite][22m[39m [35m[2m(prompt_gallery)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[vite] hot updated: virtual:cloudflare/worker-entry
+[2mAM 9:05:25[22m [36m[1m[vite][22m[39m [35m[2m(prompt_gallery)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[vite] hot updated: virtual:cloudflare/worker-entry
+[2mAM 9:05:32[22m [36m[1m[vite][22m[39m [35m[2m(prompt_gallery)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[vite] hot updated: virtual:cloudflare/worker-entry
+[2mAM 9:31:53[22m [36m[1m[vite][22m[39m [35m[2m(prompt_gallery)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[vite] hot updated: virtual:cloudflare/worker-entry
+[2mAM 9:32:01[22m [36m[1m[vite][22m[39m [35m[2m(prompt_gallery)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[vite] hot updated: virtual:cloudflare/worker-entry
+[2mAM 9:32:07[22m [36m[1m[vite][22m[39m [35m[2m(prompt_gallery)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[vite] hot updated: virtual:cloudflare/worker-entry
+[2mAM 9:32:19[22m [36m[1m[vite][22m[39m [35m[2m(prompt_gallery)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[vite] hot updated: virtual:cloudflare/worker-entry
+[2mAM 9:32:32[22m [36m[1m[vite][22m[39m [35m[2m(prompt_gallery)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[vite] hot updated: virtual:cloudflare/worker-entry
+[2mAM 9:37:08[22m [36m[1m[vite][22m[39m [35m[2m(prompt_gallery)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[vite] hot updated: virtual:cloudflare/worker-entry
+[2mAM 9:37:42[22m [36m[1m[vite][22m[39m [35m[2m(prompt_gallery)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[vite] hot updated: virtual:cloudflare/worker-entry
+[2mAM 9:38:06[22m [36m[1m[vite][22m[39m [35m[2m(prompt_gallery)[22m[39m [32mhmr update [39m[2m/@id/virtual:cloudflare/worker-entry[22m
+[vite] hot updated: virtual:cloudflare/worker-entry
+[ELIFECYCLE] Command failed with exit code 1073807364.

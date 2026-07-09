@@ -174,3 +174,10 @@ export async function assertResizedThumbnail(page) {
     `Uploaded thumbnail was not resized to 1200px max: ${dimensions.width}x${dimensions.height}`,
   )
 }
+
+export async function assertSquarePreviewFrame(locator, label) {
+  const box = await locator.first().boundingBox()
+  assert(box !== null, `${label} preview frame is not visible`)
+  const delta = Math.abs(box.width - box.height)
+  assert(delta <= 2, `${label} preview frame is not square: ${box.width}x${box.height}`)
+}

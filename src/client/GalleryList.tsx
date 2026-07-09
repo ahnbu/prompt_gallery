@@ -1,10 +1,20 @@
+import { Plus } from "lucide-react"
 import { GalleryCard } from "./GalleryCard"
 import type { Item, WorkflowItem } from "./gallery-data"
 import { type CardEntry, entryId } from "./gallery-model"
 
+type SectionAction = {
+  readonly label: string
+  readonly onClick: () => void
+}
+
 export function GalleryResults(props: {
   readonly allEntries: readonly CardEntry[]
   readonly filteredEntries: readonly CardEntry[]
+  readonly onAddImagePrompt: () => void
+  readonly onAddPrompt: () => void
+  readonly onAddRepo: () => void
+  readonly onAddWorkflow: () => void
   readonly onFavoriteChange: (item: Item) => Promise<void>
   readonly onOpenItem: (item: Item) => void
   readonly onOpenWorkflow: (workflow: WorkflowItem) => void
@@ -20,6 +30,10 @@ export function GalleryResults(props: {
   ) : (
     <SectionedList
       entries={props.allEntries}
+      onAddImagePrompt={props.onAddImagePrompt}
+      onAddPrompt={props.onAddPrompt}
+      onAddRepo={props.onAddRepo}
+      onAddWorkflow={props.onAddWorkflow}
       onFavoriteChange={props.onFavoriteChange}
       onOpenItem={props.onOpenItem}
       onOpenWorkflow={props.onOpenWorkflow}
@@ -52,6 +66,10 @@ function UnifiedList(props: {
 
 function SectionedList(props: {
   readonly entries: readonly CardEntry[]
+  readonly onAddImagePrompt: () => void
+  readonly onAddPrompt: () => void
+  readonly onAddRepo: () => void
+  readonly onAddWorkflow: () => void
   readonly onFavoriteChange: (item: Item) => Promise<void>
   readonly onOpenItem: (item: Item) => void
   readonly onOpenWorkflow: (workflow: WorkflowItem) => void
@@ -70,6 +88,7 @@ function SectionedList(props: {
   return (
     <div className="section-stack">
       <GallerySection
+        action={{ label: "프롬프트 추가", onClick: props.onAddPrompt }}
         qa="section-prompt"
         title="프롬프트"
         entries={promptEntries}
@@ -78,6 +97,7 @@ function SectionedList(props: {
         onOpenWorkflow={props.onOpenWorkflow}
       />
       <GallerySection
+        action={{ label: "이미지 프롬프트 추가", onClick: props.onAddImagePrompt }}
         qa="section-image_prompt"
         title="이미지 프롬프트"
         entries={imageEntries}
@@ -86,6 +106,7 @@ function SectionedList(props: {
         onOpenWorkflow={props.onOpenWorkflow}
       />
       <GallerySection
+        action={{ label: "Workflow 추가", onClick: props.onAddWorkflow }}
         qa="section-workflow"
         title="Workflow"
         entries={workflowEntries}
@@ -94,6 +115,7 @@ function SectionedList(props: {
         onOpenWorkflow={props.onOpenWorkflow}
       />
       <GallerySection
+        action={{ label: "레포 추가", onClick: props.onAddRepo }}
         qa="section-repo"
         title="레포"
         entries={repoEntries}
@@ -106,6 +128,7 @@ function SectionedList(props: {
 }
 
 function GallerySection(props: {
+  readonly action: SectionAction
   readonly qa: string
   readonly title: string
   readonly entries: readonly CardEntry[]
@@ -116,8 +139,19 @@ function GallerySection(props: {
   return (
     <section className="content-panel" data-qa={props.qa} aria-label={props.title}>
       <div className="section-heading">
-        <h2>{props.title}</h2>
-        <span>{props.entries.length}개</span>
+        <div className="section-heading-main">
+          <h2>{props.title}</h2>
+          <span>{props.entries.length}개</span>
+        </div>
+        <button
+          aria-label={props.action.label}
+          className="section-add-button"
+          onClick={props.action.onClick}
+          title={props.action.label}
+          type="button"
+        >
+          <Plus aria-hidden="true" size={16} strokeWidth={1.8} />
+        </button>
       </div>
       <CardGrid
         entries={props.entries}
