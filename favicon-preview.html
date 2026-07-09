@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prompt Gallery Favicon Preview</title>
+    <style>
+      :root {
+        --surface-base: #f6f5f4;
+        --surface-panel: #ffffff;
+        --text-primary: #1f1f1d;
+        --text-muted: #615d59;
+        --border-default: rgba(0, 0, 0, 0.12);
+        --accent-primary: #0075de;
+        font-family:
+          "Inter Variable", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+        color: var(--text-primary);
+        background: var(--surface-base);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-width: 320px;
+        min-height: 100dvh;
+        margin: 0;
+      }
+
+      main {
+        width: min(1040px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 48px 0;
+      }
+
+      header {
+        margin-bottom: 28px;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: 30px;
+        line-height: 1.12;
+        letter-spacing: 0;
+      }
+
+      p {
+        max-width: 640px;
+        margin: 0;
+        color: var(--text-muted);
+        font-size: 15px;
+        line-height: 1.5;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px;
+      }
+
+      .card {
+        display: grid;
+        gap: 18px;
+        padding: 18px;
+        border: 1px solid var(--border-default);
+        border-radius: 8px;
+        background: var(--surface-panel);
+      }
+
+      .card.recommended {
+        border-color: color-mix(in srgb, var(--accent-primary) 56%, transparent);
+        box-shadow: 0 8px 24px rgba(0, 117, 222, 0.12);
+      }
+
+      .title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: 18px;
+        line-height: 1.3;
+        letter-spacing: 0;
+      }
+
+      .badge {
+        flex: 0 0 auto;
+        padding: 4px 8px;
+        border-radius: 999px;
+        background: #f2f9ff;
+        color: var(--accent-primary);
+        font-size: 12px;
+        font-weight: 650;
+      }
+
+      .preview {
+        display: grid;
+        grid-template-columns: 96px 1fr;
+        align-items: center;
+        gap: 18px;
+      }
+
+      .icon-large {
+        width: 96px;
+        height: 96px;
+        image-rendering: auto;
+      }
+
+      .sizes {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .size-check {
+        display: grid;
+        gap: 6px;
+        color: var(--text-muted);
+        font-size: 12px;
+      }
+
+      .icon-small {
+        width: 32px;
+        height: 32px;
+      }
+
+      .icon-tiny {
+        width: 16px;
+        height: 16px;
+      }
+
+      dl {
+        display: grid;
+        grid-template-columns: 56px 1fr;
+        gap: 8px 10px;
+        margin: 0;
+        font-size: 13px;
+        line-height: 1.4;
+      }
+
+      dt {
+        color: var(--text-muted);
+      }
+
+      dd {
+        margin: 0;
+      }
+
+      .swatches {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .swatch {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .dot {
+        width: 14px;
+        height: 14px;
+        border: 1px solid var(--border-default);
+        border-radius: 50%;
+      }
+
+      @media (max-width: 560px) {
+        main {
+          width: min(100% - 24px, 1040px);
+          padding: 32px 0;
+        }
+
+        .preview {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Prompt Gallery favicon preview</h1>
+        <p>
+          32px favicon 기준으로 단순한 실루엣을 우선했습니다. 1번은 앱의 저장 카드 성격이 가장 빨리
+          읽혀 기본 후보로 권장합니다.
+        </p>
+      </header>
+
+      <section class="grid" aria-label="favicon options">
+        <article class="card recommended">
+          <div class="title-row">
+            <h2>1. Prompt Card</h2>
+            <span class="badge">권장</span>
+          </div>
+          <div class="preview">
+            <svg class="icon-large" viewBox="0 0 32 32" role="img" aria-label="Prompt Card favicon">
+              <rect x="2" y="2" width="28" height="28" rx="7" fill="#0075de" />
+              <rect x="8" y="8" width="16" height="16" rx="3" fill="#ffffff" />
+              <rect x="11" y="12" width="10" height="2.4" rx="1.2" fill="#0075de" />
+              <rect x="11" y="17" width="7" height="2.4" rx="1.2" fill="#0075de" />
+              <circle cx="22" cy="21" r="2" fill="#0075de" />
+            </svg>
+            <div class="sizes">
+              <span class="size-check">
+                32px
+                <svg class="icon-small" viewBox="0 0 32 32" aria-hidden="true">
+                  <rect x="2" y="2" width="28" height="28" rx="7" fill="#0075de" />
+                  <rect x="8" y="8" width="16" height="16" rx="3" fill="#ffffff" />
+                  <rect x="11" y="12" width="10" height="2.4" rx="1.2" fill="#0075de" />
+                  <rect x="11" y="17" width="7" height="2.4" rx="1.2" fill="#0075de" />
+                  <circle cx="22" cy="21" r="2" fill="#0075de" />
+                </svg>
+              </span>
+              <span class="size-check">
+                16px
+                <svg class="icon-tiny" viewBox="0 0 32 32" aria-hidden="true">
+                  <rect x="2" y="2" width="28" height="28" rx="7" fill="#0075de" />
+                  <rect x="8" y="8" width="16" height="16" rx="3" fill="#ffffff" />
+                  <rect x="11" y="12" width="10" height="2.4" rx="1.2" fill="#0075de" />
+                  <rect x="11" y="17" width="7" height="2.4" rx="1.2" fill="#0075de" />
+                  <circle cx="22" cy="21" r="2" fill="#0075de" />
+                </svg>
+              </span>
+            </div>
+          </div>
+          <dl>
+            <dt>색상</dt>
+            <dd class="swatches">
+              <span class="swatch"><span class="dot" style="background:#0075de"></span>#0075de</span>
+              <span class="swatch"><span class="dot" style="background:#ffffff"></span>#ffffff</span>
+            </dd>
+            <dt>심볼</dt>
+            <dd>프롬프트 카드와 짧은 텍스트 라인</dd>
+          </dl>
+        </article>
+
+        <article class="card">
+          <div class="title-row">
+            <h2>2. Gallery Grid</h2>
+          </div>
+          <div class="preview">
+            <svg class="icon-large" viewBox="0 0 32 32" role="img" aria-label="Gallery Grid favicon">
+              <rect x="2" y="2" width="28" height="28" rx="7" fill="#1f1f1d" />
+              <rect x="8" y="8" width="7" height="7" rx="1.8" fill="#f6f5f4" />
+              <rect x="17" y="8" width="7" height="7" rx="1.8" fill="#0075de" />
+              <rect x="8" y="17" width="7" height="7" rx="1.8" fill="#f6f5f4" />
+              <rect x="17" y="17" width="7" height="7" rx="1.8" fill="#f6f5f4" />
+            </svg>
+            <div class="sizes">
+              <span class="size-check">
+                32px
+                <svg class="icon-small" viewBox="0 0 32 32" aria-hidden="true">
+                  <rect x="2" y="2" width="28" height="28" rx="7" fill="#1f1f1d" />
+                  <rect x="8" y="8" width="7" height="7" rx="1.8" fill="#f6f5f4" />
+                  <rect x="17" y="8" width="7" height="7" rx="1.8" fill="#0075de" />
+                  <rect x="8" y="17" width="7" height="7" rx="1.8" fill="#f6f5f4" />
+                  <rect x="17" y="17" width="7" height="7" rx="1.8" fill="#f6f5f4" />
+                </svg>
+              </span>
+              <span class="size-check">
+                16px
+                <svg class="icon-tiny" viewBox="0 0 32 32" aria-hidden="true">
+                  <rect x="2" y="2" width="28" height="28" rx="7" fill="#1f1f1d" />
+                  <rect x="8" y="8" width="7" height="7" rx="1.8" fill="#f6f5f4" />
+                  <rect x="17" y="8" width="7" height="7" rx="1.8" fill="#0075de" />
+                  <rect x="8" y="17" width="7" height="7" rx="1.8" fill="#f6f5f4" />
+                  <rect x="17" y="17" width="7" height="7" rx="1.8" fill="#f6f5f4" />
+                </svg>
+              </span>
+            </div>
+          </div>
+          <dl>
+            <dt>색상</dt>
+            <dd class="swatches">
+              <span class="swatch"><span class="dot" style="background:#1f1f1d"></span>#1f1f1d</span>
+              <span class="swatch"><span class="dot" style="background:#f6f5f4"></span>#f6f5f4</span>
+              <span class="swatch"><span class="dot" style="background:#0075de"></span>#0075de</span>
+            </dd>
+            <dt>심볼</dt>
+            <dd>갤러리 그리드와 선택된 카드</dd>
+          </dl>
+        </article>
+
+        <article class="card">
+          <div class="title-row">
+            <h2>3. Spark Prompt</h2>
+          </div>
+          <div class="preview">
+            <svg class="icon-large" viewBox="0 0 32 32" role="img" aria-label="Spark Prompt favicon">
+              <rect x="2" y="2" width="28" height="28" rx="7" fill="#f6f5f4" />
+              <rect x="9" y="10" width="3" height="12" rx="1.5" fill="#1f1f1d" />
+              <path
+                d="M20 7.5l1.6 4.1 4.1 1.6-4.1 1.6L20 19l-1.6-4.2-4.1-1.6 4.1-1.6L20 7.5z"
+                fill="#0075de"
+              />
+              <rect x="15" y="22" width="8" height="2.3" rx="1.15" fill="#1f1f1d" />
+            </svg>
+            <div class="sizes">
+              <span class="size-check">
+                32px
+                <svg class="icon-small" viewBox="0 0 32 32" aria-hidden="true">
+                  <rect x="2" y="2" width="28" height="28" rx="7" fill="#f6f5f4" />
+                  <rect x="9" y="10" width="3" height="12" rx="1.5" fill="#1f1f1d" />
+                  <path
+                    d="M20 7.5l1.6 4.1 4.1 1.6-4.1 1.6L20 19l-1.6-4.2-4.1-1.6 4.1-1.6L20 7.5z"
+                    fill="#0075de"
+                  />
+                  <rect x="15" y="22" width="8" height="2.3" rx="1.15" fill="#1f1f1d" />
+                </svg>
+              </span>
+              <span class="size-check">
+                16px
+                <svg class="icon-tiny" viewBox="0 0 32 32" aria-hidden="true">
+                  <rect x="2" y="2" width="28" height="28" rx="7" fill="#f6f5f4" />
+                  <rect x="9" y="10" width="3" height="12" rx="1.5" fill="#1f1f1d" />
+                  <path
+                    d="M20 7.5l1.6 4.1 4.1 1.6-4.1 1.6L20 19l-1.6-4.2-4.1-1.6 4.1-1.6L20 7.5z"
+                    fill="#0075de"
+                  />
+                  <rect x="15" y="22" width="8" height="2.3" rx="1.15" fill="#1f1f1d" />
+                </svg>
+              </span>
+            </div>
+          </div>
+          <dl>
+            <dt>색상</dt>
+            <dd class="swatches">
+              <span class="swatch"><span class="dot" style="background:#f6f5f4"></span>#f6f5f4</span>
+              <span class="swatch"><span class="dot" style="background:#1f1f1d"></span>#1f1f1d</span>
+              <span class="swatch"><span class="dot" style="background:#0075de"></span>#0075de</span>
+            </dd>
+            <dt>심볼</dt>
+            <dd>입력 커서와 생성 신호</dd>
+          </dl>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>
