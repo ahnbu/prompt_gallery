@@ -1,2 +1,0 @@
-$ node scripts/qa/create-fixtures.mjs
-PASS fixture generated: D:\vibe-coding\prompt-gallery\test\fixtures\preview.png (224 bytes)

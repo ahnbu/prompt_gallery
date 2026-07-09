@@ -1,9 +1,0 @@
-file:///D:/vibe-coding/prompt-gallery/.omo/evidence/wave-0-browser-smoke.mjs:35
-    throw new Error(message)
-          ^
-
-Error: Expected missing app title, but Prompt Gallery title is visible
-    at assert (file:///D:/vibe-coding/prompt-gallery/.omo/evidence/wave-0-browser-smoke.mjs:35:11)
-    at file:///D:/vibe-coding/prompt-gallery/.omo/evidence/wave-0-browser-smoke.mjs:63:7
-
-Node.js v24.15.0

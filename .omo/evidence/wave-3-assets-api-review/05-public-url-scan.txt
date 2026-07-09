@@ -1,3 +1,0 @@
-command: Select-String -Path .omo/evidence/wave-3-assets-api-review.txt -Pattern r2.dev|amazonaws.com|cloudflarestorage.com|https://
-result: PASS - no public R2/storage URL patterns found
-matches:
