@@ -4,10 +4,12 @@
 
 | 일시 | 유형 | 범위 | 변경내용 | 변경사유 | 작성AI |
 |---|---|---|---|---|---|
+| 2026-07-09 17:32 | docs | evidence | 디자인 적용 검토와 QA 산출물 정리 | - | Codex |
 | 2026-07-09 17:28 | fix | ui | 헤더 브랜드 표시를 favicon과 앱명으로 정리 | - | Codex |
 | 2026-07-09 17:13 | feat | ui | 디자인 계약 기반 카드 갤러리와 QA 보강 | - | Unknown |
 | 2026-07-09 15:55 | feat | favicon | Gallery Grid favicon과 미리보기 HTML 추가 | 브라우저 탭 식별성 개선 | Codex |
 | 2026-07-09 15:51 | docs | agents | 계층형 AGENTS 지식베이스 추가 | init-deep 결과 보존 | Codex |
+| 2026-07-09 15:46 | docs | knowledge | 프로젝트 지식베이스와 디자인 레이아웃 QA 초안 추가 | - | Unknown |
 | 2026-07-09 15:42 | docs | plans | 디자인 적용 계획 본문과 evidence 경로 정리 | - | Unknown |
 | 2026-07-09 15:41 | docs | drafts | 디자인 적용 계획 초안 세부 검토 내용 보강 | - | Unknown |
 | 2026-07-09 15:39 | docs | plans | 디자인 적용 계획 초안과 배포 점검 evidence 기록 | - | Unknown |
