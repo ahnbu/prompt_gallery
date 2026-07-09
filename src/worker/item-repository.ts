@@ -111,11 +111,10 @@ export class ItemRepository {
       throw new ItemPersistenceError("Created item was not returned by D1.")
     }
 
-    if (input.tagNames === null) {
-      await tagRepository.addAutomaticTags(item)
-    } else {
+    if (input.tagNames !== null) {
       await tagRepository.setItemTagsByNames(id, input.tagNames)
     }
+    await tagRepository.syncAutomaticTagsForItem(item)
 
     const taggedItem = await this.get(id)
     if (taggedItem === null) {
@@ -169,11 +168,10 @@ export class ItemRepository {
       return null
     }
 
-    if (input.tagNames === undefined) {
-      await tagRepository.addAutomaticTags(item)
-    } else {
+    if (input.tagNames !== undefined) {
       await tagRepository.setItemTagsByNames(id, input.tagNames)
     }
+    await tagRepository.syncAutomaticTagsForItem(item)
     if (input.imageAssetId !== undefined && input.imageAssetId !== null) {
       await assetRepository.setAssetItem(input.imageAssetId, id)
     }

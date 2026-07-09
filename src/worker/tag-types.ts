@@ -25,11 +25,19 @@ export type ItemTagRow = {
   readonly id: string
   readonly name: string
   readonly color: string
+  readonly source: TagSource
 }
 
 export type TagCountRow = {
   readonly count: number
 }
+
+export const TAG_SOURCES = {
+  MANUAL: "manual",
+  AUTO: "auto",
+} as const
+
+export type TagSource = (typeof TAG_SOURCES)[keyof typeof TAG_SOURCES]
 
 export type CreateTagInput = {
   readonly name: string

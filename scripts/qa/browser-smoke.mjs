@@ -149,12 +149,13 @@ async function main() {
       app = await startLocalApp(output)
     }
 
-    const artifacts = await runScenario(scenario, baseUrl, output)
+    const scenarioBaseUrl = app?.baseUrl ?? baseUrl
+    const artifacts = await runScenario(scenario, scenarioBaseUrl, output)
     await writeFile(
       output,
       renderScenarioEvidence({
         scenario,
-        baseUrl,
+        baseUrl: scenarioBaseUrl,
         invocation,
         output: relativePath(output),
         exitCode: 0,
@@ -170,7 +171,7 @@ async function main() {
     const message = error instanceof Error ? error.message : String(error)
     const failureResult = {
       scenario,
-      baseUrl,
+      baseUrl: app?.baseUrl ?? baseUrl,
       invocation,
       output: relativePath(output),
       exitCode: 1,

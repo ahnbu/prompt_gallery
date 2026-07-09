@@ -1,5 +1,6 @@
 import { spawn } from "node:child_process"
 import { writeFile } from "node:fs/promises"
+import { createServer } from "node:net"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
@@ -8,6 +9,23 @@ const rootDir = path.resolve(fileURLToPath(new URL("../..", import.meta.url)))
 function delay(ms) {
   return new Promise((resolve) => {
     setTimeout(resolve, ms)
+  })
+}
+
+async function findAvailablePort() {
+  const server = createServer()
+  return new Promise((resolve, reject) => {
+    server.once("error", reject)
+    server.listen(0, "127.0.0.1", () => {
+      const address = server.address()
+      server.close(() => {
+        if (typeof address === "object" && address !== null) {
+          resolve(address.port)
+          return
+        }
+        reject(new Error("Unable to allocate a local port"))
+      })
+    })
   })
 }
 
@@ -29,14 +47,20 @@ export async function startLocalApp(outputPath) {
   const stem = outputPath.replace(/\.[^.]+$/, "")
   const stdoutPath = `${stem}-dev.stdout.log`
   const stderrPath = `${stem}-dev.stderr.log`
+  const port = await findAvailablePort()
+  const baseUrl = `http://127.0.0.1:${port}`
   let stdout = ""
   let stderr = ""
   const viteBin = path.join(rootDir, "node_modules/vite/bin/vite.js")
-  const child = spawn(process.execPath, [viteBin, "--host", "127.0.0.1"], {
-    cwd: rootDir,
-    env: { BROWSER: "none", NO_UPDATE_NOTIFIER: "1" },
-    stdio: ["ignore", "pipe", "pipe"],
-  })
+  const child = spawn(
+    process.execPath,
+    [viteBin, "--host", "127.0.0.1", "--port", String(port), "--strictPort"],
+    {
+      cwd: rootDir,
+      env: { ...process.env, BROWSER: "none", NO_UPDATE_NOTIFIER: "1" },
+      stdio: ["ignore", "pipe", "pipe"],
+    },
+  )
 
   child.stdout.on("data", (chunk) => {
     stdout += chunk.toString()
@@ -47,16 +71,18 @@ export async function startLocalApp(outputPath) {
 
   for (let attempt = 0; attempt < 60; attempt += 1) {
     try {
-      const health = await fetch("http://127.0.0.1:5173/api/health", {
+      const health = await fetch(`${baseUrl}/api/health`, {
         signal: AbortSignal.timeout(1000),
       })
-      const shell = await fetch("http://127.0.0.1:5173/", {
+      const shell = await fetch(`${baseUrl}/`, {
         signal: AbortSignal.timeout(1000),
       })
-      if (health.ok && shell.ok) {
+      const contentType = health.headers.get("content-type") ?? ""
+      const payload = contentType.includes("application/json") ? await health.json() : null
+      if (health.ok && shell.ok && payload?.ok === true) {
         await writeFile(stdoutPath, stdout)
         await writeFile(stderrPath, stderr)
-        return { child, stdoutPath, stderrPath }
+        return { child, stdoutPath, stderrPath, baseUrl }
       }
     } catch (error) {
       if (!(error instanceof Error)) {

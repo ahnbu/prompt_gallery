@@ -43,13 +43,14 @@ async function main() {
       app = await startLocalApp(output)
     }
 
+    const scenarioBaseUrl = app?.baseUrl ?? baseUrl
     const smoke =
       scenario === "assets"
-        ? await runAssets(baseUrl, context)
+        ? await runAssets(scenarioBaseUrl, context)
         : scenario === "wave1"
-          ? await runWave1(baseUrl, context)
+          ? await runWave1(scenarioBaseUrl, context)
           : scenario === "full-regression"
-            ? await runFullRegression(baseUrl, context)
+            ? await runFullRegression(scenarioBaseUrl, context)
             : null
     if (smoke === null) {
       throw new SmokeError(`Unknown scenario: ${scenario}`)
@@ -58,7 +59,7 @@ async function main() {
       output,
       renderEvidence({
         title: scenario === "assets" ? "Wave 3 Assets API Smoke" : undefined,
-        baseUrl,
+        baseUrl: scenarioBaseUrl,
         started: app !== undefined,
         ok: true,
         checks: context.checks,
@@ -81,7 +82,7 @@ async function main() {
       output,
       renderEvidence({
         title: scenario === "assets" ? "Wave 3 Assets API Smoke" : undefined,
-        baseUrl,
+        baseUrl: app?.baseUrl ?? baseUrl,
         started: app !== undefined,
         ok: false,
         checks: context.checks,

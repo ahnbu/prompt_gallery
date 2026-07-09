@@ -63,7 +63,10 @@ export function draftFromState(state: ItemModalState): Draft {
     notes: state.item.notes ?? "",
     githubUrl: state.item.githubUrl ?? "",
     imageAssetId: state.item.imageAssetId,
-    tagsText: state.item.tags.map((tag) => tag.name).join(", "),
+    tagsText: state.item.tags
+      .filter((tag) => tag.sources.includes("manual"))
+      .map((tag) => tag.name)
+      .join(", "),
   }
 }
 

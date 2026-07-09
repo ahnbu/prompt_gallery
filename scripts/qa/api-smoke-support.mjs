@@ -1,12 +1,13 @@
 import { spawn } from "node:child_process"
 import { writeFile } from "node:fs/promises"
+import { createServer } from "node:net"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
 const rootDir = path.resolve(fileURLToPath(new URL("../..", import.meta.url)))
 const evidenceDir = path.join(rootDir, ".omo/evidence")
 const allowedArgs = new Set(["--base-url", "--output", "--scenario"])
-const childEnv = { BROWSER: "none", CI: "1", NO_UPDATE_NOTIFIER: "1" }
+const childEnv = { ...process.env, BROWSER: "none", CI: "1", NO_UPDATE_NOTIFIER: "1" }
 
 export const defaultOutput = path.join(evidenceDir, "wave-1-api-smoke.txt")
 
@@ -58,6 +59,23 @@ function waitForExit(child, ms) {
   })
 }
 
+async function findAvailablePort() {
+  const server = createServer()
+  return new Promise((resolve, reject) => {
+    server.once("error", reject)
+    server.listen(0, "127.0.0.1", () => {
+      const address = server.address()
+      server.close(() => {
+        if (typeof address === "object" && address !== null) {
+          resolve(address.port)
+          return
+        }
+        reject(new SmokeError("Unable to allocate a local port"))
+      })
+    })
+  })
+}
+
 export async function stopProcess(child) {
   if (child.exitCode !== null) {
     return
@@ -76,14 +94,20 @@ export async function startLocalApp(outputPath) {
   const stem = outputPath.replace(/\.[^.]+$/, "")
   const stdoutPath = `${stem}-dev.stdout.log`
   const stderrPath = `${stem}-dev.stderr.log`
+  const port = await findAvailablePort()
+  const baseUrl = `http://127.0.0.1:${port}`
   let stdout = ""
   let stderr = ""
   const viteBin = path.join(rootDir, "node_modules/vite/bin/vite.js")
-  const child = spawn(process.execPath, [viteBin, "--host", "127.0.0.1"], {
-    cwd: rootDir,
-    env: childEnv,
-    stdio: ["ignore", "pipe", "pipe"],
-  })
+  const child = spawn(
+    process.execPath,
+    [viteBin, "--host", "127.0.0.1", "--port", String(port), "--strictPort"],
+    {
+      cwd: rootDir,
+      env: childEnv,
+      stdio: ["ignore", "pipe", "pipe"],
+    },
+  )
 
   child.stdout.on("data", (chunk) => {
     stdout += chunk.toString()
@@ -94,13 +118,15 @@ export async function startLocalApp(outputPath) {
 
   for (let attempt = 0; attempt < 60; attempt += 1) {
     try {
-      const response = await fetch("http://127.0.0.1:5173/api/health", {
+      const response = await fetch(`${baseUrl}/api/health`, {
         signal: AbortSignal.timeout(1000),
       })
-      if (response.ok) {
+      const contentType = response.headers.get("content-type") ?? ""
+      const payload = contentType.includes("application/json") ? await response.json() : null
+      if (response.ok && payload?.ok === true) {
         await writeFile(stdoutPath, stdout)
         await writeFile(stderrPath, stderr)
-        return { child, stdoutPath, stderrPath }
+        return { child, stdoutPath, stderrPath, baseUrl }
       }
     } catch (error) {
       if (!(error instanceof Error)) {

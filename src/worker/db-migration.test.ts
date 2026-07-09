@@ -33,4 +33,34 @@ describe("D1 migrations", () => {
     expect(tableNames).toEqual([...requiredTables].sort())
     console.info(`required tables: ${tableNames.join(", ")}`)
   })
+
+  it("stores manual and automatic tag assignments as separate sources", async () => {
+    const itemId = crypto.randomUUID()
+    const tagId = crypto.randomUUID()
+    const itemTagColumns = await env.DB.prepare("PRAGMA table_info(item_tags)").all<{
+      readonly name: string
+    }>()
+
+    expect(itemTagColumns.results.map((column) => column.name)).toContain("source")
+
+    await env.DB.prepare("INSERT INTO items (id, type, title) VALUES (?, ?, ?)")
+      .bind(itemId, "prompt", "Source-aware tag item")
+      .run()
+    await env.DB.prepare("INSERT INTO tags (id, name, color) VALUES (?, ?, ?)")
+      .bind(tagId, "source-aware", "#3366cc")
+      .run()
+    await env.DB.prepare(
+      "INSERT INTO item_tags (item_id, tag_id, source) VALUES (?, ?, ?), (?, ?, ?)",
+    )
+      .bind(itemId, tagId, "manual", itemId, tagId, "auto")
+      .run()
+
+    const rows = await env.DB.prepare(
+      "SELECT source FROM item_tags WHERE item_id = ? AND tag_id = ? ORDER BY source DESC",
+    )
+      .bind(itemId, tagId)
+      .all<{ readonly source: string }>()
+
+    expect(rows.results.map((row) => row.source)).toEqual(["manual", "auto"])
+  })
 })

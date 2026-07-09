@@ -26,7 +26,7 @@ export function TagManagementRow(props: {
     <section className="tag-management-row" data-qa="tag-management-row" data-tag-id={props.tag.id}>
       <div className="tag-management-row-heading">
         <span className="tag-color-dot" style={{ backgroundColor: props.draft.color }} />
-        <strong>{props.tag.name}</strong>
+        <strong data-qa="tag-row-name">{props.tag.name}</strong>
         <span>{props.tag.itemCount}개 항목</span>
       </div>
       <div className="tag-management-grid">

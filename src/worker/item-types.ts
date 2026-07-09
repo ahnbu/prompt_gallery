@@ -1,3 +1,5 @@
+import type { TagSource } from "./tag-types"
+
 export const ITEM_TYPES = {
   PROMPT: "prompt",
   IMAGE_PROMPT: "image_prompt",
@@ -29,6 +31,7 @@ export type ItemTag = {
   readonly id: string
   readonly name: string
   readonly color: string
+  readonly sources: readonly TagSource[]
 }
 
 export type ItemRow = {

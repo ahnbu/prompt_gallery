@@ -5,11 +5,13 @@ export const ITEM_TYPES = {
 } as const
 
 export type ItemType = (typeof ITEM_TYPES)[keyof typeof ITEM_TYPES]
+export type TagSource = "manual" | "auto"
 
 export type ItemTag = {
   readonly id: string
   readonly name: string
   readonly color: string
+  readonly sources: readonly TagSource[]
 }
 
 export type Item = {
@@ -162,6 +164,17 @@ function parseItemTag(value: unknown): ItemTag {
     id: readString(record, "id"),
     name: readString(record, "name"),
     color: readString(record, "color"),
+    sources: readArray(record, "sources").map(parseTagSource),
+  }
+}
+
+function parseTagSource(value: unknown): TagSource {
+  switch (value) {
+    case "manual":
+    case "auto":
+      return value
+    default:
+      throw new GalleryDataError("Unknown tag source.")
   }
 }
 

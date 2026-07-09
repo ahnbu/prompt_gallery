@@ -1,5 +1,6 @@
 import { X } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
+import { NEW_TAG_ID, TagCreateRow } from "./TagCreateRow"
 import { TagManagementRow } from "./TagManagementRow"
 import type { Tag } from "./gallery-data"
 import {
@@ -171,8 +172,16 @@ export function TagManagementModal(props: {
         </p>
 
         <div className="tag-management-list">
+          <TagCreateRow
+            busy={busyId === NEW_TAG_ID}
+            handleError={handleError}
+            onBusyChange={setBusyId}
+            onChanged={props.onChanged}
+            setRowStatus={setRowStatus}
+            statuses={statuses}
+          />
           {props.tags.length === 0 ? (
-            <section className="content-panel">관리할 태그가 없습니다</section>
+            <section className="content-panel">아직 생성된 태그가 없습니다</section>
           ) : (
             props.tags.map((tag) => {
               const draft = drafts.get(tag.id) ?? draftFromTag(tag)

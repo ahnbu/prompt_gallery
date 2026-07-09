@@ -20,6 +20,36 @@ async function createTag(name: string): Promise<string> {
   return Reflect.get(Reflect.get(payload, "tag") ?? {}, "id") as string
 }
 
+function objectField(value: unknown, key: string): object {
+  if (typeof value !== "object" || value === null) {
+    throw new Error(`Expected object while reading ${key}`)
+  }
+  const field = Reflect.get(value, key)
+  if (typeof field !== "object" || field === null || Array.isArray(field)) {
+    throw new Error(`Expected ${key} to be an object`)
+  }
+
+  return field
+}
+
+function arrayField(value: object, key: string): readonly unknown[] {
+  const field = Reflect.get(value, key)
+  if (!Array.isArray(field)) {
+    throw new Error(`Expected ${key} to be an array`)
+  }
+
+  return field
+}
+
+function stringField(value: object, key: string): string {
+  const field = Reflect.get(value, key)
+  if (typeof field !== "string") {
+    throw new Error(`Expected ${key} to be a string`)
+  }
+
+  return field
+}
+
 describe("export API", () => {
   beforeEach(async () => {
     await clearPreviewBucket()
@@ -35,15 +65,19 @@ describe("export API", () => {
   it("returns a schema-versioned full export without public R2 object keys", async () => {
     const tagName = `export-${crypto.randomUUID()}`
     await createTag(tagName)
-    const itemId = crypto.randomUUID()
+    const itemResponse = await apiRequest("POST", "/api/items", {
+      type: "image_prompt",
+      title: "Export image prompt",
+      body: "Export this prompt",
+    })
+    expect(itemResponse.status).toBe(201)
+    const itemId = stringField(objectField(await itemResponse.json(), "item"), "id")
     const assetId = crypto.randomUUID()
     const workflowId = crypto.randomUUID()
     const stepId = crypto.randomUUID()
     const objectKey = `previews/${assetId}.png`
-    await env.DB.prepare(
-      "INSERT INTO items (id, type, title, body, favorite, image_key) VALUES (?, ?, ?, ?, ?, ?)",
-    )
-      .bind(itemId, "image_prompt", "Export image prompt", "Export this prompt", 0, objectKey)
+    await env.DB.prepare("UPDATE items SET image_key = ? WHERE id = ?")
+      .bind(objectKey, itemId)
       .run()
     await env.DB.prepare(
       "INSERT INTO assets (id, item_id, object_key, filename, content_type, size_bytes, hash) VALUES (?, ?, ?, ?, ?, ?, ?)",
@@ -65,6 +99,12 @@ describe("export API", () => {
     expect(response.headers.get("content-type")).toContain("application/json")
     expect(response.headers.get("content-disposition")).toContain("prompt-gallery-export.json")
     const payload: unknown = await response.json()
+    const item = objectField(
+      { item: arrayField(objectField({ payload }, "payload"), "items")[0] },
+      "item",
+    )
+    const tag = objectField({ tag: arrayField(item, "tags")[0] }, "tag")
+
     expect(payload).toMatchObject({
       schemaVersion: 1,
       app: "prompt-gallery",
@@ -75,6 +115,7 @@ describe("export API", () => {
       workflows: [{ name: "Export workflow", steps: [{ kind: "prompt", itemId, position: 1 }] }],
       assets: [{ id: assetId, contentUrl: `/api/assets/${assetId}/content` }],
     })
+    expect(tag).toMatchObject({ name: tagName, sources: ["auto"] })
     expect(JSON.stringify(payload)).not.toContain(objectKey)
   })
 })

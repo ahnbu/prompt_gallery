@@ -1,11 +1,14 @@
 import { ApiError, type Item, type ItemTag } from "./item-types"
-import type { CreateTagInput, ItemTagRow, MergeTagsInput, PatchTagInput, Tag } from "./tag-types"
-import { type TagCountRow, type TagKeywordRow, type TagRow, rowToTag } from "./tag-types"
-
-type TagKeywordMatchRow = {
-  readonly tag_id: string
-  readonly keyword: string
-}
+import { tagsForItems } from "./tag-assignment-reader"
+import { TagAutoSync } from "./tag-auto-sync"
+import type { CreateTagInput, MergeTagsInput, PatchTagInput, Tag } from "./tag-types"
+import {
+  TAG_SOURCES,
+  type TagCountRow,
+  type TagKeywordRow,
+  type TagRow,
+  rowToTag,
+} from "./tag-types"
 
 const SELECT_TAG = `
   SELECT id, name, color, created_at, updated_at
@@ -16,18 +19,13 @@ function placeholders(values: readonly unknown[]): string {
   return values.map(() => "?").join(", ")
 }
 
-function itemSearchText(item: Item): string {
-  return [item.title, item.body, item.notes, item.githubUrl]
-    .filter((value): value is string => value !== null)
-    .join(" ")
-    .toLowerCase()
-}
-
 export class TagRepository {
   readonly db: D1Database
+  readonly autoSync: TagAutoSync
 
   constructor(db: D1Database) {
     this.db = db
+    this.autoSync = new TagAutoSync(db)
   }
 
   async list(): Promise<readonly Tag[]> {
@@ -52,6 +50,7 @@ export class TagRepository {
         .bind(id, input.name, input.color),
       ...this.keywordInsertStatements(id, input.keywords),
     ])
+    await this.autoSync.syncTag(id)
 
     const tag = await this.get(id)
     if (tag === null) {
@@ -86,6 +85,9 @@ export class TagRepository {
       statements.push(...this.replaceKeywordsStatements(id, input.keywords))
     }
     await this.db.batch(statements)
+    if (input.keywords !== undefined) {
+      await this.autoSync.syncTag(id)
+    }
 
     return this.get(id)
   }
@@ -114,8 +116,8 @@ export class TagRepository {
     await this.db.batch([
       this.db
         .prepare(`
-          INSERT OR IGNORE INTO item_tags (item_id, tag_id)
-          SELECT item_id, ? FROM item_tags WHERE tag_id = ?
+          INSERT OR IGNORE INTO item_tags (item_id, tag_id, source, created_at)
+          SELECT item_id, ?, source, created_at FROM item_tags WHERE tag_id = ?
         `)
         .bind(input.targetId, input.sourceId),
       this.db
@@ -130,6 +132,7 @@ export class TagRepository {
         .bind(input.targetId, input.sourceId),
       this.db.prepare("DELETE FROM tags WHERE id = ?").bind(input.sourceId),
     ])
+    await this.autoSync.syncTag(input.targetId)
 
     const merged = await this.get(input.targetId)
     if (merged === null) {
@@ -142,11 +145,13 @@ export class TagRepository {
   async setItemTagsByNames(itemId: string, names: readonly string[]): Promise<void> {
     const rows = await this.rowsByNames(names, "invalid_item")
     await this.db.batch([
-      this.db.prepare("DELETE FROM item_tags WHERE item_id = ?").bind(itemId),
+      this.db
+        .prepare("DELETE FROM item_tags WHERE item_id = ? AND source = ?")
+        .bind(itemId, TAG_SOURCES.MANUAL),
       ...rows.map((row) =>
         this.db
-          .prepare("INSERT OR IGNORE INTO item_tags (item_id, tag_id) VALUES (?, ?)")
-          .bind(itemId, row.id),
+          .prepare("INSERT OR IGNORE INTO item_tags (item_id, tag_id, source) VALUES (?, ?, ?)")
+          .bind(itemId, row.id, TAG_SOURCES.MANUAL),
       ),
     ])
   }
@@ -158,57 +163,16 @@ export class TagRepository {
     await this.rowsByNames(names, errorCode)
   }
 
-  async addAutomaticTags(item: Item): Promise<void> {
-    const rows = await this.db
-      .prepare(`
-        SELECT tags.id AS tag_id, tag_keywords.keyword
-        FROM tags
-        JOIN tag_keywords ON tag_keywords.tag_id = tags.id
-        ORDER BY tags.name ASC, tag_keywords.keyword ASC
-      `)
-      .all<TagKeywordMatchRow>()
-    const text = itemSearchText(item)
-    const tagIds = new Set<string>()
+  async syncAutomaticTagsForItem(item: Item): Promise<void> {
+    await this.autoSync.syncItem(item)
+  }
 
-    for (const row of rows.results) {
-      if (text.includes(row.keyword.toLowerCase())) {
-        tagIds.add(row.tag_id)
-      }
-    }
-
-    for (const tagId of tagIds) {
-      await this.insertItemTag(item.id, tagId)
-    }
+  async syncAutomaticTag(tagId: string): Promise<void> {
+    await this.autoSync.syncTag(tagId)
   }
 
   async tagsForItems(itemIds: readonly string[]): Promise<ReadonlyMap<string, readonly ItemTag[]>> {
-    const tagsByItemId = new Map<string, ItemTag[]>()
-    if (itemIds.length === 0) {
-      return tagsByItemId
-    }
-
-    const rows = await this.db
-      .prepare(`
-        SELECT item_tags.item_id, tags.id, tags.name, tags.color
-        FROM item_tags
-        JOIN tags ON tags.id = item_tags.tag_id
-        WHERE item_tags.item_id IN (${placeholders(itemIds)})
-        ORDER BY tags.name ASC
-      `)
-      .bind(...itemIds)
-      .all<ItemTagRow>()
-
-    for (const row of rows.results) {
-      const tag = { id: row.id, name: row.name, color: row.color }
-      const existing = tagsByItemId.get(row.item_id)
-      if (existing === undefined) {
-        tagsByItemId.set(row.item_id, [tag])
-      } else {
-        existing.push(tag)
-      }
-    }
-
-    return tagsByItemId
+    return tagsForItems(this.db, itemIds)
   }
 
   private async rowsByNames(
@@ -249,7 +213,7 @@ export class TagRepository {
 
   private async itemCount(tagId: string): Promise<number> {
     const row = await this.db
-      .prepare("SELECT COUNT(*) AS count FROM item_tags WHERE tag_id = ?")
+      .prepare("SELECT COUNT(DISTINCT item_id) AS count FROM item_tags WHERE tag_id = ?")
       .bind(tagId)
       .first<TagCountRow>()
     return row?.count ?? 0
@@ -278,12 +242,5 @@ export class TagRepository {
         .prepare("INSERT INTO tag_keywords (id, tag_id, keyword) VALUES (?, ?, ?)")
         .bind(crypto.randomUUID(), tagId, keyword),
     )
-  }
-
-  private async insertItemTag(itemId: string, tagId: string): Promise<void> {
-    await this.db
-      .prepare("INSERT OR IGNORE INTO item_tags (item_id, tag_id) VALUES (?, ?)")
-      .bind(itemId, tagId)
-      .run()
   }
 }

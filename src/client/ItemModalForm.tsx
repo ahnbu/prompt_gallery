@@ -18,6 +18,7 @@ export function ItemModalForm(props: {
   readonly previewItem: Item | null
   readonly setDraft: (draft: Draft) => void
 }) {
+  const automaticTags = props.previewItem?.tags.filter((tag) => tag.sources.includes("auto")) ?? []
   return (
     <div className="form-grid">
       {props.typeEditable ? (
@@ -92,6 +93,18 @@ export function ItemModalForm(props: {
           <option key={tag.id} value={tag.name} />
         ))}
       </datalist>
+      {automaticTags.length > 0 ? (
+        <div className="readonly-field" data-qa="automatic-tags-readonly">
+          <span>자동태그</span>
+          <div className="card-tags">
+            {automaticTags.map((tag) => (
+              <span className="card-tag" data-qa="automatic-tag" key={tag.id}>
+                {tag.name}
+              </span>
+            ))}
+          </div>
+        </div>
+      ) : null}
       {props.draft.type === ITEM_TYPES.IMAGE_PROMPT ? (
         <ImagePreviewField
           imageAssetId={props.draft.imageAssetId === undefined ? null : props.draft.imageAssetId}

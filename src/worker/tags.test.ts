@@ -54,6 +54,24 @@ function tagNames(value: object): readonly string[] {
   return arrayField(value, "tags").map((tag) => stringField(objectField({ tag }, "tag"), "name"))
 }
 
+function tagSources(value: object, name: string): readonly string[] {
+  const tag = arrayField(value, "tags")
+    .map((entry) => objectField({ entry }, "entry"))
+    .find((entry) => stringField(entry, "name") === name)
+  if (tag === undefined) {
+    return []
+  }
+
+  return arrayField(tag, "sources").map((source) => stringField({ source }, "source"))
+}
+
+async function getItem(id: string): Promise<object> {
+  const response = await apiRequest("GET", `/api/items/${id}`)
+  expect(response.status).toBe(200)
+
+  return objectField(await response.json(), "item")
+}
+
 async function createTag(name: string, keywords: readonly string[] = []): Promise<string> {
   const response = await apiRequest("POST", "/api/tags", {
     name,
@@ -117,23 +135,39 @@ describe("tags API", () => {
     expect(tagNames(item)).toEqual(["research"])
   })
 
-  it("lets manual tags override automatic keyword tags on create and update", async () => {
+  it("keeps automatic tags separate from manual tag edits", async () => {
     // Given: an automatic tag and a manually selected tag
     await createTag("research", ["research"])
     await createTag("slides")
     const item = await createPrompt("Research brief", ["slides"])
+    const itemId = stringField(item, "id")
 
     // When: the item is updated to remove all manual tags
-    const response = await apiRequest("PATCH", `/api/items/${stringField(item, "id")}`, {
+    const response = await apiRequest("PATCH", `/api/items/${itemId}`, {
       tags: [],
     })
 
-    // Then: manual tag selection wins over keyword assignment
-    expect(tagNames(item)).toEqual(["slides"])
+    // Then: manual selection is cleared, but automatic rules still apply
     expect(response.status).toBe(200)
-    await expect(response.json()).resolves.toMatchObject({
-      item: { id: stringField(item, "id"), tags: [] },
-    })
+    const updated = objectField(await response.json(), "item")
+    expect(tagNames(updated)).toEqual(["research"])
+    expect(tagSources(updated, "research")).toEqual(["auto"])
+
+    const persisted = await getItem(itemId)
+    expect(tagNames(persisted)).toEqual(["research"])
+    expect(tagSources(persisted, "research")).toEqual(["auto"])
+  })
+
+  it("returns one tag with both manual and automatic sources when both apply", async () => {
+    // Given: a tag selected manually and matched by keyword
+    await createTag("research", ["research"])
+
+    // When: the item is saved with the tag and text containing the keyword
+    const item = await createPrompt("Research brief", ["research"])
+
+    // Then: the response keeps one chip and reports both assignment sources
+    expect(tagNames(item)).toEqual(["research"])
+    expect(tagSources(item, "research")).toEqual(["manual", "auto"])
   })
 
   it("rejects unknown manual tags on create without persisting the item", async () => {
@@ -223,6 +257,29 @@ describe("tags API", () => {
     })
     expect(tagNames(oldMatch)).toEqual([])
     expect(tagNames(newMatch)).toEqual(["research"])
+  })
+
+  it("recomputes automatic assignments for existing items when keywords change", async () => {
+    // Given: existing items before a keyword rule is changed
+    const tagId = await createTag("research", ["old rule"])
+    const oldMatch = await createPrompt("This text has the old rule")
+    const newMatch = await createPrompt("This text has the new rule")
+    const manual = await createPrompt("Manual research note", ["research"])
+
+    // When: the rule is replaced
+    const response = await apiRequest("PATCH", `/api/tags/${tagId}`, {
+      keywords: ["new rule"],
+    })
+
+    // Then: automatic assignments are removed and added in bulk while manual tags remain
+    expect(response.status).toBe(200)
+    expect(tagNames(await getItem(stringField(oldMatch, "id")))).toEqual([])
+    const newMatchAfter = await getItem(stringField(newMatch, "id"))
+    expect(tagNames(newMatchAfter)).toEqual(["research"])
+    expect(tagSources(newMatchAfter, "research")).toEqual(["auto"])
+    const manualAfter = await getItem(stringField(manual, "id"))
+    expect(tagNames(manualAfter)).toEqual(["research"])
+    expect(tagSources(manualAfter, "research")).toEqual(["manual"])
   })
 
   it("protects tags from deletion while they are used by items", async () => {

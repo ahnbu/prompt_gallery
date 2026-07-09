@@ -1,121 +1,22 @@
-import { stat } from "node:fs/promises"
 import { chromium } from "playwright"
+import {
+  assert,
+  assertVisible,
+  cleanupFixtures,
+  getItem,
+  openTagManagement,
+  saveExport,
+  screenshot,
+  seedItem,
+  sourcesForTag,
+  tagRowById,
+  tagRowByName,
+} from "./browser-tag-management-support.mjs"
 
 const viewports = [
   { name: "desktop", width: 1280, height: 800 },
   { name: "mobile", width: 390, height: 844 },
 ]
-
-class TagManagementError extends Error {}
-
-function assert(condition, message) {
-  if (!condition) {
-    throw new TagManagementError(message)
-  }
-}
-
-async function requestJson(baseUrl, method, pathname, body) {
-  let lastError
-  for (let attempt = 0; attempt < 3; attempt += 1) {
-    try {
-      const response = await fetch(new URL(pathname, baseUrl), {
-        method,
-        headers: body === undefined ? undefined : { "content-type": "application/json" },
-        body: body === undefined ? undefined : JSON.stringify(body),
-        signal: AbortSignal.timeout(5000),
-      })
-      const bodyText = await response.text()
-      return {
-        status: response.status,
-        bodyText,
-        json: bodyText.length > 0 ? JSON.parse(bodyText) : null,
-      }
-    } catch (error) {
-      lastError = error
-      await new Promise((resolve) => {
-        setTimeout(resolve, 200)
-      })
-    }
-  }
-
-  if (lastError instanceof Error) {
-    throw lastError
-  }
-  throw new TagManagementError(`${pathname} request failed`)
-}
-
-async function assertVisible(locator, message) {
-  try {
-    await locator.first().waitFor({ state: "visible", timeout: 5000 })
-  } catch (error) {
-    if (error instanceof Error) {
-      throw new TagManagementError(`${message}: ${error.message}`)
-    }
-    throw error
-  }
-}
-
-async function screenshot(page, screenshotStem, viewportName, stateName) {
-  const screenshotPath = `${screenshotStem}-${viewportName}-${stateName}.png`
-  const image = await page.screenshot({ path: screenshotPath, fullPage: true })
-  assert(image.byteLength > 1000, `Screenshot is unexpectedly small: ${screenshotPath}`)
-  return { viewport: viewportName, state: stateName, path: screenshotPath, bytes: image.byteLength }
-}
-
-async function cleanupFixtures(baseUrl) {
-  const items = await requestJson(baseUrl, "GET", "/api/items")
-  if (items.status === 200 && Array.isArray(items.json?.items)) {
-    for (const item of items.json.items) {
-      if (
-        typeof item.id === "string" &&
-        typeof item.title === "string" &&
-        item.title.startsWith("Task19 ")
-      ) {
-        await requestJson(baseUrl, "DELETE", `/api/items/${item.id}`)
-      }
-    }
-  }
-
-  const tags = await requestJson(baseUrl, "GET", "/api/tags")
-  if (tags.status === 200 && Array.isArray(tags.json?.tags)) {
-    for (const tag of tags.json.tags) {
-      if (
-        typeof tag.id === "string" &&
-        typeof tag.name === "string" &&
-        tag.name.startsWith("task19-")
-      ) {
-        await requestJson(baseUrl, "DELETE", `/api/tags/${tag.id}`)
-      }
-    }
-  }
-}
-
-async function seedTag(baseUrl, name, color, keywords) {
-  const response = await requestJson(baseUrl, "POST", "/api/tags", { name, color, keywords })
-  assert(response.status === 201, `Tag seed failed: ${response.status} ${response.bodyText}`)
-  assert(typeof response.json?.tag?.id === "string", `Tag seed missing id: ${response.bodyText}`)
-  return response.json.tag
-}
-
-async function seedItem(baseUrl, title, body, tags) {
-  const response = await requestJson(baseUrl, "POST", "/api/items", {
-    type: "prompt",
-    title,
-    body,
-    notes: null,
-    githubUrl: null,
-    tags,
-  })
-  assert(response.status === 201, `Item seed failed: ${response.status} ${response.bodyText}`)
-}
-
-function tagRowById(page, id) {
-  return page.locator(`[data-qa="tag-management-row"][data-tag-id="${id}"]`).first()
-}
-
-function tagRowByName(page, name) {
-  return page.locator('[data-qa="tag-management-row"]').filter({ hasText: name }).first()
-}
 
 async function runViewport(baseUrl, outputPath, viewport) {
   const browser = await chromium.launch()
@@ -126,37 +27,71 @@ async function runViewport(baseUrl, outputPath, viewport) {
   const researchName = `task19-research-${suffix}`
   const sourceName = `task19-source-${suffix}`
   const mergedName = `task19-merged-${suffix}`
-  const promptTitle = `Task19 Prompt ${suffix}`
+  const oldTitle = `Task19 Old ${suffix}`
+  const newTitle = `Task19 New ${suffix}`
+  const manualTitle = `Task19 Manual ${suffix}`
 
   try {
-    const researchTag = await seedTag(baseUrl, researchName, "#3366cc", ["brief"])
-    const sourceTag = await seedTag(baseUrl, sourceName, "#cc6633", ["source"])
-    await seedItem(baseUrl, promptTitle, `Task19 prompt body ${suffix}`, [researchName, sourceName])
+    await openTagManagement(page, baseUrl)
 
-    await page.goto(baseUrl, { waitUntil: "networkidle" })
-    await assertVisible(page.getByRole("heading", { name: "Prompt Gallery" }), "App shell missing")
-    await page.getByRole("button", { name: "태그 관리", exact: true }).click()
-    await assertVisible(
-      page.getByRole("dialog", { name: "태그 관리" }),
-      "Tag management modal missing",
+    await page.locator('[data-qa="tag-create-name"]').fill(researchName)
+    await page.locator('[data-qa="tag-create-color"]').fill("#3366cc")
+    await page.locator('[data-qa="tag-create-keywords"]').fill("old rule")
+    await page.locator('[data-qa="tag-create-button"]').click()
+    await assertVisible(page.getByText("생성됨"), "Tag create status missing")
+    const researchRow = tagRowByName(page, researchName)
+    await assertVisible(researchRow, "Research tag row missing")
+    const researchTagId = await researchRow.getAttribute("data-tag-id")
+    assert(typeof researchTagId === "string", "Created research row should expose tag id")
+
+    await page.locator('[data-qa="tag-create-name"]').fill(sourceName)
+    await page.locator('[data-qa="tag-create-color"]').fill("#cc6633")
+    await page.locator('[data-qa="tag-create-keywords"]').fill("source")
+    await page.locator('[data-qa="tag-create-button"]').click()
+    const createdSourceRow = tagRowByName(page, sourceName)
+    await assertVisible(createdSourceRow, "Source tag row missing")
+    const sourceTagId = await createdSourceRow.getAttribute("data-tag-id")
+    assert(typeof sourceTagId === "string", "Created source row should expose tag id")
+
+    const oldItem = await seedItem(baseUrl, oldTitle, `Task19 old rule body ${suffix}`)
+    const newItem = await seedItem(baseUrl, newTitle, `Task19 new rule body ${suffix}`)
+    const manualItem = await seedItem(baseUrl, manualTitle, `Task19 manual body ${suffix}`, [
+      researchName,
+      sourceName,
+    ])
+    await openTagManagement(page, baseUrl)
+
+    const updatedResearchRow = tagRowById(page, researchTagId)
+    await assertVisible(updatedResearchRow.getByText("2개 항목"), "Usage count missing")
+    await updatedResearchRow.getByLabel("태그 이름").fill(mergedName)
+    await updatedResearchRow.getByLabel("태그 색상").fill("#228833")
+    await updatedResearchRow.getByLabel("자동 태그 키워드").fill("new rule")
+    await updatedResearchRow.locator('[data-qa="tag-save-button"]').click()
+    await assertVisible(page.getByText("저장됨"), "Tag save status missing")
+    await assertVisible(tagRowByName(page, mergedName), "Renamed target row missing")
+
+    const oldAfter = await getItem(baseUrl, oldItem.id)
+    const newAfter = await getItem(baseUrl, newItem.id)
+    const manualAfter = await getItem(baseUrl, manualItem.id)
+    assert(sourcesForTag(oldAfter, mergedName).length === 0, "Old automatic tag should be removed")
+    assert(
+      sourcesForTag(newAfter, mergedName).join(",") === "auto",
+      "New automatic tag should be applied",
+    )
+    assert(
+      sourcesForTag(manualAfter, mergedName).join(",") === "manual",
+      "Manual tag should remain manual after keyword recompute",
     )
 
-    const researchRow = tagRowById(page, researchTag.id)
-    await assertVisible(researchRow, "Research tag row missing")
-    await assertVisible(researchRow.getByText("1개 항목"), "Usage count missing")
-    await researchRow.getByLabel("태그 이름").fill(mergedName)
-    await researchRow.getByLabel("태그 색상").fill("#228833")
-    await researchRow.getByLabel("자동 태그 키워드").fill("brief, strategy")
-    await researchRow.locator('[data-qa="tag-save-button"]').click()
-    await assertVisible(page.getByText("저장됨"), "Tag save status missing")
-
-    const sourceRow = tagRowById(page, sourceTag.id)
+    const sourceRow = tagRowById(page, sourceTagId)
     await assertVisible(sourceRow, "Merge source row missing")
     const mergeTarget = sourceRow.getByLabel("병합 대상")
+    const mergeOptions = await mergeTarget.locator("option").allTextContents()
     assert(
-      (await mergeTarget.inputValue()) === researchTag.id,
-      "Default merge target should be the renamed tag",
+      mergeOptions.includes(mergedName),
+      `Merge target option missing. Options: ${mergeOptions.join(" | ")}`,
     )
+    await mergeTarget.selectOption({ label: mergedName })
     const mergeButton = sourceRow.locator('[data-qa="tag-merge-button"]')
     assert(
       (await mergeButton.count()) === 1,
@@ -164,7 +99,7 @@ async function runViewport(baseUrl, outputPath, viewport) {
     )
     await mergeButton.click({ force: true })
     await assertVisible(page.getByText("병합됨"), "Merge status missing")
-    await assertVisible(tagRowById(page, researchTag.id), "Merged target row missing")
+    await assertVisible(tagRowById(page, researchTagId), "Merged target row missing")
     assert(
       (await tagRowByName(page, sourceName).count()) === 0,
       "Source tag should disappear after merge",
@@ -173,7 +108,8 @@ async function runViewport(baseUrl, outputPath, viewport) {
     artifacts.push(await screenshot(page, screenshotStem, viewport.name, "tag-management"))
     await page.getByRole("button", { name: "닫기", exact: true }).click()
     await page.getByRole("button", { name: mergedName, exact: true }).click()
-    await assertVisible(page.getByText(promptTitle), "Merged tag filter should show seeded prompt")
+    await assertVisible(page.getByText(newTitle), "Merged tag filter should show automatic prompt")
+    await assertVisible(page.getByText(manualTitle), "Merged tag filter should show manual prompt")
     assert(
       (await page.getByRole("button", { name: sourceName, exact: true }).count()) === 0,
       "Merged source tag filter should be gone",
@@ -187,14 +123,12 @@ async function runViewport(baseUrl, outputPath, viewport) {
       `Export download filename mismatch: ${download.suggestedFilename()}`,
     )
     const exportPath = `${screenshotStem}-${viewport.name}-export.json`
-    await download.saveAs(exportPath)
-    const exportStats = await stat(exportPath)
-    assert(exportStats.size > 100, `Export download is unexpectedly small: ${exportStats.size}`)
+    const exportBytes = await saveExport(download, exportPath)
     artifacts.push({
       viewport: viewport.name,
       state: "export-download",
       path: exportPath,
-      bytes: exportStats.size,
+      bytes: exportBytes,
     })
     return artifacts
   } finally {
@@ -230,8 +164,11 @@ export function renderTagManagementEvidence(result) {
       "",
       "## Assertions",
       "- Tag management entry opens a real modal.",
+      "- First tags are created through the modal, not API seed data.",
       "- Usage count is visible.",
       "- Rename, color edit, and keyword edit save through the API.",
+      "- Keyword changes bulk remove and apply automatic tags on existing items.",
+      "- Manual tag assignments stay manual after automatic recomputation.",
       "- Merge moves item associations and removes the source tag.",
       "- Main tag filter reflects the merged tag result.",
       "- Export button downloads prompt-gallery-export.json.",
