@@ -1,0 +1,19 @@
+# Wave 4 Deploy Check
+
+Result: PASS
+Remote action: read-only
+
+## Checks
+- DB binding present
+- prompt-gallery-db database name present
+- expected database id present
+- PREVIEWS binding present
+- prompt-gallery-previews bucket present
+- color-db absent
+- build output dist/client/index.html present
+- wrangler whoami succeeded
+- remote D1 prompt-gallery-db listed
+- remote R2 prompt-gallery-previews listed
+
+## Auth / Remote Limitations
+- none

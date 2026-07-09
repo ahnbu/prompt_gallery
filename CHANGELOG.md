@@ -4,6 +4,7 @@
 
 | 일시 | 유형 | 범위 | 변경내용 | 변경사유 | 작성AI |
 |---|---|---|---|---|---|
+| 2026-07-09 15:39 | docs | plans | 디자인 적용 계획 초안과 배포 점검 evidence 기록 | - | Unknown |
 | 2026-07-09 15:37 | feat | ui | 갤러리 섹션 추가 버튼과 정사각형 이미지 프롬프트 카드 개선 | - | Unknown |
 | 2026-07-09 14:24 | docs | final-gate | Final gate 검증 결과와 구현 계획 완료 상태 반영 | Wave 4 이후 F1-F5 완료 근거 기록 | Codex |
 | 2026-07-09 13:54 | feat | ops | 태그 관리 UI와 export/local backup, deploy readiness 검증 흐름 추가 | - | Unknown |
