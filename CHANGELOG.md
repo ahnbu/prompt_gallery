@@ -4,6 +4,7 @@
 
 | 일시 | 유형 | 범위 | 변경내용 | 변경사유 | 작성AI |
 |---|---|---|---|---|---|
+| 2026-07-09 15:51 | docs | agents | 계층형 AGENTS 지식베이스 추가 | init-deep 결과 보존 | Codex |
 | 2026-07-09 15:42 | docs | plans | 디자인 적용 계획 본문과 evidence 경로 정리 | - | Unknown |
 | 2026-07-09 15:41 | docs | drafts | 디자인 적용 계획 초안 세부 검토 내용 보강 | - | Unknown |
 | 2026-07-09 15:39 | docs | plans | 디자인 적용 계획 초안과 배포 점검 evidence 기록 | - | Unknown |
