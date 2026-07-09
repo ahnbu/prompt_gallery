@@ -159,8 +159,8 @@ export function App() {
   return (
     <main className="app-shell" aria-labelledby="app-title">
       <header className="topbar">
-        <div className="title-block">
-          <p className="eyebrow">Personal workspace</p>
+        <div className="title-block brand-lockup">
+          <img aria-hidden="true" className="brand-favicon" src="/favicon.svg" alt="" />
           <h1 id="app-title">Prompt Gallery</h1>
         </div>
         <div className="topbar-actions">
