@@ -48,7 +48,9 @@ async function main() {
         ? await runAssets(baseUrl, context)
         : scenario === "wave1"
           ? await runWave1(baseUrl, context)
-          : null
+          : scenario === "full-regression"
+            ? await runFullRegression(baseUrl, context)
+            : null
     if (smoke === null) {
       throw new SmokeError(`Unknown scenario: ${scenario}`)
     }
@@ -99,6 +101,27 @@ async function main() {
       await stopProcess(app.child)
     }
   }
+}
+
+async function runFullRegression(baseUrl, context) {
+  const wave1 = await runWave1(baseUrl, context)
+  await runAssets(baseUrl, context)
+  const exported = await fetch(new URL("/api/export", baseUrl), {
+    signal: AbortSignal.timeout(5000),
+  })
+  const exportText = await exported.text()
+  if (!exported.ok) {
+    throw new SmokeError(`GET /api/export expected 200, got ${exported.status}: ${exportText}`)
+  }
+  const exportJson = JSON.parse(exportText)
+  if (exportJson.schemaVersion !== 1 || exportJson.app !== "prompt-gallery") {
+    throw new SmokeError(`GET /api/export returned invalid payload: ${exportText}`)
+  }
+  if (exportText.includes("objectKey") || exportText.includes("previews/")) {
+    throw new SmokeError("GET /api/export exposed internal R2 object keys")
+  }
+  context.checks.push("GET /api/export -> 200 schemaVersion 1 without internal R2 object keys")
+  return { health: wave1.health }
 }
 
 try {

@@ -5,16 +5,19 @@ import { fileURLToPath } from "node:url"
 const rootDir = path.resolve(fileURLToPath(new URL("../..", import.meta.url)))
 const defaultPlan = ".omo/plans/prompt-gallery-implementation.md"
 const defaultEvidenceDir = ".omo/evidence"
-const defaultOutput = ".omo/evidence/wave-0-verify-plan.md"
+const defaultOutput = ".omo/evidence/final-plan-compliance.md"
 const allowedArgs = new Set(["--plan", "--evidence-dir", "--output"])
 const requiredFiles = [
   "scripts/qa/api-smoke.mjs",
   "scripts/qa/browser-smoke.mjs",
+  "scripts/qa/browser-smoke-support.mjs",
+  "scripts/qa/browser-full-regression.mjs",
   "scripts/qa/create-fixtures.mjs",
   "scripts/qa/verify-plan.mjs",
   "scripts/qa/verify-scope.mjs",
   "scripts/qa/verify-cleanup.mjs",
   "scripts/qa/deploy-check.mjs",
+  "scripts/qa/backup-local.mjs",
   "test/fixtures/preview.png",
 ]
 const requiredScripts = [
@@ -25,11 +28,80 @@ const requiredScripts = [
   "verify:scope",
   "verify:cleanup",
   "deploy:check",
+  "backup:local",
 ]
 const requiredEvidence = [
-  "wave-0-api-smoke-fail.txt",
-  "wave-0-api-smoke.txt",
-  "wave-0-browser-smoke.md",
+  "wave-4-tag-management-gate.md",
+  "wave-4-export-test.txt",
+  "wave-4-backup/manifest.json",
+  "wave-4-deploy-check.txt",
+  "wave-4-code-review.md",
+  "final-api-qa.txt",
+  "final-browser-qa.md",
+  "final-code-review.md",
+  "final-scope-fidelity.md",
+  "final-cleanup.md",
+]
+const mustHaveCoverage = [
+  {
+    name: "React/Vite/TS/Workers scaffold",
+    terms: ["React", "Vite", "TypeScript", "Workers"],
+    evidence: [
+      "package.json",
+      "vite.config.ts",
+      "wrangler.jsonc",
+      ".omo/evidence/final-browser-qa.md",
+    ],
+  },
+  {
+    name: "D1 and R2 bindings",
+    terms: ["D1", "R2"],
+    evidence: ["wrangler.jsonc", ".omo/evidence/wave-4-deploy-check.txt"],
+  },
+  {
+    name: "item/tag/favorite/workflow/repo APIs",
+    terms: ["item", "tag", "favorite", "workflow", "repo"],
+    evidence: [".omo/evidence/final-api-qa.txt", ".omo/evidence/wave-4-export-test.txt"],
+  },
+  {
+    name: "asset R2 protected preview",
+    terms: ["asset", "R2", "preview"],
+    evidence: [".omo/evidence/final-api-qa.txt", ".omo/evidence/final-browser-qa.md"],
+  },
+  {
+    name: "tag management",
+    terms: ["tag management", "태그"],
+    evidence: [".omo/evidence/wave-4-tag-management-gate.md", ".omo/evidence/final-browser-qa.md"],
+  },
+  {
+    name: "workflow/repo UI",
+    terms: ["workflow", "repo"],
+    evidence: [".omo/evidence/final-browser-qa.md"],
+  },
+  {
+    name: "export and local backup",
+    terms: ["export", "backup"],
+    evidence: [
+      ".omo/evidence/wave-4-backup/manifest.json",
+      ".omo/evidence/wave-4-backup/d1.sql",
+      ".omo/evidence/wave-4-backup/d1-export.json",
+    ],
+  },
+  {
+    name: "deploy readiness",
+    terms: ["deploy"],
+    evidence: [".omo/evidence/wave-4-deploy-check.txt"],
+  },
+  {
+    name: "final scope and cleanup",
+    terms: ["scope", "cleanup"],
+    evidence: [".omo/evidence/final-scope-fidelity.md", ".omo/evidence/final-cleanup.md"],
+  },
+  {
+    name: "forbidden features excluded",
+    terms: ["금지", "forbidden", "scope"],
+    evidence: [".omo/evidence/final-scope-fidelity.md", ".omo/evidence/final-code-review.md"],
+  },
 ]
 
 class VerifyPlanError extends Error {}
@@ -78,8 +150,12 @@ async function main() {
   const results = []
 
   results.push({
-    name: "Wave 0 task 3 remains unchecked",
-    ok: planText.includes("- [ ] 3. Wave 0 - Add repeatable QA, fixture, and evidence scripts"),
+    name: "plan contains Final verification wave",
+    ok: planText.includes("## Final verification wave"),
+  })
+  results.push({
+    name: "plan has no unchecked task checkboxes",
+    ok: !/^- \[ \]/m.test(planText),
   })
   for (const scriptName of requiredScripts) {
     results.push({
@@ -96,13 +172,25 @@ async function main() {
       ok: await exists(path.join(evidenceDir, evidenceName)),
     })
   }
+  const coverageRows = []
+  for (const row of mustHaveCoverage) {
+    const termOk = row.terms.some((term) => planText.toLowerCase().includes(term.toLowerCase()))
+    const evidenceChecks = []
+    for (const evidenceName of row.evidence) {
+      const existsOk = await exists(path.join(rootDir, evidenceName))
+      evidenceChecks.push({ name: evidenceName, ok: existsOk })
+    }
+    const rowOk = termOk && evidenceChecks.every((check) => check.ok)
+    coverageRows.push({ ...row, termOk, evidenceChecks, ok: rowOk })
+    results.push({ name: `must-have coverage ${row.name}`, ok: rowOk })
+  }
 
   const ok = results.every((result) => result.ok)
   await mkdir(path.dirname(outputPath), { recursive: true })
   await writeFile(
     outputPath,
     [
-      "# Wave 0 Verify Plan",
+      "# Final Plan Compliance",
       "",
       `Plan: ${planPath}`,
       `Evidence dir: ${evidenceDir}`,
@@ -110,6 +198,13 @@ async function main() {
       "",
       "## Checks",
       ...results.map((result) => `- ${result.ok ? "PASS" : "FAIL"} ${result.name}`),
+      "",
+      "## Must-Have Coverage Map",
+      ...coverageRows.flatMap((row) => [
+        `- ${row.ok ? "PASS" : "FAIL"} ${row.name}`,
+        `  - plan terms: ${row.termOk ? "matched" : "missing"} (${row.terms.join(", ")})`,
+        `  - evidence: ${row.evidenceChecks.map((check) => `${check.ok ? "PASS" : "FAIL"} ${check.name}`).join("; ")}`,
+      ]),
       "",
     ].join("\n"),
   )

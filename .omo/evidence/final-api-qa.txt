@@ -1,0 +1,45 @@
+# Wave 1 API Smoke
+
+Base URL: http://127.0.0.1:5173
+Local app started: yes
+Result: PASS
+
+## Coverage
+- GET /api/health -> 200 ok:true
+- POST /api/items body-only -> 201 fallback title/body id=9c417db3-4b64-44b9-bcd6-b8de3f306976
+- POST /api/tags -> 201 research=4880881d-e4e4-4ffd-b6c8-376f90379e27, slides=e42f5511-10e2-498a-a4de-1d46148f4d31
+- GET /api/items?tags=research,slides -> AND matched 43a20f76-63f7-4f4b-9091-a49e3d69910b and excluded 8031b61f-dff7-4ac9-afe6-552556555dc4
+- POST favorite + GET favorite=true -> included id=43a20f76-63f7-4f4b-9091-a49e3d69910b
+- POST /api/workflows -> 201 ordered positions 1,2,3,4 id=329dc317-9171-4e2b-a074-18a543c2a0d0
+- POST malformed favorite body -> JSON 400 invalid_item
+- POST /api/items image_prompt -> 201 id=e46abec6-21c9-4df6-b76f-7044d67f06e1
+- POST /api/assets -> 201 id=a5ac0366-80ae-4f0b-a4fc-8e947a469fb4 internal object key not emitted
+- GET /api/assets/a5ac0366-80ae-4f0b-a4fc-8e947a469fb4/content -> 200 image/png 224 bytes
+- POST /api/assets replacement -> old asset a5ac0366-80ae-4f0b-a4fc-8e947a469fb4 returns 404, new id=de08821f-5059-4325-8ac6-9d76b1ffdeeb
+- DELETE /api/assets -> 200 and content 404 id=de08821f-5059-4325-8ac6-9d76b1ffdeeb
+- GET /api/export -> 200 schemaVersion 1 without internal R2 object keys
+
+## Cleanup
+- workflows/329dc317-9171-4e2b-a074-18a543c2a0d0: 200
+- items/8251098a-de73-437c-8e76-4006776062e1: 200
+- items/dc2ef406-ad36-489a-ab09-09ffee54cac9: 200
+- items/8031b61f-dff7-4ac9-afe6-552556555dc4: 200
+- items/43a20f76-63f7-4f4b-9091-a49e3d69910b: 200
+- items/9c417db3-4b64-44b9-bcd6-b8de3f306976: 200
+- tags/e42f5511-10e2-498a-a4de-1d46148f4d31: 200
+- tags/4880881d-e4e4-4ffd-b6c8-376f90379e27: 200
+- assets/a5ac0366-80ae-4f0b-a4fc-8e947a469fb4: 404
+- items/e46abec6-21c9-4df6-b76f-7044d67f06e1: 200
+
+## Health
+Status: 200
+Content-Type: application/json
+Body:
+{"ok":true}
+
+## Dev Logs
+stdout: D:\vibe-coding\prompt-gallery\.omo\evidence\final-api-qa-dev.stdout.log
+stderr: D:\vibe-coding\prompt-gallery\.omo\evidence\final-api-qa-dev.stderr.log
+
+## Binary Observable
+Health, item fallback, tags filter, favorite, workflow, malformed JSON 400, and cleanup assertions passed.

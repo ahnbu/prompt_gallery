@@ -7,7 +7,7 @@ import { promisify } from "node:util"
 const execFileAsync = promisify(execFile)
 const rootDir = path.resolve(fileURLToPath(new URL("../..", import.meta.url)))
 const defaultPlan = ".omo/plans/prompt-gallery-implementation.md"
-const defaultOutput = ".omo/evidence/wave-0-verify-scope.md"
+const defaultOutput = ".omo/evidence/final-scope-fidelity.md"
 const allowedArgs = new Set(["--plan", "--output"])
 const forbiddenProductMarkers = [
   "Cloudflare Images",
@@ -18,12 +18,14 @@ const forbiddenProductMarkers = [
   "app login",
 ]
 const taskFiles = [
+  ".omo/evidence/",
+  ".omo/plans/prompt-gallery-implementation.md",
+  "CHANGELOG.md",
+  "package.json",
   "scripts/qa/",
   "test/fixtures/preview.png",
-  ".omo/evidence/",
-  ".omo/start-work/ledger.jsonl",
-  "package.json",
 ]
+const ignoredStatusFiles = [".omo/evidence/wave-1-checkbox-8-dev.stdout.log"]
 
 class VerifyScopeError extends Error {}
 
@@ -54,7 +56,16 @@ async function gitStatus() {
     cwd: rootDir,
     windowsHide: true,
   })
-  return stdout.trim().split(/\r?\n/).filter(Boolean)
+  return stdout.split(/\r?\n/).filter(Boolean)
+}
+
+function statusPath(line) {
+  const normalized = line.replace(/\\/g, "/")
+  const renameArrowIndex = normalized.lastIndexOf(" -> ")
+  if (renameArrowIndex !== -1) {
+    return normalized.slice(renameArrowIndex + 4)
+  }
+  return normalized.slice(3)
 }
 
 async function main() {
@@ -65,36 +76,50 @@ async function main() {
   const appText = await readFile(path.join(rootDir, "src/client/App.tsx"), "utf8")
   const workerText = await readFile(path.join(rootDir, "src/worker/index.ts"), "utf8")
   const statusLines = await gitStatus()
+  const relevantStatusLines = statusLines.filter(
+    (line) => !ignoredStatusFiles.includes(statusPath(line)),
+  )
   const forbiddenHits = forbiddenProductMarkers.filter(
     (marker) => appText.includes(marker) || workerText.includes(marker),
   )
-  const scopedLines = statusLines.filter((line) =>
-    taskFiles.some((fileName) => line.includes(fileName)),
+  const scopedLines = relevantStatusLines.filter((line) =>
+    taskFiles.some((fileName) => statusPath(line).startsWith(fileName)),
   )
+  const outOfScopeLines = relevantStatusLines.filter(
+    (line) => !taskFiles.some((fileName) => statusPath(line).startsWith(fileName)),
+  )
+  const ignoredLines = statusLines.filter((line) => ignoredStatusFiles.includes(statusPath(line)))
   const unrelatedDocLine = statusLines.find((line) =>
     line.includes("_docs/20260708_04_R2-비용폭주-방지-의사결정.md"),
   )
-  const task3Unchecked = planText.includes(
-    "- [ ] 3. Wave 0 - Add repeatable QA, fixture, and evidence scripts",
-  )
-  const ok = forbiddenHits.length === 0 && task3Unchecked
+  const finalWavePresent = planText.includes("## Final verification wave")
+  const ok = forbiddenHits.length === 0 && finalWavePresent && outOfScopeLines.length === 0
 
   await mkdir(path.dirname(outputPath), { recursive: true })
   await writeFile(
     outputPath,
     [
-      "# Wave 0 Verify Scope",
+      "# Final Scope Fidelity",
       "",
       `Result: ${ok ? "PASS" : "FAIL"}`,
-      `Plan task 3 unchecked: ${task3Unchecked ? "yes" : "no"}`,
+      `Final wave present: ${finalWavePresent ? "yes" : "no"}`,
       `Forbidden product markers in app/worker: ${forbiddenHits.length === 0 ? "none" : forbiddenHits.join(", ")}`,
       "",
       "## Dirty Worktree Probe",
       `Total status lines: ${statusLines.length}`,
+      `Relevant status lines: ${relevantStatusLines.length}`,
       `Task-scope status lines: ${scopedLines.length}`,
+      `Ignored pre-existing status lines: ${ignoredLines.length}`,
+      `Out-of-scope status lines: ${outOfScopeLines.length}`,
       unrelatedDocLine === undefined
         ? "Unrelated R2 cost document: not present in git status"
         : `Unrelated R2 cost document: ${unrelatedDocLine}`,
+      "",
+      "## Out-of-Scope Lines",
+      ...(outOfScopeLines.length === 0 ? ["- none"] : outOfScopeLines.map((line) => `- ${line}`)),
+      "",
+      "## Ignored Pre-existing Lines",
+      ...(ignoredLines.length === 0 ? ["- none"] : ignoredLines.map((line) => `- ${line}`)),
       "",
       "## Task Scope Lines",
       ...scopedLines.map((line) => `- ${line}`),

@@ -346,7 +346,7 @@ Your next move: 이 계획을 실행하려면 `$omo:start-work` 또는 동등한
   Result: PASS. Evidence `.omo/evidence/wave-3-task-18-final-gate-review.md`, `.omo/evidence/wave-3-gate-api.txt`, `.omo/evidence/wave-3-gate-assets-api.txt`, `.omo/evidence/wave-3-gate-image-preview.md`, `.omo/evidence/wave-3-gate-workflow-repo.md`, `.omo/evidence/wave-3-gate-cleanup.md`. Final Wave 3 gate approved after fresh typecheck, lint, tests, Worker tests, build, API QA, image preview QA, workflow-repo QA, cleanup, exposure scan, local-folder scope scan, and diff whitespace check passed.
   Commit: Yes | `feat(media-workflows): 이미지 preview와 Workflow 실행 흐름 추가`
 
-- [ ] 19. Wave 4 - Implement tag management screen
+- [x] 19. Wave 4 - Implement tag management screen
   What to do / Must NOT do: Add management entry icon, tag list with usage counts, rename, color edit, delete confirmation, merge flow, and auto keyword edit. Use user-facing language for keyword behavior. Do not create a separate advanced admin vocabulary.
   Parallelization: Wave 4 | Blocked by: 7, 11 | Blocks: final browser QA
   References: `_docs/specs/20260708_01_prompt-gallery_요구사항_SPEC.md:31`, `_docs/specs/20260708_01_prompt-gallery_요구사항_SPEC.md:137`, `_docs/specs/20260708_01_prompt-gallery_요구사항_SPEC.md:203`
@@ -354,9 +354,10 @@ Your next move: 이 계획을 실행하려면 `$omo:start-work` 또는 동등한
   QA scenarios:
   - Failure first: run `tag-management` before screen implementation; expected FAIL.
   - Happy path: `pnpm qa:browser -- --scenario tag-management --output .omo/evidence/wave-4-tag-management.md`; expected auto-start/stop and PASS.
+  Result: PASS. Evidence `.omo/evidence/wave-4-tag-management-red.md`, `.omo/evidence/wave-4-tag-management.md`, `.omo/evidence/wave-4-tag-management-gate.md`. The final scenario verifies management entry, usage counts, rename, color edit, keyword edit, merge, filter reflection, and Export button download.
   Commit: No, commit at Wave 4 gate.
 
-- [ ] 20. Wave 4 - Implement export and local backup helpers
+- [x] 20. Wave 4 - Implement export and local backup helpers
   What to do / Must NOT do: Add app export endpoint/button producing `prompt-gallery-export.json`, and local backup script producing D1 dump/export JSON, downloaded preview files from the protected asset API, `r2-objects.json`, and `manifest.json` with schema version. Do not leave R2 backup as instructions only. Do not add scheduled backup or CI secrets.
   Parallelization: Wave 4 | Blocked by: 3, 10, 15 | Blocks: final ops QA
   References: `_docs/20260708_02_prompt-gallery_저장-배포-리서치.md:150`
@@ -364,9 +365,10 @@ Your next move: 이 계획을 실행하려면 `$omo:start-work` 또는 동등한
   QA scenarios:
   - Failure first: export shape test before endpoint implementation; expected FAIL.
   - Happy path: run `pnpm backup:local -- --out .omo/evidence/wave-4-backup`; expected automatic local app start/stop, manifest with schema version, D1 dump/export path, `r2-objects.json`, and at least one downloaded preview file when assets exist. Evidence `.omo/evidence/wave-4-ops-deploy.txt`.
+  Result: PASS. Evidence `.omo/evidence/wave-4-export-red.txt`, `.omo/evidence/wave-4-export-test.txt`, `.omo/evidence/wave-4-backup/manifest.json`, `.omo/evidence/wave-4-backup/d1.sql`, `.omo/evidence/wave-4-backup/d1-export.json`, `.omo/evidence/wave-4-backup/r2-objects.json`, `.omo/evidence/wave-4-ops-deploy.txt`.
   Commit: No, commit at Wave 4 gate.
 
-- [ ] 21. Wave 4 - Implement deployment readiness checks
+- [x] 21. Wave 4 - Implement deployment readiness checks
   What to do / Must NOT do: Add `pnpm deploy:check` that validates Wrangler config, required binding names, expected D1/R2 remote resource names, D1 database id, build output, `wrangler whoami`, `wrangler d1 list`, and `wrangler r2 bucket list` status. Do not create remote Cloudflare resources or deploy publicly unless user gives a separate deploy instruction.
   Parallelization: Wave 4 | Blocked by: 1, 2 | Blocks: final ops QA
   References: `_docs/20260708_02_prompt-gallery_저장-배포-리서치.md:90`, `_docs/20260708_02_prompt-gallery_저장-배포-리서치.md:165`, `_docs/20260708_03_cloudflare-환경세팅-구현착수.md`
@@ -374,9 +376,10 @@ Your next move: 이 계획을 실행하려면 `$omo:start-work` 또는 동등한
   QA scenarios:
   - Failure first: deliberately missing required binding in a test fixture causes deploy check to fail; expected FAIL recorded by unit test.
   - Happy path: PowerShell command `pnpm deploy:check | Tee-Object .omo/evidence/wave-4-deploy-check.txt`; expected build/config checks PASS and auth status reported. Do not expose tokens.
+  Result: PASS. Evidence `.omo/evidence/wave-4-deploy-check-red.txt`, `.omo/evidence/wave-4-deploy-check.txt`. The deploy check confirms local bindings, D1 database id, build output, `wrangler whoami`, remote D1 `prompt-gallery-db`, and remote R2 `prompt-gallery-previews` without creating resources.
   Commit: No, commit at Wave 4 gate.
 
-- [ ] 22. Wave 4 gate - Verify and commit ops/tag management
+- [x] 22. Wave 4 gate - Verify and commit ops/tag management
   What to do / Must NOT do: Run full verification, backup check, deploy check, security gate, then commit through cp. Do not perform public deploy in this commit.
   Parallelization: Wave 4 gate | Blocked by: 19, 20, 21 | Blocks: final verification
   References: `.omo/evidence/wave-4-ops-deploy.txt`
@@ -384,9 +387,10 @@ Your next move: 이 계획을 실행하려면 `$omo:start-work` 또는 동등한
   QA scenarios:
   - Happy path: all Wave 4 checks PASS and evidence paths exist.
   - Failure path: any secret leak, missing backup manifest, or broken tag management flow blocks commit.
+  Result: PASS. Evidence `.omo/evidence/wave-4-api-smoke.txt`, `.omo/evidence/wave-4-browser-smoke.md`, `.omo/evidence/wave-4-code-review.md`, `.omo/evidence/prompt-gallery-wave-4-tasks-19-21-gate-review.md`; gate reviewer approved after blocker fixes. Commit pushed: `ac4b050 feat(ops): 태그 관리와 백업 점검 흐름 추가`.
   Commit: Yes | `feat(ops): 태그 관리와 백업 점검 흐름 추가`
 
-- [ ] 23. Final gate - Verify final evidence and commit plan/results update
+- [x] 23. Final gate - Verify final evidence and commit plan/results update
   What to do / Must NOT do: Run the final verification wave, update this plan checkboxes and final evidence references, then commit the plan/evidence status through `cp`. Do not claim complete from test output alone; real browser/API evidence must exist.
   Parallelization: Final gate | Blocked by: 22 and F1-F5 | Blocks: final user report
   References: `.omo/evidence/final-verification.md`, `.omo/evidence/final-plan-compliance.md`, `.omo/evidence/final-code-review.md`, `.omo/evidence/final-browser-qa.md`, `.omo/evidence/final-api-qa.txt`, `.omo/evidence/final-scope-fidelity.md`, `.omo/evidence/final-cleanup.md`
@@ -394,25 +398,31 @@ Your next move: 이 계획을 실행하려면 `$omo:start-work` 또는 동등한
   QA scenarios:
   - Happy path: `pnpm typecheck && pnpm lint && pnpm test && pnpm test:worker && pnpm build && pnpm qa:api -- --scenario full-regression --output .omo/evidence/final-api-qa.txt && pnpm qa:browser -- --scenario full-regression --output .omo/evidence/final-browser-qa.md`; expected QA scripts automatically start/stop the local app and all checks PASS.
   - Failure path: any missing final evidence file, live dev process without cleanup note, or dirty uncommitted plan/evidence file blocks completion.
+  Result: PASS. Evidence `.omo/evidence/final-plan-compliance.md`, `.omo/evidence/final-code-review.md`, `.omo/evidence/final-api-qa.txt`, `.omo/evidence/final-browser-qa.md`, `.omo/evidence/final-scope-fidelity.md`, `.omo/evidence/final-cleanup.md`.
   Commit: Yes | `docs(plan): 구현 결과와 최종 검증 기록 반영`
 
 ## Final verification wave
 > Runs after all implementation waves. ALL checks must pass. Surface results in the final report after the final cp commit; do not wait for a user decision inside automated verification.
-- [ ] F1. Plan compliance audit
+- [x] F1. Plan compliance audit
   Command/evidence: `pnpm verify:plan -- --plan .omo/plans/prompt-gallery-implementation.md --evidence-dir .omo/evidence --output .omo/evidence/final-plan-compliance.md`.
   PASS requires exit 0 and `.omo/evidence/final-plan-compliance.md` states every Must have item is represented by tests, QA, or an explicit user-approved deferred note.
-- [ ] F2. Code quality review
+  Result: PASS. Evidence `.omo/evidence/final-plan-compliance.md`.
+- [x] F2. Code quality review
   Command/evidence: Run `pnpm typecheck && pnpm lint && pnpm test && pnpm test:worker && pnpm build`; run a code review pass focused on D1/R2 consistency, validation, no `as any`, no skipped tests, and no scope creep; write `.omo/evidence/final-code-review.md`.
   PASS requires no blocking findings.
-- [ ] F3. Real manual QA
+  Result: PASS. Evidence `.omo/evidence/final-code-review.md`.
+- [x] F3. Real manual QA
   Command/evidence: Run `pnpm qa:browser -- --scenario full-regression --output .omo/evidence/final-browser-qa.md` and `pnpm qa:api -- --scenario full-regression --output .omo/evidence/final-api-qa.txt`; both scripts must automatically start/stop the local app when no `--base-url` is supplied.
   PASS requires visible browser flows for add, search, filter, copy, favorite, edit, delete, image preview, workflow, repo, tag management, export.
-- [ ] F4. Scope fidelity
+  Result: PASS. Evidence `.omo/evidence/final-api-qa.txt`, `.omo/evidence/final-browser-qa.md`.
+- [x] F4. Scope fidelity
   Command/evidence: `pnpm verify:scope -- --plan .omo/plans/prompt-gallery-implementation.md --output .omo/evidence/final-scope-fidelity.md`; the script must automatically start/stop the local app when no `--base-url` is supplied.
   PASS requires exit 0 and `.omo/evidence/final-scope-fidelity.md` states no app login, public sharing, Cloudflare Images, Google Drive preview, GitHub raw preview, local folder open, or D1 image blobs were found.
-- [ ] F5. Cleanup receipt
+  Result: PASS. Evidence `.omo/evidence/final-scope-fidelity.md`.
+- [x] F5. Cleanup receipt
   Command/evidence: `pnpm verify:cleanup -- --output .omo/evidence/final-cleanup.md`.
   PASS requires exit 0 and `.omo/evidence/final-cleanup.md` states no dev server, browser context, temporary backup folder outside `.omo/evidence`, or test artifact is left running unless intentionally documented.
+  Result: PASS. Evidence `.omo/evidence/final-cleanup.md`.
 
 ## Commit strategy
 - Commit after each wave, not after every todo.

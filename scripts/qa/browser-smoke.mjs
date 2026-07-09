@@ -1,12 +1,13 @@
-import { spawn } from "node:child_process"
 import { existsSync } from "node:fs"
 import { mkdir, readFile, writeFile } from "node:fs/promises"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 import { renderCopyFavoriteEvidence, runCopyFavorite } from "./browser-copy-favorite.mjs"
+import { renderFullRegressionEvidence, runFullRegression } from "./browser-full-regression.mjs"
 import { renderGallerySearchEvidence, runGallerySearch } from "./browser-gallery-search.mjs"
 import { renderImagePreviewEvidence, runImagePreview } from "./browser-image-preview.mjs"
 import { renderModalCrudEvidence, runModalCrud } from "./browser-modal-crud.mjs"
+import { startLocalApp, stopProcess } from "./browser-smoke-support.mjs"
 import { renderTagManagementEvidence, runTagManagement } from "./browser-tag-management.mjs"
 import { renderWave0Evidence, runWave0 } from "./browser-wave0-smoke.mjs"
 import { renderWorkflowRepoEvidence } from "./browser-workflow-repo-evidence.mjs"
@@ -61,75 +62,10 @@ function invocationFor(scenario, output, suppliedBaseUrl, usesDefaults) {
   return `pnpm qa:browser -- ${args.join(" ")}`
 }
 
-function delay(ms) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms)
-  })
-}
-
-async function stopProcess(child) {
-  if (child.exitCode !== null) {
-    return
-  }
-
-  if (process.platform === "win32" && child.pid !== undefined) {
-    spawn("taskkill", ["/pid", String(child.pid), "/t", "/f"], { stdio: "ignore" })
-  } else {
-    child.kill("SIGTERM")
-  }
-
-  await delay(1500)
-}
-
-async function startLocalApp(outputPath) {
-  const stem = outputPath.replace(/\.[^.]+$/, "")
-  const stdoutPath = `${stem}-dev.stdout.log`
-  const stderrPath = `${stem}-dev.stderr.log`
-  let stdout = ""
-  let stderr = ""
-  const viteBin = path.join(rootDir, "node_modules/vite/bin/vite.js")
-  const child = spawn(process.execPath, [viteBin, "--host", "127.0.0.1"], {
-    cwd: rootDir,
-    env: { BROWSER: "none", NO_UPDATE_NOTIFIER: "1" },
-    stdio: ["ignore", "pipe", "pipe"],
-  })
-
-  child.stdout.on("data", (chunk) => {
-    stdout += chunk.toString()
-  })
-  child.stderr.on("data", (chunk) => {
-    stderr += chunk.toString()
-  })
-
-  for (let attempt = 0; attempt < 60; attempt += 1) {
-    try {
-      const health = await fetch("http://127.0.0.1:5173/api/health", {
-        signal: AbortSignal.timeout(1000),
-      })
-      const shell = await fetch("http://127.0.0.1:5173/", {
-        signal: AbortSignal.timeout(1000),
-      })
-      if (health.ok && shell.ok) {
-        await writeFile(stdoutPath, stdout)
-        await writeFile(stderrPath, stderr)
-        return { child, stdoutPath, stderrPath }
-      }
-    } catch (error) {
-      if (!(error instanceof Error)) {
-        throw error
-      }
-    }
-
-    await delay(500)
-  }
-
-  await writeFile(stdoutPath, stdout)
-  await writeFile(stderrPath, stderr)
-  await stopProcess(child)
-  throw new BrowserSmokeError("Local dev server did not become ready within 30s")
-}
-
 function renderScenarioEvidence(result) {
+  if (result.scenario === "full-regression") {
+    return renderFullRegressionEvidence(result)
+  }
   if (result.scenario === "gallery-search") {
     return renderGallerySearchEvidence(result)
   }
@@ -154,6 +90,15 @@ function renderScenarioEvidence(result) {
 
 async function runScenario(scenario, baseUrl, output) {
   switch (scenario) {
+    case "full-regression":
+      return runFullRegression(baseUrl, output, [
+        ["gallery-search", runGallerySearch],
+        ["modal-crud", runModalCrud],
+        ["copy-favorite", runCopyFavorite],
+        ["image-preview", runImagePreview],
+        ["workflow-repo", runWorkflowRepo],
+        ["tag-management", runTagManagement],
+      ])
     case "wave-0":
       return runWave0(baseUrl, output)
     case "gallery-search":
