@@ -13,6 +13,7 @@
     "test:worker": "vitest --config vitest.worker.config.ts",
     "qa:api": "node scripts/qa/api-smoke.mjs",
     "qa:browser": "node scripts/qa/browser-smoke.mjs",
+    "backup:local": "node scripts/qa/backup-local.mjs",
     "qa:fixtures": "node scripts/qa/create-fixtures.mjs",
     "verify:plan": "node scripts/qa/verify-plan.mjs",
     "verify:scope": "node scripts/qa/verify-scope.mjs",

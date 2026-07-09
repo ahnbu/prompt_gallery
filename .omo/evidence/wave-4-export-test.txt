@@ -1,0 +1,43 @@
+
+[1m[46m RUN [49m[22m [36mv3.2.7 [39m[90mD:/vibe-coding/prompt-gallery[39m
+
+[vpw:debug] Adding `enable_nodejs_tty_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_fs_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_http_modules` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_perf_hooks_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:info] Starting isolated runtimes for vitest.worker.config.ts...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[90mstdout[2m | src/worker/db-migration.test.ts[2m > [22m[2mD1 migrations[2m > [22m[2mcreates every required table when migrations are applied
+[22m[39mrequired tables: assets, item_tags, items, tag_keywords, tags, workflow_steps, workflows
+
+ [32m✓[39m src/worker/health.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 130[2mms[22m[39m
+ [32m✓[39m src/worker/db-migration.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 139[2mms[22m[39m
+ [32m✓[39m src/worker/export.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 226[2mms[22m[39m
+ [32m✓[39m src/worker/favorites.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 522[2mms[22m[39m
+ [32m✓[39m src/worker/items.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 524[2mms[22m[39m
+ [32m✓[39m src/worker/workflows.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 547[2mms[22m[39m
+ [32m✓[39m src/worker/tags.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 971[2mms[22m[39m
+ [32m✓[39m src/worker/assets.test.ts [2m([22m[2m12 tests[22m[2m)[22m[33m 1270[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m8 passed[39m[22m[90m (8)[39m
+[2m      Tests [22m [1m[32m40 passed[39m[22m[90m (40)[39m
+[2m   Start at [22m 13:12:40
+[2m   Duration [22m 6.85s[2m (transform 294ms, setup 2.90s, collect 437ms, tests 4.33s, environment 3ms, prepare 10.50s)[22m
+
+[vpw:debug] Shutting down runtimes...
+[vpw:debug] Disposing remote proxy sessions...

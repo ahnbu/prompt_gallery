@@ -4,6 +4,7 @@
 
 | 일시 | 유형 | 범위 | 변경내용 | 변경사유 | 작성AI |
 |---|---|---|---|---|---|
+| 2026-07-09 13:54 | feat | ops | 태그 관리 UI와 export/local backup, deploy readiness 검증 흐름 추가 | - | Unknown |
 | 2026-07-09 12:48 | feat | media-workflows | 이미지 preview와 Workflow 실행 흐름 추가 | - | Codex |
 | 2026-07-09 01:10 | feat | ui | 갤러리 검색·필터·모달 CRUD·본문 복사·즐겨찾기 UX와 Wave 2 브라우저 QA 추가 | - | Unknown |
 | 2026-07-08 22:24 | feat | api | D1 기반 항목·태그·즐겨찾기·워크플로우 API와 Wave 1 검증 smoke 추가 | - | Unknown |

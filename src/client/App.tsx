@@ -1,8 +1,21 @@
-import { FileText, Github, Image, Layers, Plus, Search, Star, Workflow } from "lucide-react"
+import {
+  Download,
+  FileText,
+  Github,
+  Image,
+  Layers,
+  Plus,
+  Search,
+  Star,
+  Tags,
+  Workflow,
+} from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { GalleryResults } from "./GalleryList"
 import { ItemModal, type ItemModalState, defaultTypeForTab } from "./ItemModal"
+import { TagManagementModal } from "./TagManagementModal"
 import { WorkflowModal, type WorkflowModalState } from "./WorkflowModal"
+import { downloadExport } from "./export-data"
 import { type GalleryData, type Item, type WorkflowItem, fetchGalleryData } from "./gallery-data"
 import {
   type GalleryTab,
@@ -38,6 +51,8 @@ export function App() {
   const [selectedTags, setSelectedTags] = useState<readonly string[]>([])
   const [modalState, setModalState] = useState<ItemModalState | null>(null)
   const [workflowModalState, setWorkflowModalState] = useState<WorkflowModalState | null>(null)
+  const [tagManagementOpen, setTagManagementOpen] = useState(false)
+  const [exportStatus, setExportStatus] = useState<"idle" | "failed">("idle")
 
   useEffect(() => {
     const controller = new AbortController()
@@ -113,6 +128,19 @@ export function App() {
     setWorkflowModalState({ kind: "detail", workflow })
   }
 
+  async function exportGallery(): Promise<void> {
+    setExportStatus("idle")
+    try {
+      await downloadExport()
+    } catch (error) {
+      if (error instanceof Error) {
+        setExportStatus("failed")
+        return
+      }
+      throw error
+    }
+  }
+
   return (
     <main className="app-shell" aria-labelledby="app-title">
       <header className="topbar">
@@ -120,10 +148,24 @@ export function App() {
           <p className="eyebrow">Personal workspace</p>
           <h1 id="app-title">Prompt Gallery</h1>
         </div>
-        <button className="add-button" onClick={openAddModal} type="button">
-          <Plus aria-hidden="true" size={17} strokeWidth={1.8} />
-          <span>추가</span>
-        </button>
+        <div className="topbar-actions">
+          <button className="add-button" onClick={openAddModal} type="button">
+            <Plus aria-hidden="true" size={17} strokeWidth={1.8} />
+            <span>추가</span>
+          </button>
+          <button
+            className="secondary-button"
+            onClick={() => setTagManagementOpen(true)}
+            type="button"
+          >
+            <Tags aria-hidden="true" size={17} strokeWidth={1.8} />
+            <span>태그 관리</span>
+          </button>
+          <button className="secondary-button" onClick={() => void exportGallery()} type="button">
+            <Download aria-hidden="true" size={17} strokeWidth={1.8} />
+            <span>Export</span>
+          </button>
+        </div>
         <label className="search-control">
           <Search aria-hidden="true" size={16} strokeWidth={1.8} />
           <input
@@ -157,6 +199,9 @@ export function App() {
           )
         })}
       </nav>
+      {exportStatus === "failed" ? (
+        <p className="form-error">Export 파일을 만들지 못했습니다</p>
+      ) : null}
 
       <section className="tag-filter" aria-label="태그 필터">
         {galleryData.tags.map((tag) => {
@@ -207,6 +252,13 @@ export function App() {
           onDeleted={refreshAfterMutation}
           onSaved={refreshAfterMutation}
           state={workflowModalState}
+        />
+      ) : null}
+      {tagManagementOpen ? (
+        <TagManagementModal
+          onChanged={refreshAfterMutation}
+          onClose={() => setTagManagementOpen(false)}
+          tags={galleryData.tags}
         />
       ) : null}
     </main>

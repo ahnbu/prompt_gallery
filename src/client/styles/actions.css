@@ -67,6 +67,12 @@
   padding: 0;
 }
 
+.topbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
 .add-button:focus-visible,
 .primary-button:focus-visible,
 .secondary-button:focus-visible,

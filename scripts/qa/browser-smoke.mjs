@@ -7,6 +7,7 @@ import { renderCopyFavoriteEvidence, runCopyFavorite } from "./browser-copy-favo
 import { renderGallerySearchEvidence, runGallerySearch } from "./browser-gallery-search.mjs"
 import { renderImagePreviewEvidence, runImagePreview } from "./browser-image-preview.mjs"
 import { renderModalCrudEvidence, runModalCrud } from "./browser-modal-crud.mjs"
+import { renderTagManagementEvidence, runTagManagement } from "./browser-tag-management.mjs"
 import { renderWave0Evidence, runWave0 } from "./browser-wave0-smoke.mjs"
 import { renderWorkflowRepoEvidence } from "./browser-workflow-repo-evidence.mjs"
 import { runWorkflowRepo } from "./browser-workflow-repo.mjs"
@@ -144,6 +145,9 @@ function renderScenarioEvidence(result) {
   if (result.scenario === "workflow-repo") {
     return renderWorkflowRepoEvidence(result)
   }
+  if (result.scenario === "tag-management") {
+    return renderTagManagementEvidence(result)
+  }
 
   return renderWave0Evidence(result)
 }
@@ -162,6 +166,8 @@ async function runScenario(scenario, baseUrl, output) {
       return runImagePreview(baseUrl, output)
     case "workflow-repo":
       return runWorkflowRepo(baseUrl, output)
+    case "tag-management":
+      return runTagManagement(baseUrl, output)
     default:
       throw new BrowserSmokeError(`Unsupported browser scenario: ${scenario}`)
   }
@@ -186,7 +192,8 @@ async function main() {
   await mkdir(path.dirname(output), { recursive: true })
   const previousEvidence = existsSync(output) ? await readFile(output, "utf8") : undefined
   const redOutput = output.replace(/\.md$/, "-red.md")
-  const scenarioUsesRedEvidence = scenario === "gallery-search" || scenario === "workflow-repo"
+  const scenarioUsesRedEvidence =
+    scenario === "gallery-search" || scenario === "workflow-repo" || scenario === "tag-management"
   const provenanceEvidence =
     scenarioUsesRedEvidence && !output.endsWith("-red.md") && existsSync(redOutput)
       ? await readFile(redOutput, "utf8")

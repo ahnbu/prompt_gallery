@@ -8,8 +8,14 @@
   }
 
   .add-button,
+  .topbar-actions,
   .search-control {
     width: 100%;
+  }
+
+  .topbar-actions .add-button,
+  .topbar-actions .secondary-button {
+    flex: 1 1 140px;
   }
 
   h1 {
@@ -40,6 +46,10 @@
 
   .modal-actions {
     flex-wrap: wrap;
+  }
+
+  .tag-management-grid {
+    grid-template-columns: 1fr;
   }
 }
 

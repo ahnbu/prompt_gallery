@@ -44,6 +44,13 @@ export class AssetRepository {
     return row === null ? null : rowToAsset(row)
   }
 
+  async list(): Promise<readonly Asset[]> {
+    const rows = await this.db
+      .prepare(`${SELECT_ASSET} ORDER BY created_at ASC, id ASC`)
+      .all<AssetRow>()
+    return rows.results.map(rowToAsset)
+  }
+
   async getByObjectKey(objectKey: string): Promise<Asset | null> {
     const row = await this.db
       .prepare(`${SELECT_ASSET} WHERE object_key = ?`)
