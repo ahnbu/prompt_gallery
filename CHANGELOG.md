@@ -4,6 +4,7 @@
 
 | 일시 | 유형 | 범위 | 변경내용 | 변경사유 | 작성AI |
 |---|---|---|---|---|---|
+| 2026-07-09 19:51 | chore | backlog | 프로젝트 백로그(BACKLOG.md) 업데이트 | - | Antigravity |
 | 2026-07-09 19:51 | docs | ui | 카드 상세 개선안, UI 변경계획, 개선 목업 및 통합 실행계획 추가 | - | Antigravity |
 | 2026-07-09 19:50 | docs | plans | 자동 및 수동 태그 분리 계획서 수정 내용 반영 | - | Antigravity |
 | 2026-07-09 19:50 | docs | plans | gitignore OMO 임시파일 제외 계획서 최종 완료 상태 반영 | - | Antigravity |
