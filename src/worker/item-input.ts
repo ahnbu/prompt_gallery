@@ -53,6 +53,21 @@ function readOptionalBoolean(value: unknown, key: string): boolean | undefined {
   return field
 }
 
+function readOptionalNullableId(value: unknown, key: string): string | null | undefined {
+  const field = getField(value, key)
+  if (field === undefined) {
+    return undefined
+  }
+  if (field === null) {
+    return null
+  }
+  if (typeof field !== "string" || field.trim().length === 0) {
+    throw new ApiError("invalid_item", `${key} must be a non-empty string or null.`, 400)
+  }
+
+  return field.trim()
+}
+
 function isValidGitHubUrl(value: string): boolean {
   try {
     const url = new URL(value)
@@ -164,7 +179,6 @@ export function parseCreateItem(value: unknown): CreateItemInput {
     body,
     notes: readOptionalString(value, "notes") ?? null,
     githubUrl,
-    imageKey: readOptionalString(value, "imageKey") ?? null,
     favorite: readOptionalBoolean(value, "favorite") ?? false,
     tagNames: readOptionalTags(value) ?? null,
   }
@@ -175,9 +189,9 @@ export function parsePatchItem(value: unknown, current: Item): PatchItemInput {
   const body = readOptionalString(value, "body")
   const notes = readOptionalString(value, "notes")
   const githubUrl = readOptionalString(value, "githubUrl")
-  const imageKey = readOptionalString(value, "imageKey")
   const favorite = readOptionalBoolean(value, "favorite")
   const tagNames = readOptionalTags(value)
+  const imageAssetId = readOptionalNullableId(value, "imageAssetId")
 
   if (isPromptLike(current.type) && body === null) {
     throw new ApiError("invalid_item", "Prompt and image prompt items require body.", 400)
@@ -191,9 +205,9 @@ export function parsePatchItem(value: unknown, current: Item): PatchItemInput {
     ...(body !== undefined ? { body } : {}),
     ...(notes !== undefined ? { notes } : {}),
     ...(githubUrl !== undefined ? { githubUrl } : {}),
-    ...(imageKey !== undefined ? { imageKey } : {}),
     ...(favorite !== undefined ? { favorite } : {}),
     ...(tagNames !== undefined ? { tagNames: tagNames ?? [] } : {}),
+    ...(imageAssetId !== undefined ? { imageAssetId } : {}),
   } satisfies PatchItemInput
 
   if (Object.keys(patch).length === 0) {

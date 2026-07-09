@@ -82,6 +82,7 @@
 }
 
 .primary-button:disabled,
+.secondary-button:disabled,
 .danger-button:disabled {
   cursor: wait;
   opacity: 0.62;

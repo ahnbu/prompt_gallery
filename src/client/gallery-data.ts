@@ -19,7 +19,8 @@ export type Item = {
   readonly body: string | null
   readonly notes: string | null
   readonly githubUrl: string | null
-  readonly imageKey: string | null
+  readonly imageAssetId: string | null
+  readonly contentUrl: string | null
   readonly favorite: boolean
   readonly tags: readonly ItemTag[]
   readonly createdAt: string
@@ -38,12 +39,14 @@ export type Tag = {
 
 export type WorkflowStep = {
   readonly id: string
-  readonly kind: string
+  readonly kind: WorkflowStepKind
   readonly position: number
   readonly itemId: string | null
   readonly memo: string | null
   readonly url: string | null
 }
+
+export type WorkflowStepKind = "prompt" | "repo" | "memo" | "link"
 
 export type WorkflowItem = {
   readonly id: string
@@ -84,6 +87,18 @@ function readString(record: JsonRecord, key: string): string {
 function readNullableString(record: JsonRecord, key: string): string | null {
   const value = getField(record, key)
   if (value === null) {
+    return null
+  }
+  if (typeof value !== "string") {
+    throw new GalleryDataError(`${key} must be a string or null.`)
+  }
+
+  return value
+}
+
+function readOptionalNullableString(record: JsonRecord, key: string): string | null {
+  const value = getField(record, key)
+  if (value === undefined || value === null) {
     return null
   }
   if (typeof value !== "string") {
@@ -159,7 +174,8 @@ function parseItem(value: unknown): Item {
     body: readNullableString(record, "body"),
     notes: readNullableString(record, "notes"),
     githubUrl: readNullableString(record, "githubUrl"),
-    imageKey: readNullableString(record, "imageKey"),
+    imageAssetId: readNullableString(record, "imageAssetId"),
+    contentUrl: readOptionalNullableString(record, "contentUrl"),
     favorite: readBoolean(record, "favorite"),
     tags: readArray(record, "tags").map(parseItemTag),
     createdAt: readString(record, "createdAt"),
@@ -192,11 +208,23 @@ function parseWorkflowStep(value: unknown): WorkflowStep {
   const url = getField(record, "url")
   return {
     id: readString(record, "id"),
-    kind: readString(record, "kind"),
+    kind: parseWorkflowStepKind(getField(record, "kind")),
     position: readNumber(record, "position"),
     itemId: typeof itemId === "string" ? itemId : null,
     memo: typeof memo === "string" ? memo : null,
     url: typeof url === "string" ? url : null,
+  }
+}
+
+function parseWorkflowStepKind(value: unknown): WorkflowStepKind {
+  switch (value) {
+    case "prompt":
+    case "repo":
+    case "memo":
+    case "link":
+      return value
+    default:
+      throw new GalleryDataError("Unknown workflow step kind.")
   }
 }
 

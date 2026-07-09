@@ -1,7 +1,8 @@
+import { deleteAssetObjectAndMetadata } from "./asset-routes"
 import type { WorkerEnv } from "./index"
 import { parseCreateItem, parseFavoriteItem, parsePatchItem, readJson } from "./item-input"
 import { ItemRepository } from "./item-repository"
-import { ApiError, errorResponse } from "./item-types"
+import { ApiError, errorResponse, itemResponse } from "./item-types"
 
 function methodNotAllowed(): Response {
   return errorResponse(new ApiError("method_not_allowed", "Method not allowed.", 405))
@@ -45,14 +46,19 @@ export async function handleItemsRequest(
       switch (request.method) {
         case "GET":
           return Response.json({
-            items: await repository.list({
-              tagNames: parseTagFilter(request),
-              favoriteOnly: parseFavoriteFilter(request),
-            }),
+            items: (
+              await repository.list({
+                tagNames: parseTagFilter(request),
+                favoriteOnly: parseFavoriteFilter(request),
+              })
+            ).map(itemResponse),
           })
         case "POST": {
           const input = parseCreateItem(await readJson(request))
-          return Response.json({ item: await repository.create(input) }, { status: 201 })
+          return Response.json(
+            { item: itemResponse(await repository.create(input)) },
+            { status: 201 },
+          )
         }
         default:
           return methodNotAllowed()
@@ -74,13 +80,15 @@ export async function handleItemsRequest(
 
       const favorite = parseFavoriteItem(await readJson(request))
       const updatedItem = await repository.updateFavorite(id, favorite)
-      return updatedItem === null ? itemNotFound() : Response.json({ item: updatedItem })
+      return updatedItem === null
+        ? itemNotFound()
+        : Response.json({ item: itemResponse(updatedItem) })
     }
 
     switch (request.method) {
       case "GET": {
         const item = await repository.get(id)
-        return item === null ? itemNotFound() : Response.json({ item })
+        return item === null ? itemNotFound() : Response.json({ item: itemResponse(item) })
       }
       case "PATCH": {
         const item = await repository.get(id)
@@ -90,10 +98,29 @@ export async function handleItemsRequest(
 
         const input = parsePatchItem(await readJson(request), item)
         const updatedItem = await repository.update(id, input)
-        return updatedItem === null ? itemNotFound() : Response.json({ item: updatedItem })
+        if (
+          updatedItem !== null &&
+          input.imageAssetId !== undefined &&
+          item.imageKey !== updatedItem.imageKey
+        ) {
+          await deleteAssetObjectAndMetadata(env.DB, env.PREVIEWS, item.imageKey)
+        }
+        return updatedItem === null
+          ? itemNotFound()
+          : Response.json({ item: itemResponse(updatedItem) })
       }
-      case "DELETE":
-        return (await repository.delete(id)) ? Response.json({ ok: true }) : itemNotFound()
+      case "DELETE": {
+        const item = await repository.get(id)
+        if (item === null) {
+          return itemNotFound()
+        }
+        const deleted = await repository.delete(id)
+        if (!deleted) {
+          return itemNotFound()
+        }
+        await deleteAssetObjectAndMetadata(env.DB, env.PREVIEWS, item.imageKey)
+        return Response.json({ ok: true })
+      }
       default:
         return methodNotAllowed()
     }

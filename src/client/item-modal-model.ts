@@ -11,7 +11,7 @@ export type Draft = {
   readonly body: string
   readonly notes: string
   readonly githubUrl: string
-  readonly imageKey: string
+  readonly imageAssetId: string | null | undefined
   readonly tagsText: string
 }
 
@@ -20,7 +20,7 @@ type ItemPayload = {
   readonly body: string | null
   readonly notes: string | null
   readonly githubUrl: string | null
-  readonly imageKey: string | null
+  readonly imageAssetId?: string | null
   readonly tags: readonly string[]
 }
 
@@ -51,7 +51,7 @@ export function draftFromState(state: ItemModalState): Draft {
       body: "",
       notes: "",
       githubUrl: "",
-      imageKey: "",
+      imageAssetId: undefined,
       tagsText: "",
     }
   }
@@ -62,7 +62,7 @@ export function draftFromState(state: ItemModalState): Draft {
     body: state.item.body ?? "",
     notes: state.item.notes ?? "",
     githubUrl: state.item.githubUrl ?? "",
-    imageKey: state.item.imageKey ?? "",
+    imageAssetId: state.item.imageAssetId,
     tagsText: state.item.tags.map((tag) => tag.name).join(", "),
   }
 }
@@ -104,7 +104,7 @@ function payloadFromDraft(draft: Draft): ItemPayload {
     body: normalize(draft.body),
     notes: normalize(draft.notes),
     githubUrl: normalize(draft.githubUrl),
-    imageKey: normalize(draft.imageKey),
+    ...(draft.imageAssetId !== undefined ? { imageAssetId: draft.imageAssetId } : {}),
     tags: tagNames(draft.tagsText),
   }
 }

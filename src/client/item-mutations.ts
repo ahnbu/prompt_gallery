@@ -6,7 +6,7 @@ type CreateItemRequest = {
   readonly body: string | null
   readonly notes: string | null
   readonly githubUrl: string | null
-  readonly imageKey: string | null
+  readonly imageAssetId?: string | null
   readonly tags: readonly string[]
 }
 

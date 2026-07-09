@@ -14,10 +14,15 @@ export type Item = {
   readonly notes: string | null
   readonly githubUrl: string | null
   readonly imageKey: string | null
+  readonly imageAssetId: string | null
   readonly favorite: boolean
   readonly tags: readonly ItemTag[]
   readonly createdAt: string
   readonly updatedAt: string
+}
+
+export type ItemResponse = Omit<Item, "imageKey"> & {
+  readonly contentUrl: string | null
 }
 
 export type ItemTag = {
@@ -34,6 +39,7 @@ export type ItemRow = {
   readonly notes: string | null
   readonly github_url: string | null
   readonly image_key: string | null
+  readonly image_asset_id: string | null
   readonly favorite: number
   readonly created_at: string
   readonly updated_at: string
@@ -45,7 +51,6 @@ export type CreateItemInput = {
   readonly body: string | null
   readonly notes: string | null
   readonly githubUrl: string | null
-  readonly imageKey: string | null
   readonly favorite: boolean
   readonly tagNames: readonly string[] | null
 }
@@ -55,18 +60,20 @@ export type PatchItemInput = {
   readonly body?: string | null
   readonly notes?: string | null
   readonly githubUrl?: string | null
-  readonly imageKey?: string | null
   readonly favorite?: boolean
   readonly tagNames?: readonly string[]
+  readonly imageAssetId?: string | null
 }
 
 export type ApiErrorCode =
   | "invalid_json"
+  | "invalid_asset"
   | "invalid_item"
   | "invalid_workflow"
   | "invalid_tag"
   | "invalid_merge"
   | "not_found"
+  | "server_error"
   | "tag_in_use"
   | "method_not_allowed"
 
@@ -90,10 +97,28 @@ export function rowToItem(row: ItemRow): Item {
     notes: row.notes,
     githubUrl: row.github_url,
     imageKey: row.image_key,
+    imageAssetId: row.image_asset_id,
     favorite: row.favorite === 1,
     tags: [],
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+  }
+}
+
+export function itemResponse(item: Item): ItemResponse {
+  return {
+    id: item.id,
+    type: item.type,
+    title: item.title,
+    body: item.body,
+    notes: item.notes,
+    githubUrl: item.githubUrl,
+    imageAssetId: item.imageAssetId,
+    contentUrl: item.imageAssetId === null ? null : `/api/assets/${item.imageAssetId}/content`,
+    favorite: item.favorite,
+    tags: item.tags,
+    createdAt: item.createdAt,
+    updatedAt: item.updatedAt,
   }
 }
 

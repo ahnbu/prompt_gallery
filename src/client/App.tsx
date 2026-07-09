@@ -2,7 +2,8 @@ import { FileText, Github, Image, Layers, Plus, Search, Star, Workflow } from "l
 import { useEffect, useMemo, useState } from "react"
 import { GalleryResults } from "./GalleryList"
 import { ItemModal, type ItemModalState, defaultTypeForTab } from "./ItemModal"
-import { type GalleryData, type Item, fetchGalleryData } from "./gallery-data"
+import { WorkflowModal, type WorkflowModalState } from "./WorkflowModal"
+import { type GalleryData, type Item, type WorkflowItem, fetchGalleryData } from "./gallery-data"
 import {
   type GalleryTab,
   allCardEntries,
@@ -36,6 +37,7 @@ export function App() {
   const [searchText, setSearchText] = useState("")
   const [selectedTags, setSelectedTags] = useState<readonly string[]>([])
   const [modalState, setModalState] = useState<ItemModalState | null>(null)
+  const [workflowModalState, setWorkflowModalState] = useState<WorkflowModalState | null>(null)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -96,11 +98,19 @@ export function App() {
   }
 
   function openAddModal(): void {
+    if (activeTab === "workflow") {
+      setWorkflowModalState({ kind: "add" })
+      return
+    }
     setModalState({ kind: "add", defaultType: defaultTypeForTab(activeTab) })
   }
 
   function openDetailModal(item: Item): void {
     setModalState({ kind: "detail", item })
+  }
+
+  function openWorkflowModal(workflow: WorkflowItem): void {
+    setWorkflowModalState({ kind: "detail", workflow })
   }
 
   return (
@@ -176,6 +186,7 @@ export function App() {
           filteredEntries={filteredEntries}
           onFavoriteChange={toggleFavorite}
           onOpenItem={openDetailModal}
+          onOpenWorkflow={openWorkflowModal}
           showUnified={showUnified}
         />
       ) : null}
@@ -187,6 +198,15 @@ export function App() {
           onSaved={refreshAfterMutation}
           state={modalState}
           tags={galleryData.tags}
+        />
+      ) : null}
+      {workflowModalState !== null ? (
+        <WorkflowModal
+          items={galleryData.items}
+          onClose={() => setWorkflowModalState(null)}
+          onDeleted={refreshAfterMutation}
+          onSaved={refreshAfterMutation}
+          state={workflowModalState}
         />
       ) : null}
     </main>

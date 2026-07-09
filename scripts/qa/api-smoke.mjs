@@ -1,5 +1,6 @@
 import { mkdir, writeFile } from "node:fs/promises"
 import path from "node:path"
+import { runAssets } from "./api-smoke-assets.mjs"
 import {
   SmokeError,
   defaultOutput,
@@ -15,6 +16,7 @@ const localHostnames = new Set(["localhost", "127.0.0.1", "::1", "[::1]"])
 
 async function main() {
   const args = parseArgs(process.argv.slice(2))
+  const scenario = args.get("--scenario") ?? "wave1"
   const output = resolvePath(args.get("--output") ?? defaultOutput)
   const suppliedBaseUrl = args.get("--base-url")
   const baseUrl = suppliedBaseUrl ?? "http://127.0.0.1:5173"
@@ -34,25 +36,36 @@ async function main() {
       throw error
     }
     if (parsedBaseUrl.protocol !== "http:" || !localHostnames.has(parsedBaseUrl.hostname)) {
-      throw new SmokeError(
-        `Refusing mutating Wave 1 API smoke for non-local --base-url: ${baseUrl}`,
-      )
+      throw new SmokeError(`Refusing mutating API smoke for non-local --base-url: ${baseUrl}`)
     }
 
     if (suppliedBaseUrl === undefined) {
       app = await startLocalApp(output)
     }
 
-    const smoke = await runWave1(baseUrl, context)
+    const smoke =
+      scenario === "assets"
+        ? await runAssets(baseUrl, context)
+        : scenario === "wave1"
+          ? await runWave1(baseUrl, context)
+          : null
+    if (smoke === null) {
+      throw new SmokeError(`Unknown scenario: ${scenario}`)
+    }
     await writeFile(
       output,
       renderEvidence({
+        title: scenario === "assets" ? "Wave 3 Assets API Smoke" : undefined,
         baseUrl,
         started: app !== undefined,
         ok: true,
         checks: context.checks,
         cleanup: context.cleanup,
         health: smoke.health,
+        binaryObservable:
+          scenario === "assets"
+            ? "Live API upload, protected content retrieval, replacement cleanup, explicit delete, and cleanup assertions passed."
+            : undefined,
         devLogs:
           app === undefined
             ? undefined
@@ -65,12 +78,14 @@ async function main() {
     await writeFile(
       output,
       renderEvidence({
+        title: scenario === "assets" ? "Wave 3 Assets API Smoke" : undefined,
         baseUrl,
         started: app !== undefined,
         ok: false,
         checks: context.checks,
         cleanup: context.cleanup,
         error: message,
+        binaryObservable: "Nonzero CLI exit with captured API assertion failure.",
         devLogs:
           app === undefined
             ? undefined

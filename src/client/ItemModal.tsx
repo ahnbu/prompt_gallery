@@ -4,6 +4,7 @@ import { DetailActions, EditActions } from "./ItemModalActions"
 import { ItemModalDetail } from "./ItemModalDetail"
 import { ItemModalForm } from "./ItemModalForm"
 import { ITEM_TYPES, type Item, type Tag } from "./gallery-data"
+import { deleteImageAsset } from "./image-assets"
 import { canCopyItemBody } from "./item-actions-model"
 import {
   type Draft,
@@ -149,7 +150,8 @@ export function ItemModal(props: {
     }
   }
 
-  function closeModal(): void {
+  async function closeModal(): Promise<void> {
+    await cleanupCurrentStagedAsset(props.state, draft)
     props.onClose()
   }
 
@@ -162,7 +164,7 @@ export function ItemModal(props: {
         data-qa="item-modal"
         onCancel={(event) => {
           event.preventDefault()
-          closeModal()
+          void closeModal()
         }}
         onMouseDown={(event) => {
           const bounds = event.currentTarget.getBoundingClientRect()
@@ -172,7 +174,7 @@ export function ItemModal(props: {
             event.clientY >= bounds.top &&
             event.clientY <= bounds.bottom
           if (!isInside) {
-            closeModal()
+            void closeModal()
           }
         }}
         ref={dialogRef}
@@ -182,7 +184,12 @@ export function ItemModal(props: {
             <p className="eyebrow">{props.state.kind === "add" ? "New item" : "Item detail"}</p>
             <h2 id="item-modal-title">{title}</h2>
           </div>
-          <button aria-label="닫기" className="icon-button" onClick={closeModal} type="button">
+          <button
+            aria-label="닫기"
+            className="icon-button"
+            onClick={() => void closeModal()}
+            type="button"
+          >
             <X aria-hidden="true" size={17} strokeWidth={1.8} />
           </button>
         </header>
@@ -193,6 +200,7 @@ export function ItemModal(props: {
           <ItemModalForm
             draft={draft}
             promptLike={isPromptLike(draft.type)}
+            previewItem={props.state.kind === "detail" ? props.state.item : null}
             repoLike={draft.type === ITEM_TYPES.REPO}
             setDraft={setDraft}
             tags={props.tags}
@@ -226,6 +234,28 @@ export function ItemModal(props: {
       </dialog>
     </div>
   )
+}
+
+async function cleanupCurrentStagedAsset(state: ItemModalState, draft: Draft): Promise<void> {
+  if (state.kind !== "detail") {
+    return
+  }
+  if (draft.imageAssetId === undefined || draft.imageAssetId === null) {
+    return
+  }
+  if (draft.imageAssetId === state.item.imageAssetId) {
+    return
+  }
+
+  try {
+    await deleteImageAsset(draft.imageAssetId)
+  } catch (error) {
+    if (error instanceof Error) {
+      console.warn("staged_asset_cleanup_failed", draft.imageAssetId)
+      return
+    }
+    throw error
+  }
 }
 
 function handleError(error: unknown, setError: (message: string) => void): void {

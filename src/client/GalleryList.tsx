@@ -1,5 +1,5 @@
 import { GalleryCard } from "./GalleryCard"
-import type { Item } from "./gallery-data"
+import type { Item, WorkflowItem } from "./gallery-data"
 import { type CardEntry, entryId } from "./gallery-model"
 
 export function GalleryResults(props: {
@@ -7,6 +7,7 @@ export function GalleryResults(props: {
   readonly filteredEntries: readonly CardEntry[]
   readonly onFavoriteChange: (item: Item) => Promise<void>
   readonly onOpenItem: (item: Item) => void
+  readonly onOpenWorkflow: (workflow: WorkflowItem) => void
   readonly showUnified: boolean
 }) {
   return props.showUnified ? (
@@ -14,12 +15,14 @@ export function GalleryResults(props: {
       entries={props.filteredEntries}
       onFavoriteChange={props.onFavoriteChange}
       onOpenItem={props.onOpenItem}
+      onOpenWorkflow={props.onOpenWorkflow}
     />
   ) : (
     <SectionedList
       entries={props.allEntries}
       onFavoriteChange={props.onFavoriteChange}
       onOpenItem={props.onOpenItem}
+      onOpenWorkflow={props.onOpenWorkflow}
     />
   )
 }
@@ -28,6 +31,7 @@ function UnifiedList(props: {
   readonly entries: readonly CardEntry[]
   readonly onFavoriteChange: (item: Item) => Promise<void>
   readonly onOpenItem: (item: Item) => void
+  readonly onOpenWorkflow: (workflow: WorkflowItem) => void
 }) {
   return (
     <section className="content-panel" data-qa="unified-results" aria-label="검색 결과">
@@ -40,6 +44,7 @@ function UnifiedList(props: {
         emptyLabel="조건에 맞는 항목이 없습니다"
         onFavoriteChange={props.onFavoriteChange}
         onOpenItem={props.onOpenItem}
+        onOpenWorkflow={props.onOpenWorkflow}
       />
     </section>
   )
@@ -49,6 +54,7 @@ function SectionedList(props: {
   readonly entries: readonly CardEntry[]
   readonly onFavoriteChange: (item: Item) => Promise<void>
   readonly onOpenItem: (item: Item) => void
+  readonly onOpenWorkflow: (workflow: WorkflowItem) => void
 }) {
   const promptEntries = props.entries.filter(
     (entry) => entry.kind === "item" && entry.item.type === "prompt",
@@ -69,6 +75,7 @@ function SectionedList(props: {
         entries={promptEntries}
         onFavoriteChange={props.onFavoriteChange}
         onOpenItem={props.onOpenItem}
+        onOpenWorkflow={props.onOpenWorkflow}
       />
       <GallerySection
         qa="section-image_prompt"
@@ -76,6 +83,7 @@ function SectionedList(props: {
         entries={imageEntries}
         onFavoriteChange={props.onFavoriteChange}
         onOpenItem={props.onOpenItem}
+        onOpenWorkflow={props.onOpenWorkflow}
       />
       <GallerySection
         qa="section-workflow"
@@ -83,6 +91,7 @@ function SectionedList(props: {
         entries={workflowEntries}
         onFavoriteChange={props.onFavoriteChange}
         onOpenItem={props.onOpenItem}
+        onOpenWorkflow={props.onOpenWorkflow}
       />
       <GallerySection
         qa="section-repo"
@@ -90,6 +99,7 @@ function SectionedList(props: {
         entries={repoEntries}
         onFavoriteChange={props.onFavoriteChange}
         onOpenItem={props.onOpenItem}
+        onOpenWorkflow={props.onOpenWorkflow}
       />
     </div>
   )
@@ -101,6 +111,7 @@ function GallerySection(props: {
   readonly entries: readonly CardEntry[]
   readonly onFavoriteChange: (item: Item) => Promise<void>
   readonly onOpenItem: (item: Item) => void
+  readonly onOpenWorkflow: (workflow: WorkflowItem) => void
 }) {
   return (
     <section className="content-panel" data-qa={props.qa} aria-label={props.title}>
@@ -113,6 +124,7 @@ function GallerySection(props: {
         emptyLabel="아직 항목이 없습니다"
         onFavoriteChange={props.onFavoriteChange}
         onOpenItem={props.onOpenItem}
+        onOpenWorkflow={props.onOpenWorkflow}
       />
     </section>
   )
@@ -123,6 +135,7 @@ function CardGrid(props: {
   readonly emptyLabel: string
   readonly onFavoriteChange: (item: Item) => Promise<void>
   readonly onOpenItem: (item: Item) => void
+  readonly onOpenWorkflow: (workflow: WorkflowItem) => void
 }) {
   if (props.entries.length === 0) {
     return <p className="empty-copy">{props.emptyLabel}</p>
@@ -136,6 +149,7 @@ function CardGrid(props: {
           key={`${entry.kind}:${entryId(entry)}`}
           onFavoriteChange={props.onFavoriteChange}
           onOpenItem={props.onOpenItem}
+          onOpenWorkflow={props.onOpenWorkflow}
         />
       ))}
     </div>

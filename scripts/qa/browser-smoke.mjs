@@ -5,8 +5,11 @@ import path from "node:path"
 import { fileURLToPath } from "node:url"
 import { renderCopyFavoriteEvidence, runCopyFavorite } from "./browser-copy-favorite.mjs"
 import { renderGallerySearchEvidence, runGallerySearch } from "./browser-gallery-search.mjs"
+import { renderImagePreviewEvidence, runImagePreview } from "./browser-image-preview.mjs"
 import { renderModalCrudEvidence, runModalCrud } from "./browser-modal-crud.mjs"
 import { renderWave0Evidence, runWave0 } from "./browser-wave0-smoke.mjs"
+import { renderWorkflowRepoEvidence } from "./browser-workflow-repo-evidence.mjs"
+import { runWorkflowRepo } from "./browser-workflow-repo.mjs"
 
 const rootDir = path.resolve(fileURLToPath(new URL("../..", import.meta.url)))
 const defaultOutput = path.join(rootDir, ".omo/evidence/wave-2-core-ui.md")
@@ -99,10 +102,13 @@ async function startLocalApp(outputPath) {
 
   for (let attempt = 0; attempt < 60; attempt += 1) {
     try {
-      const response = await fetch("http://127.0.0.1:5173/api/health", {
+      const health = await fetch("http://127.0.0.1:5173/api/health", {
         signal: AbortSignal.timeout(1000),
       })
-      if (response.ok) {
+      const shell = await fetch("http://127.0.0.1:5173/", {
+        signal: AbortSignal.timeout(1000),
+      })
+      if (health.ok && shell.ok) {
         await writeFile(stdoutPath, stdout)
         await writeFile(stderrPath, stderr)
         return { child, stdoutPath, stderrPath }
@@ -132,6 +138,12 @@ function renderScenarioEvidence(result) {
   if (result.scenario === "copy-favorite") {
     return renderCopyFavoriteEvidence(result)
   }
+  if (result.scenario === "image-preview") {
+    return renderImagePreviewEvidence(result)
+  }
+  if (result.scenario === "workflow-repo") {
+    return renderWorkflowRepoEvidence(result)
+  }
 
   return renderWave0Evidence(result)
 }
@@ -146,6 +158,10 @@ async function runScenario(scenario, baseUrl, output) {
       return runModalCrud(baseUrl, output)
     case "copy-favorite":
       return runCopyFavorite(baseUrl, output)
+    case "image-preview":
+      return runImagePreview(baseUrl, output)
+    case "workflow-repo":
+      return runWorkflowRepo(baseUrl, output)
     default:
       throw new BrowserSmokeError(`Unsupported browser scenario: ${scenario}`)
   }
@@ -170,8 +186,9 @@ async function main() {
   await mkdir(path.dirname(output), { recursive: true })
   const previousEvidence = existsSync(output) ? await readFile(output, "utf8") : undefined
   const redOutput = output.replace(/\.md$/, "-red.md")
+  const scenarioUsesRedEvidence = scenario === "gallery-search" || scenario === "workflow-repo"
   const provenanceEvidence =
-    scenario === "gallery-search" && !output.endsWith("-red.md") && existsSync(redOutput)
+    scenarioUsesRedEvidence && !output.endsWith("-red.md") && existsSync(redOutput)
       ? await readFile(redOutput, "utf8")
       : previousEvidence
 
@@ -212,7 +229,7 @@ async function main() {
       previousEvidence,
     }
     await writeFile(output, renderScenarioEvidence(failureResult))
-    if (scenario === "gallery-search" && !output.endsWith("-red.md")) {
+    if (scenarioUsesRedEvidence && !output.endsWith("-red.md")) {
       await writeFile(
         redOutput,
         renderScenarioEvidence({

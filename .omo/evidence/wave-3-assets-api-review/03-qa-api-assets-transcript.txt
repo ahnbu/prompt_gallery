@@ -1,0 +1,25 @@
+**********************
+PowerShell transcript start
+Start time: 20260709012543
+Username: gbook16\ahnbu
+RunAs User: gbook16\ahnbu
+Configuration Name: 
+Machine: GBOOK16 (Microsoft Windows NT 10.0.26200.0)
+Host Application: C:\Program Files\PowerShell\7\pwsh.dll -Command try { [Console]::OutputEncoding=[System.Text.Encoding]::UTF8 } catch {}
+$ErrorActionPreference='Continue'; Start-Transcript -Path .omo/evidence/wave-3-assets-api-review/03-qa-api-assets-transcript.txt -Force | Out-Null; pnpm qa:api -- --scenario assets --output .omo/evidence/wave-3-assets-api-review.txt; $code=$LASTEXITCODE; Stop-Transcript | Out-Null; exit $code
+Process ID: 7436
+PSVersion: 7.6.1
+PSEdition: Core
+GitCommitId: 7.6.1
+OS: Microsoft Windows 10.0.26200
+Platform: Win32NT
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1, 6.0, 7.0
+PSRemotingProtocolVersion: 2.4
+SerializationVersion: 1.1.0.1
+WSManStackVersion: 3.0
+**********************
+
+**********************
+PowerShell transcript end
+End time: 20260709012546
+**********************

@@ -138,7 +138,7 @@ describe("items API", () => {
         title: "Updated title",
         notes: "Updated note",
         favorite: true,
-        imageKey: "previews/item.webp",
+        imageAssetId: null,
       },
     })
     expect(deleteResponse.status).toBe(200)
@@ -149,6 +149,36 @@ describe("items API", () => {
         code: "not_found",
         message: "Item not found.",
       },
+    })
+  })
+
+  it("does not expose or store client-provided imageKey on create and patch", async () => {
+    // Given: a prompt request with a public asset URL supplied by the client
+    const createResponse = await itemRequest("POST", "/api/items", {
+      type: "image_prompt",
+      body: "Do not store this direct image reference",
+      imageKey: "https://example.r2.dev/public-preview.png",
+    })
+    expect(createResponse.status).toBe(201)
+    const createPayload: unknown = await createResponse.json()
+    expect(JSON.stringify(createPayload)).not.toContain("imageKey")
+    expect(JSON.stringify(createPayload)).not.toContain("r2.dev")
+
+    const id = await createItem({ type: "image_prompt", body: "Existing image prompt" })
+
+    // When: a later patch includes an arbitrary object key alongside valid fields
+    const patchResponse = await itemRequest("PATCH", `/api/items/${id}`, {
+      title: "Updated without direct image",
+      imageKey: "previews/client-supplied.webp",
+    })
+
+    // Then: normal fields update, but imageKey remains server-managed
+    expect(patchResponse.status).toBe(200)
+    const patchPayload: unknown = await patchResponse.json()
+    expect(JSON.stringify(patchPayload)).not.toContain("imageKey")
+    expect(JSON.stringify(patchPayload)).not.toContain("previews/")
+    expect(patchPayload).toMatchObject({
+      item: { title: "Updated without direct image", imageAssetId: null },
     })
   })
 })

@@ -1,5 +1,6 @@
 import { Copy, Star } from "lucide-react"
 import { useState } from "react"
+import { ImagePreviewField } from "./ImagePreviewField"
 import type { Item, ItemTag, ItemType, WorkflowItem } from "./gallery-data"
 import { type CardEntry, assertNever, visibleTags } from "./gallery-model"
 import { canCopyItemBody } from "./item-actions-model"
@@ -10,6 +11,7 @@ export function GalleryCard(props: {
   readonly entry: CardEntry
   readonly onFavoriteChange: (item: Item) => Promise<void>
   readonly onOpenItem: (item: Item) => void
+  readonly onOpenWorkflow: (workflow: WorkflowItem) => void
 }) {
   switch (props.entry.kind) {
     case "item":
@@ -21,7 +23,7 @@ export function GalleryCard(props: {
         />
       )
     case "workflow":
-      return <WorkflowCard workflow={props.entry.workflow} />
+      return <WorkflowCard onOpenWorkflow={props.onOpenWorkflow} workflow={props.entry.workflow} />
     default:
       return assertNever(props.entry)
   }
@@ -109,6 +111,7 @@ function ItemCard(props: {
         onClick={() => props.onOpenItem(item)}
         type="button"
       >
+        {item.type === "image_prompt" ? <ImagePreviewField compact item={item} /> : null}
         <h3>{item.title}</h3>
         <p className="card-preview">{preview}</p>
       </button>
@@ -117,6 +120,7 @@ function ItemCard(props: {
         <time dateTime={item.updatedAt}>{item.updatedAt.slice(0, 10)}</time>
         {item.type === "repo" && item.githubUrl !== null ? (
           <a
+            data-qa="repo-card-github"
             href={item.githubUrl}
             onClick={(event) => event.stopPropagation()}
             rel="noreferrer"
@@ -130,7 +134,11 @@ function ItemCard(props: {
   )
 }
 
-function WorkflowCard({ workflow }: { readonly workflow: WorkflowItem }) {
+function WorkflowCard(props: {
+  readonly workflow: WorkflowItem
+  readonly onOpenWorkflow: (workflow: WorkflowItem) => void
+}) {
+  const workflow = props.workflow
   return (
     <article className="gallery-card" data-card-type="workflow" data-qa="gallery-card">
       <div className="card-topline">
@@ -138,8 +146,16 @@ function WorkflowCard({ workflow }: { readonly workflow: WorkflowItem }) {
           Workflow
         </span>
       </div>
-      <h3>{workflow.name}</h3>
-      <p className="card-preview">{workflow.notes ?? `${workflow.steps.length} steps`}</p>
+      <button
+        aria-label={`${workflow.name} 상세 열기`}
+        className="card-open-button"
+        data-qa="card-open"
+        onClick={() => props.onOpenWorkflow(workflow)}
+        type="button"
+      >
+        <h3>{workflow.name}</h3>
+        <p className="card-preview">{workflow.notes ?? `${workflow.steps.length} steps`}</p>
+      </button>
       <footer className="card-footer">
         <time dateTime={workflow.updatedAt}>{workflow.updatedAt.slice(0, 10)}</time>
       </footer>

@@ -302,7 +302,7 @@ Your next move: 이 계획을 실행하려면 `$omo:start-work` 또는 동등한
   Result: PASS. Evidence `.omo/evidence/wave-2-gate-gallery-search-final.md`, `.omo/evidence/wave-2-gate-modal-crud-final.md`, `.omo/evidence/wave-2-gate-copy-favorite-final.md`, `.omo/evidence/wave-2-gate-cleanup-final.md`, `.omo/evidence/wave-2-final-code-review.md`, `.omo/evidence/wave-2-final-gate-review.md`. Final gate approved after typecheck, lint, unit tests, worker tests, build, all three Wave 2 browser scenarios, cleanup, CSS split review, long tag chip screenshot review, and scope review passed. `.omo/evidence/wave-1-checkbox-8-dev.stdout.log` is a pre-existing Wave 1 dev-log contamination and is excluded from the Wave 2 commit.
   Commit: Yes | `feat(ui): 핵심 갤러리 탐색과 편집 UX 추가`
 
-- [ ] 15. Wave 3 - Implement R2 asset API and consistency handling
+- [x] 15. Wave 3 - Implement R2 asset API and consistency handling
   What to do / Must NOT do: Implement upload, replace, delete, protected content retrieval, metadata persistence, content-type/size validation, temporary upload cleanup when D1 save fails, item-delete object cleanup, and orphan-check script. On item delete, delete associated R2 object best-effort and record failures in evidence/log output. Do not publicize the bucket.
   Parallelization: Wave 3 | Blocked by: 3, 10 | Blocks: 16
   References: `_docs/20260708_02_prompt-gallery_저장-배포-리서치.md:103`, `_docs/20260708_02_prompt-gallery_저장-배포-리서치.md:150`
@@ -310,9 +310,10 @@ Your next move: 이 계획을 실행하려면 `$omo:start-work` 또는 동등한
   QA scenarios:
   - Failure first: asset upload test before implementation; expected FAIL.
   - Happy path: start `pnpm dev -- --host 127.0.0.1`; Git Bash command `pnpm qa:fixtures; ASSET_ID=$(curl -s -X POST http://127.0.0.1:5173/api/assets -F "file=@test/fixtures/preview.png" | jq -r '.asset.id'); curl -i "http://127.0.0.1:5173/api/assets/$ASSET_ID/content"`; capture output, then stop the dev server. Expected upload `201`, D1 asset metadata, and content response with image content-type. Evidence `.omo/evidence/wave-3-assets-workflows.txt`.
+  Result: PASS. Evidence `.omo/evidence/wave-3-assets-workflows.txt`, `.omo/evidence/wave-3-assets-api.txt`, `.omo/evidence/wave-3-assets-api-final-gate.txt`, `.omo/evidence/wave-3-cleanup-assets-final-gate.md`, `.omo/evidence/wave-3-task-15-code-review.md`, `.omo/evidence/wave-3-task-15-final-gate-review-2.md`. Final gate approved after Worker asset tests, live asset API smoke, cleanup, typecheck, lint, unit tests, worker tests, build, and internal key exposure scan passed.
   Commit: No, commit at Wave 3 gate.
 
-- [ ] 16. Wave 3 - Implement image prompt preview UI
+- [x] 16. Wave 3 - Implement image prompt preview UI
   What to do / Must NOT do: Add image prompt tab gallery, browser-side resize/compress to 1200px max, upload progress/error UI, preview display through Worker proxy, replace/remove preview, and lucide no-image state. Do not load a placeholder image file.
   Parallelization: Wave 3 | Blocked by: 11, 15 | Blocks: final browser QA
   References: `_docs/specs/20260708_01_prompt-gallery_요구사항_SPEC.md:36`, `_docs/specs/20260708_01_prompt-gallery_요구사항_SPEC.md:160`, `_docs/20260708_02_prompt-gallery_저장-배포-리서치.md:116`
@@ -320,9 +321,10 @@ Your next move: 이 계획을 실행하려면 `$omo:start-work` 또는 동등한
   QA scenarios:
   - Failure first: run `image-preview` before UI upload wiring; expected FAIL.
   - Happy path: `pnpm qa:browser -- --scenario image-preview --output .omo/evidence/wave-3-image-preview.md`; expected auto-start/stop and PASS with screenshots.
+  Result: PASS. Evidence `.omo/evidence/wave-3-image-preview.md`, `.omo/evidence/wave-3-image-preview-final-gate.md`, `.omo/evidence/wave-3-modal-regression-final-gate.md`, `.omo/evidence/wave-3-gallery-regression-final-gate.md`, `.omo/evidence/wave-3-copy-regression-final-gate.md`, `.omo/evidence/wave-3-cleanup-image-preview-final-gate.md`, `.omo/evidence/wave-3-task-16-code-review-final.md`, `.omo/evidence/wave-3-task-16-final-gate-review-2.md`. Final gate approved after exact-path browser QA, cleanup, final code review, typecheck, lint, worker tests, and exposure checks passed.
   Commit: No, commit at Wave 3 gate.
 
-- [ ] 17. Wave 3 - Implement repo cards and workflow editor
+- [x] 17. Wave 3 - Implement repo cards and workflow editor
   What to do / Must NOT do: Implement repo item form/card/detail with GitHub open action, and workflow list/detail/editor with ordered steps. Steps must support prompt reference, repo reference, memo, and external link. Do not implement local folder actions.
   Parallelization: Wave 3 | Blocked by: 9, 11 | Blocks: final browser QA
   References: `_docs/specs/20260708_01_prompt-gallery_요구사항_SPEC.md:32`, `_docs/specs/20260708_01_prompt-gallery_요구사항_SPEC.md:34`, `_docs/specs/20260708_01_prompt-gallery_요구사항_SPEC.md:150`
@@ -330,9 +332,10 @@ Your next move: 이 계획을 실행하려면 `$omo:start-work` 또는 동등한
   QA scenarios:
   - Failure first: run `workflow-repo` before editor implementation; expected FAIL.
   - Happy path: `pnpm qa:browser -- --scenario workflow-repo --output .omo/evidence/wave-3-workflow-repo.md`; expected auto-start/stop and PASS.
+  Result: PASS. Evidence `.omo/evidence/wave-3-workflow-repo-red.md`, `.omo/evidence/wave-3-workflow-repo.md`, `.omo/evidence/wave-3-workflow-repo-qa-review.md`, `.omo/evidence/wave-3-image-preview-task17-regression.md`, `.omo/evidence/wave-3-cleanup-workflow-repo-qa-review.md`, `.omo/evidence/wave-3-task-17-code-review.md`, `.omo/evidence/wave-3-task-17-qa-review-2.md`. Code review and QA approved after repo GitHub open action, workflow ordered prompt/repo/memo/link steps, reload persistence, no local folder action, image-preview regression, cleanup, typecheck, lint, tests, and build passed.
   Commit: No, commit at Wave 3 gate.
 
-- [ ] 18. Wave 3 gate - Verify and commit assets/workflows
+- [x] 18. Wave 3 gate - Verify and commit assets/workflows
   What to do / Must NOT do: Run Worker R2 tests and browser QA for image, repo, and workflow flows. Commit only after screenshots and API evidence exist.
   Parallelization: Wave 3 gate | Blocked by: 15, 16, 17 | Blocks: Wave 4
   References: `.omo/evidence/wave-3-assets-workflows.txt`
@@ -340,6 +343,7 @@ Your next move: 이 계획을 실행하려면 `$omo:start-work` 또는 동등한
   QA scenarios:
   - Happy path: scenarios `image-preview` and `workflow-repo` PASS and screenshots are saved.
   - Failure path: broken image, public R2 URL leakage, or local folder action blocks commit.
+  Result: PASS. Evidence `.omo/evidence/wave-3-task-18-final-gate-review.md`, `.omo/evidence/wave-3-gate-api.txt`, `.omo/evidence/wave-3-gate-assets-api.txt`, `.omo/evidence/wave-3-gate-image-preview.md`, `.omo/evidence/wave-3-gate-workflow-repo.md`, `.omo/evidence/wave-3-gate-cleanup.md`. Final Wave 3 gate approved after fresh typecheck, lint, tests, Worker tests, build, API QA, image preview QA, workflow-repo QA, cleanup, exposure scan, local-folder scope scan, and diff whitespace check passed.
   Commit: Yes | `feat(media-workflows): 이미지 preview와 Workflow 실행 흐름 추가`
 
 - [ ] 19. Wave 4 - Implement tag management screen

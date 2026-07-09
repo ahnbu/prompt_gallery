@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url"
 
 const rootDir = path.resolve(fileURLToPath(new URL("../..", import.meta.url)))
 const evidenceDir = path.join(rootDir, ".omo/evidence")
-const allowedArgs = new Set(["--base-url", "--output"])
+const allowedArgs = new Set(["--base-url", "--output", "--scenario"])
 const childEnv = { BROWSER: "none", CI: "1", NO_UPDATE_NOTIFIER: "1" }
 
 export const defaultOutput = path.join(evidenceDir, "wave-1-api-smoke.txt")
@@ -162,7 +162,7 @@ export function requireItem(result, label) {
 
 export function renderEvidence(result) {
   const lines = [
-    "# Wave 1 API Smoke",
+    `# ${result.title ?? "Wave 1 API Smoke"}`,
     "",
     `Base URL: ${result.baseUrl}`,
     `Local app started: ${result.started ? "yes" : "no"}`,
@@ -203,9 +203,10 @@ export function renderEvidence(result) {
   lines.push(
     "",
     "## Binary Observable",
-    result.ok
-      ? "Health, item fallback, tags filter, favorite, workflow, malformed JSON 400, and cleanup assertions passed."
-      : "Nonzero CLI exit with captured API assertion failure.",
+    result.binaryObservable ??
+      (result.ok
+        ? "Health, item fallback, tags filter, favorite, workflow, malformed JSON 400, and cleanup assertions passed."
+        : "Nonzero CLI exit with captured API assertion failure."),
   )
   return `${lines.join("\n")}\n`
 }

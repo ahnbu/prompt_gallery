@@ -1,4 +1,6 @@
+import { AssetRepository } from "./asset-repository"
 import type { CreateItemInput, Item, ItemRow, PatchItemInput } from "./item-types"
+import { ApiError } from "./item-types"
 import { rowToItem } from "./item-types"
 import { TagRepository } from "./tag-repository"
 
@@ -13,7 +15,9 @@ type ItemListFilter = {
 }
 
 const SELECT_ITEM = `
-  SELECT id, type, title, body, notes, github_url, image_key, favorite, created_at, updated_at
+  SELECT id, type, title, body, notes, github_url, image_key,
+    (SELECT assets.id FROM assets WHERE assets.object_key = items.image_key LIMIT 1) AS image_asset_id,
+    favorite, created_at, updated_at
   FROM items
 `
 
@@ -97,7 +101,7 @@ export class ItemRepository {
         input.body,
         input.notes,
         input.githubUrl,
-        input.imageKey,
+        null,
         favoriteValue(input.favorite),
       )
       .run()
@@ -123,6 +127,7 @@ export class ItemRepository {
 
   async update(id: string, input: PatchItemInput): Promise<Item | null> {
     const tagRepository = new TagRepository(this.db)
+    const assetRepository = new AssetRepository(this.db)
     if (input.tagNames !== undefined) {
       await tagRepository.requireNames(input.tagNames, "invalid_item")
     }
@@ -134,7 +139,18 @@ export class ItemRepository {
     addStringField(fields, values, { column: "body", value: input.body })
     addStringField(fields, values, { column: "notes", value: input.notes })
     addStringField(fields, values, { column: "github_url", value: input.githubUrl })
-    addStringField(fields, values, { column: "image_key", value: input.imageKey })
+    if (input.imageAssetId !== undefined) {
+      let objectKey: string | null = null
+      if (input.imageAssetId !== null) {
+        const asset = await assetRepository.get(input.imageAssetId)
+        if (asset === null) {
+          throw new ApiError("invalid_item", "imageAssetId must reference an uploaded asset.", 400)
+        }
+        objectKey = asset.objectKey
+      }
+      fields.push("image_key = ?")
+      values.push(objectKey)
+    }
     if (input.favorite !== undefined) {
       fields.push("favorite = ?")
       values.push(favoriteValue(input.favorite))
@@ -157,6 +173,9 @@ export class ItemRepository {
       await tagRepository.addAutomaticTags(item)
     } else {
       await tagRepository.setItemTagsByNames(id, input.tagNames)
+    }
+    if (input.imageAssetId !== undefined && input.imageAssetId !== null) {
+      await assetRepository.setAssetItem(input.imageAssetId, id)
     }
 
     return this.get(id)

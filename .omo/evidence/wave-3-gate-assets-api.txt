@@ -1,0 +1,29 @@
+# Wave 3 Assets API Smoke
+
+Base URL: http://127.0.0.1:5173
+Local app started: yes
+Result: PASS
+
+## Coverage
+- POST /api/items image_prompt -> 201 id=720602a5-b8f3-4ba4-bb51-5cff9bbc0b60
+- POST /api/assets -> 201 id=eb3eca57-b6e9-4d28-8c1f-5083b22170ae internal object key not emitted
+- GET /api/assets/eb3eca57-b6e9-4d28-8c1f-5083b22170ae/content -> 200 image/png 224 bytes
+- POST /api/assets replacement -> old asset eb3eca57-b6e9-4d28-8c1f-5083b22170ae returns 404, new id=533b493f-2d13-40ed-9e41-7031c4760ff0
+- DELETE /api/assets -> 200 and content 404 id=533b493f-2d13-40ed-9e41-7031c4760ff0
+
+## Cleanup
+- assets/eb3eca57-b6e9-4d28-8c1f-5083b22170ae: 404
+- items/720602a5-b8f3-4ba4-bb51-5cff9bbc0b60: 200
+
+## Health
+Status: 200
+Content-Type: application/json
+Body:
+{"ok":true}
+
+## Dev Logs
+stdout: D:\vibe-coding\prompt-gallery\.omo\evidence\wave-3-gate-assets-api-dev.stdout.log
+stderr: D:\vibe-coding\prompt-gallery\.omo\evidence\wave-3-gate-assets-api-dev.stderr.log
+
+## Binary Observable
+Live API upload, protected content retrieval, replacement cleanup, explicit delete, and cleanup assertions passed.

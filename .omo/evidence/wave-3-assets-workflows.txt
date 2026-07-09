@@ -1,0 +1,298 @@
+# Wave 3 Assets Workflows Evidence
+
+Note: previous raw output is superseded by this sanitized evidence after the public asset response model fix. RED/GREEN facts, commands, exit codes, and failure/pass summaries are preserved while internal asset fields and keys are redacted.
+## Final Gate RED evidence
+Command: pnpm test:worker -- --run src/worker/assets.test.ts
+Expected: fail before asset-route unknown error boundary fix.
+
+$ vitest --config vitest.worker.config.ts "--" "--run" "src/worker/assets.test.ts"
+
+[1m[46m RUN [49m[22m [36mv3.2.7 [39m[90mD:/vibe-coding/prompt-gallery[39m
+
+[vpw:debug] Adding `enable_nodejs_tty_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_fs_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_http_modules` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_perf_hooks_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:info] Starting isolated runtimes for vitest.worker.config.ts...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[90mstdout[2m | src/worker/db-migration.test.ts[2m > [22m[2mD1 migrations[2m > [22m[2mcreates every required table when migrations are applied
+[22m[39mrequired tables: assets, item_tags, items, tag_keywords, tags, workflow_steps, workflows
+
+ [32m✓[39m src/worker/db-migration.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 230[2mms[22m[39m
+ [32m✓[39m src/worker/health.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 211[2mms[22m[39m
+ [32m✓[39m src/worker/favorites.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 629[2mms[22m[39m
+ [32m✓[39m src/worker/items.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 652[2mms[22m[39m
+ [32m✓[39m src/worker/workflows.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 681[2mms[22m[39m
+ [32m✓[39m src/worker/tags.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 1130[2mms[22m[39m
+ [31m❯[39m src/worker/assets.test.ts [2m([22m[2m11 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 1354[2mms[22m[39m
+   [32m✓[39m assets API[2m > [22muploads metadata and retrieves protected content through the Worker[32m 157[2mms[22m[39m
+   [32m✓[39m assets API[2m > [22mreplaces an item asset and deletes the old R2 object[32m 173[2mms[22m[39m
+   [32m✓[39m assets API[2m > [22mkeeps replacement when old R2 cleanup fails[32m 169[2mms[22m[39m
+   [32m✓[39m assets API[2m > [22mkeeps replacement when old metadata cleanup fails after old R2 delete[32m 139[2mms[22m[39m
+   [32m✓[39m assets API[2m > [22mdeletes asset metadata, item relation, and object through DELETE /api/assets[32m 114[2mms[22m[39m
+   [32m✓[39m assets API[2m > [22mdeletes associated R2 objects when an item is deleted[32m 109[2mms[22m[39m
+   [32m✓[39m assets API[2m > [22mkeeps item delete successful when associated asset cleanup fails[32m 103[2mms[22m[39m
+[31m   [31m×[31m assets API[2m > [22mcleans the temporary upload and rethrows when D1 metadata save fails[39m[32m 62[2mms[22m[39m
+[31m     → promise resolved "Response{}" instead of rejecting[39m
+   [32m✓[39m assets API[2m > [22mreports missing R2 objects, untracked R2 objects, and dangling item image keys[32m 114[2mms[22m[39m
+   [32m✓[39m assets API[2m > [22mrejects unsupported content types before writing to R2[32m 64[2mms[22m[39m
+   [32m✓[39m assets API[2m > [22mrejects files whose magic bytes do not match the claimed image type[32m 50[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/worker/assets.test.ts[2m > [22massets API[2m > [22mcleans the temporary upload and rethrows when D1 metadata save fails
+[31m[1mAssertionError[22m: promise resolved "Response{}" instead of rejecting[39m
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
+- }
++ Response {}
+
+[90m [2m❯[22m Assertion.propertyGetter node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/deps_ssr/vitest___@vitest_expect___chai.js:[2m1484:27[22m[39m
+[90m [2m❯[22m Object.proxyGetter [as get] node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/deps_ssr/vitest___@vitest_expect___chai.js:[2m1566:22[22m[39m
+[36m [2m❯[22m src/worker/assets.test.ts:[2m130:86[22m[39m
+    [90m128| [39m    const asset = await requireUploadedAsset(await uploadAsset({ itemI…
+    [90m129| [39m
+    [90m130| [39m    [35mconst[39m response [33m=[39m [35mawait[39m [34mapiRequest[39m([32m"DELETE"[39m[33m,[39m [32m`/api/items/[39m[36m${[39mitemId[36m}[39m[32m`[39m)
+    [90m   | [39m                                                                                     [31m^[39m
+    [90m131| [39m
+    [90m132| [39m    [34mexpect[39m(response[33m.[39mstatus)[33m.[39m[34mtoBe[39m([34m200[39m)
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m6 passed[39m[22m[90m (7)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m37 passed[39m[22m[90m (38)[39m
+[2m   Start at [22m 08:47:21
+[2m   Duration [22m 6.80s[2m (transform 257ms, setup 2.27s, collect 375ms, tests 4.89s, environment 2ms, prepare 11.79s)[22m
+
+[vpw:debug] Shutting down runtimes...
+[vpw:debug] Disposing remote proxy sessions...
+[ELIFECYCLE] Command failed with exit code 1.
+
+Exit code: 1
+
+
+## Validation: asset worker targeted
+Command: pnpm test:worker -- --run src/worker/assets.test.ts
+
+$ vitest --config vitest.worker.config.ts "--" "--run" "src/worker/assets.test.ts"
+
+[1m[46m RUN [49m[22m [36mv3.2.7 [39m[90mD:/vibe-coding/prompt-gallery[39m
+
+[vpw:debug] Adding `enable_nodejs_tty_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_fs_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_http_modules` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_perf_hooks_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:info] Starting isolated runtimes for vitest.worker.config.ts...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[90mstdout[2m | src/worker/db-migration.test.ts[2m > [22m[2mD1 migrations[2m > [22m[2mcreates every required table when migrations are applied
+[22m[39mrequired tables: assets, item_tags, items, tag_keywords, tags, workflow_steps, workflows
+
+ [32m✓[39m src/worker/health.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 544[2mms[22m[39m
+ [32m✓[39m src/worker/db-migration.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 546[2mms[22m[39m
+ [32m✓[39m src/worker/favorites.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 1068[2mms[22m[39m
+   [33m[2m✓[22m[39m favorites API[2m > [22mtoggles an item favorite on and off through the dedicated endpoint [33m 311[2mms[22m[39m
+   [33m[2m✓[22m[39m favorites API[2m > [22mlists favorite prompts, image prompts, and repos across all item types [33m 307[2mms[22m[39m
+ [32m✓[39m src/worker/items.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 1181[2mms[22m[39m
+ [32m✓[39m src/worker/workflows.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 1297[2mms[22m[39m
+   [33m[2m✓[22m[39m workflows API[2m > [22mcreates a valid workflow with prompt, repo, memo, and link steps [33m 320[2mms[22m[39m
+ [32m✓[39m src/worker/tags.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 1931[2mms[22m[39m
+   [33m[2m✓[22m[39m tags API[2m > [22mreturns only items containing every selected tag when listing with tags query [33m 380[2mms[22m[39m
+ [32m✓[39m src/worker/assets.test.ts [2m([22m[2m11 tests[22m[2m)[22m[33m 1998[2mms[22m[39m
+   [33m[2m✓[22m[39m assets API[2m > [22mreplaces an item asset and deletes the old R2 object [33m 301[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m7 passed[39m[22m[90m (7)[39m
+[2m      Tests [22m [1m[32m38 passed[39m[22m[90m (38)[39m
+[2m   Start at [22m 08:48:38
+[2m   Duration [22m 7.20s[2m (transform 519ms, setup 4.33s, collect 739ms, tests 8.56s, environment 1ms, prepare 8.48s)[22m
+
+[vpw:debug] Shutting down runtimes...
+[vpw:debug] Disposing remote proxy sessions...
+
+Exit code: 0
+
+## Validation: asset api smoke
+Command: pnpm qa:api -- --scenario assets --output .omo/evidence/wave-3-assets-api.txt
+
+$ node scripts/qa/api-smoke.mjs "--" "--scenario" "assets" "--output" ".omo/evidence/wave-3-assets-api.txt"
+PASS api smoke: D:\vibe-coding\prompt-gallery\.omo\evidence\wave-3-assets-api.txt
+
+Exit code: 0
+
+## Validation: typecheck
+Command: pnpm typecheck
+
+$ tsc --noEmit
+
+Exit code: 0
+
+## Validation: lint
+Command: pnpm lint
+
+$ biome check .
+Checked 73 files in 56ms. No fixes applied.
+
+Exit code: 0
+
+## Validation: unit tests
+Command: pnpm test
+
+$ pnpm test:worker
+$ vitest --config vitest.worker.config.ts
+
+[1m[46m RUN [49m[22m [36mv3.2.7 [39m[90mD:/vibe-coding/prompt-gallery[39m
+
+[vpw:debug] Adding `enable_nodejs_tty_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_fs_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_http_modules` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_perf_hooks_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:info] Starting isolated runtimes for vitest.worker.config.ts...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[90mstdout[2m | src/worker/db-migration.test.ts[2m > [22m[2mD1 migrations[2m > [22m[2mcreates every required table when migrations are applied
+[22m[39mrequired tables: assets, item_tags, items, tag_keywords, tags, workflow_steps, workflows
+
+ [32m✓[39m src/worker/health.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 121[2mms[22m[39m
+ [32m✓[39m src/worker/db-migration.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 143[2mms[22m[39m
+ [32m✓[39m src/worker/items.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 484[2mms[22m[39m
+ [32m✓[39m src/worker/favorites.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 515[2mms[22m[39m
+ [32m✓[39m src/worker/workflows.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 608[2mms[22m[39m
+ [32m✓[39m src/worker/tags.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 1011[2mms[22m[39m
+ [32m✓[39m src/worker/assets.test.ts [2m([22m[2m11 tests[22m[2m)[22m[33m 1169[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m7 passed[39m[22m[90m (7)[39m
+[2m      Tests [22m [1m[32m38 passed[39m[22m[90m (38)[39m
+[2m   Start at [22m 08:48:56
+[2m   Duration [22m 5.13s[2m (transform 240ms, setup 2.16s, collect 274ms, tests 4.05s, environment 1ms, prepare 4.49s)[22m
+
+[vpw:debug] Shutting down runtimes...
+[vpw:debug] Disposing remote proxy sessions...
+
+Exit code: 0
+
+## Validation: worker tests
+Command: pnpm test:worker
+
+$ vitest --config vitest.worker.config.ts
+
+[1m[46m RUN [49m[22m [36mv3.2.7 [39m[90mD:/vibe-coding/prompt-gallery[39m
+
+[vpw:debug] Adding `enable_nodejs_tty_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_fs_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_http_modules` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:debug] Adding `enable_nodejs_perf_hooks_module` compatibility flag during tests as this feature is needed to support the Vitest runner.
+[vpw:info] Starting isolated runtimes for vitest.worker.config.ts...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+[mf:warn] The latest compatibility date supported by the installed Cloudflare Workers Runtime is "2026-03-10",
+but you've requested "2026-07-08". Falling back to "2026-03-10"...
+ [32m✓[39m src/worker/health.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 201[2mms[22m[39m
+[90mstdout[2m | src/worker/db-migration.test.ts[2m > [22m[2mD1 migrations[2m > [22m[2mcreates every required table when migrations are applied
+[22m[39mrequired tables: assets, item_tags, items, tag_keywords, tags, workflow_steps, workflows
+
+ [32m✓[39m src/worker/db-migration.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 270[2mms[22m[39m
+ [32m✓[39m src/worker/favorites.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 630[2mms[22m[39m
+ [32m✓[39m src/worker/items.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 657[2mms[22m[39m
+ [32m✓[39m src/worker/workflows.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 701[2mms[22m[39m
+ [32m✓[39m src/worker/tags.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 1142[2mms[22m[39m
+ [32m✓[39m src/worker/assets.test.ts [2m([22m[2m11 tests[22m[2m)[22m[33m 1344[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m7 passed[39m[22m[90m (7)[39m
+[2m      Tests [22m [1m[32m38 passed[39m[22m[90m (38)[39m
+[2m   Start at [22m 08:49:04
+[2m   Duration [22m 5.29s[2m (transform 237ms, setup 2.26s, collect 352ms, tests 4.95s, environment 3ms, prepare 4.76s)[22m
+
+[vpw:debug] Shutting down runtimes...
+[vpw:debug] Disposing remote proxy sessions...
+
+Exit code: 0
+
+## Validation: build
+Command: pnpm build
+
+$ vite build
+[36mvite v6.4.3 [32mbuilding SSR bundle for production...[36m[39m
+transforming...
+[32m✓[39m 19 modules transformed.
+rendering chunks...
+[2mdist/prompt_gallery/[22m[32m.vite/manifest.json  [39m[1m[2m 0.16 kB[22m[1m[22m
+[2mdist/prompt_gallery/[22m[32mwrangler.json        [39m[1m[2m 1.53 kB[22m[1m[22m
+[2mdist/prompt_gallery/[22m[36mindex.js             [39m[1m[2m49.68 kB[22m[1m[22m
+[32m✓ built in 135ms[39m
+[36mvite v6.4.3 [32mbuilding for production...[36m[39m
+transforming...
+[32m✓[39m 1588 modules transformed.
+rendering chunks...
+computing gzip size...
+[2mdist/client/[22m[32m.assetsignore              [39m[1m[2m  0.02 kB[22m[1m[22m
+[2mdist/client/[22m[32mindex.html                 [39m[1m[2m  0.54 kB[22m[1m[22m[2m │ gzip:  0.37 kB[22m
+[2mdist/client/[22m[35massets/index-BXhlfpI9.css  [39m[1m[2m 10.11 kB[22m[1m[22m[2m │ gzip:  2.24 kB[22m
+[2mdist/client/[22m[36massets/index-DJrGZbsa.js   [39m[1m[2m172.26 kB[22m[1m[22m[2m │ gzip: 54.19 kB[22m
+[32m✓ built in 1.72s[39m
+
+Exit code: 0
+
+## Validation: cleanup verify
+Command: pnpm verify:cleanup -- --output .omo/evidence/wave-3-cleanup-assets.md
+
+$ node scripts/qa/verify-cleanup.mjs "--" "--output" ".omo/evidence/wave-3-cleanup-assets.md"
+PASS verify cleanup: D:\vibe-coding\prompt-gallery\.omo\evidence\wave-3-cleanup-assets.md
+
+Exit code: 0
+
+## Validation: exposure grep
+Command: forbidden internal asset/public-storage exposure grep over workflows and API text evidence
+Result: PASS, no matches.
+Exit code: 1 (ripgrep no-match success condition)

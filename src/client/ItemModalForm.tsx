@@ -1,4 +1,6 @@
+import { ImagePreviewField } from "./ImagePreviewField"
 import { ITEM_TYPES, type Tag } from "./gallery-data"
+import type { Item } from "./gallery-data"
 import { type Draft, readType } from "./item-modal-model"
 
 const typeOptions = [
@@ -13,6 +15,7 @@ export function ItemModalForm(props: {
   readonly repoLike: boolean
   readonly tags: readonly Tag[]
   readonly typeEditable: boolean
+  readonly previewItem: Item | null
   readonly setDraft: (draft: Draft) => void
 }) {
   return (
@@ -90,16 +93,11 @@ export function ItemModalForm(props: {
         ))}
       </datalist>
       {props.draft.type === ITEM_TYPES.IMAGE_PROMPT ? (
-        <label>
-          이미지 메타데이터
-          <input
-            onChange={(event) =>
-              props.setDraft({ ...props.draft, imageKey: event.currentTarget.value })
-            }
-            placeholder="업로드는 Wave 3에서 연결"
-            value={props.draft.imageKey}
-          />
-        </label>
+        <ImagePreviewField
+          imageAssetId={props.draft.imageAssetId === undefined ? null : props.draft.imageAssetId}
+          item={props.previewItem}
+          onDraftChange={(imageAssetId) => props.setDraft({ ...props.draft, imageAssetId })}
+        />
       ) : null}
       <label>
         메모

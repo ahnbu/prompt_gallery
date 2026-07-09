@@ -1,3 +1,4 @@
+import { handleAssetsRequest } from "./asset-routes"
 import { handleItemsRequest } from "./item-routes"
 import { handleTagsRequest } from "./tag-routes"
 import { handleWorkflowsRequest } from "./workflow-routes"
@@ -24,6 +25,16 @@ export function handleRequest(request: Request, env?: WorkerEnv): Response | Pro
       )
     }
     return handleItemsRequest(request, env, pathParts[2] ?? null, pathParts[3] ?? null)
+  }
+
+  if (pathParts[0] === "api" && pathParts[1] === "assets" && pathParts.length <= 4) {
+    if (env === undefined) {
+      return Response.json(
+        { error: { code: "server_error", message: "Worker environment is unavailable." } },
+        { status: 500 },
+      )
+    }
+    return handleAssetsRequest(request, env, pathParts[2] ?? null, pathParts[3] ?? null)
   }
 
   if (pathParts[0] === "api" && pathParts[1] === "tags" && pathParts.length <= 3) {

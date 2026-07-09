@@ -1,18 +1,37 @@
 class ModalFixtureError extends Error {}
 
-async function fetchJson(baseUrl, pathname, init) {
-  const response = await fetch(`${baseUrl}${pathname}`, {
-    ...init,
-    headers: { "content-type": "application/json", ...init?.headers },
+function delay(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms)
   })
-  const payload = await response.json()
-  if (!response.ok) {
-    throw new ModalFixtureError(
-      `${pathname} returned ${response.status}: ${JSON.stringify(payload)}`,
-    )
+}
+
+async function fetchJson(baseUrl, pathname, init) {
+  let lastError
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const response = await fetch(`${baseUrl}${pathname}`, {
+        ...init,
+        headers: { "content-type": "application/json", ...init?.headers },
+      })
+      const payload = await response.json()
+      if (!response.ok) {
+        throw new ModalFixtureError(
+          `${pathname} returned ${response.status}: ${JSON.stringify(payload)}`,
+        )
+      }
+
+      return payload
+    } catch (error) {
+      lastError = error
+      await delay(200)
+    }
   }
 
-  return payload
+  if (lastError instanceof Error) {
+    throw lastError
+  }
+  throw new ModalFixtureError(`${pathname} request failed`)
 }
 
 async function deleteResource(baseUrl, pathname) {

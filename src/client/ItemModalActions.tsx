@@ -89,7 +89,7 @@ export function DetailActions(props: {
 
 export function EditActions(props: {
   readonly saving: boolean
-  readonly onCancel: () => void
+  readonly onCancel: () => void | Promise<void>
   readonly onSave: () => void
 }) {
   return (
