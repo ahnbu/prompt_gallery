@@ -7,7 +7,7 @@
 
 .topbar {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(220px, 360px);
+  grid-template-columns: minmax(220px, 1fr) auto minmax(220px, 360px);
   gap: var(--space-4);
   align-items: center;
   padding: var(--space-4);

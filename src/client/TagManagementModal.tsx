@@ -157,8 +157,7 @@ export function TagManagementModal(props: {
         ref={dialogRef}
       >
         <header className="modal-header">
-          <div>
-            <p className="eyebrow">Tags</p>
+          <div className="modal-title-block">
             <h2 id="tag-management-title">태그 관리</h2>
           </div>
           <button aria-label="닫기" className="icon-button" onClick={props.onClose} type="button">

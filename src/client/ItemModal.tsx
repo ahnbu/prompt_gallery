@@ -1,4 +1,4 @@
-import { X } from "lucide-react"
+import { Check, Copy, Star, X } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { DetailActions, EditActions } from "./ItemModalActions"
 import { ItemModalDetail } from "./ItemModalDetail"
@@ -71,12 +71,12 @@ export function ItemModal(props: {
   }, [])
 
   const title =
-    props.state.kind === "add"
-      ? "항목 추가"
-      : mode === "edit"
-        ? "항목 수정"
-        : props.state.item.title
+    props.state.kind === "add" ? "새 항목" : mode === "edit" ? "편집" : props.state.item.title
   const detailItem = props.state.kind === "detail" ? props.state.item : null
+  const favoriteLabel =
+    detailItem?.favorite === true
+      ? `${detailItem.title} 즐겨찾기 해제`
+      : `${detailItem?.title ?? "항목"} 즐겨찾기 추가`
 
   async function save(): Promise<void> {
     const parsed = parseDraft(draft)
@@ -180,19 +180,62 @@ export function ItemModal(props: {
         ref={dialogRef}
       >
         <header className="modal-header">
-          <div>
-            <p className="eyebrow">{props.state.kind === "add" ? "New item" : "Item detail"}</p>
+          <div className="modal-title-block">
+            <ModalTypeBadge type={draft.type} />
             <h2 id="item-modal-title">{title}</h2>
           </div>
-          <button
-            aria-label="닫기"
-            className="icon-button"
-            onClick={() => void closeModal()}
-            type="button"
-          >
-            <X aria-hidden="true" size={17} strokeWidth={1.8} />
-          </button>
+          <div className="modal-header-actions">
+            {mode === "detail" && detailItem !== null && canCopyItemBody(detailItem) ? (
+              <button
+                aria-label={`${detailItem.title} 본문 복사`}
+                className="icon-button"
+                data-qa="copy-body-button"
+                onClick={() => void copyBody()}
+                title="본문 복사"
+                type="button"
+              >
+                {copyStatus === "copied" ? (
+                  <Check aria-hidden="true" size={17} strokeWidth={1.8} />
+                ) : (
+                  <Copy aria-hidden="true" size={17} strokeWidth={1.8} />
+                )}
+              </button>
+            ) : null}
+            {mode === "detail" && detailItem !== null ? (
+              <button
+                aria-label={favoriteLabel}
+                aria-pressed={detailItem.favorite}
+                className={detailItem.favorite ? "icon-button active" : "icon-button"}
+                data-qa="favorite-toggle"
+                data-state={detailItem.favorite ? "favorite" : "not-favorite"}
+                disabled={saving}
+                onClick={() => void toggleFavorite()}
+                title={favoriteLabel}
+                type="button"
+              >
+                <Star
+                  aria-hidden="true"
+                  fill={detailItem.favorite ? "currentColor" : "none"}
+                  size={17}
+                  strokeWidth={1.8}
+                />
+              </button>
+            ) : null}
+            <button
+              aria-label="닫기"
+              className="icon-button"
+              onClick={() => void closeModal()}
+              type="button"
+            >
+              <X aria-hidden="true" size={17} strokeWidth={1.8} />
+            </button>
+          </div>
         </header>
+        {copyStatus !== "idle" ? (
+          <output className="copy-status modal-toast" data-qa="copy-status">
+            {copyStatus === "copied" ? "복사됨" : "복사 실패"}
+          </output>
+        ) : null}
 
         {mode === "detail" && props.state.kind === "detail" ? (
           <ItemModalDetail item={props.state.item} />
@@ -214,26 +257,46 @@ export function ItemModal(props: {
         <footer className="modal-actions">
           {mode === "detail" && detailItem !== null ? (
             <DetailActions
-              canCopyBody={canCopyItemBody(detailItem)}
               confirmDelete={confirmDelete}
-              copyStatus={copyStatus}
-              favorite={detailItem.favorite}
-              itemTitle={detailItem.title}
               onCancelDelete={() => setConfirmDelete(false)}
-              onCopyBody={copyBody}
               onDelete={remove}
-              onEdit={() => setMode("edit")}
+              onEdit={() => {
+                setConfirmDelete(false)
+                setMode("edit")
+              }}
               onStartDelete={() => setConfirmDelete(true)}
-              onToggleFavorite={toggleFavorite}
               saving={saving}
             />
           ) : (
-            <EditActions onCancel={closeModal} onSave={save} saving={saving} />
+            <EditActions
+              canDelete={props.state.kind === "detail"}
+              confirmDelete={confirmDelete}
+              onCancel={confirmDelete ? () => setConfirmDelete(false) : closeModal}
+              onDelete={remove}
+              onSave={save}
+              onStartDelete={() => setConfirmDelete(true)}
+              saving={saving}
+            />
           )}
         </footer>
       </dialog>
     </div>
   )
+}
+
+function ModalTypeBadge(props: { readonly type: Draft["type"] }) {
+  switch (props.type) {
+    case ITEM_TYPES.PROMPT:
+      return <span className="type-badge prompt">프롬프트</span>
+    case ITEM_TYPES.IMAGE_PROMPT:
+      return <span className="type-badge image">이미지</span>
+    case ITEM_TYPES.REPO:
+      return <span className="type-badge repo">레포</span>
+    case "":
+      return <span className="type-badge neutral">새 항목</span>
+    default:
+      return assertNever(props.type)
+  }
 }
 
 async function cleanupCurrentStagedAsset(state: ItemModalState, draft: Draft): Promise<void> {
@@ -265,4 +328,8 @@ function handleError(error: unknown, setError: (message: string) => void): void 
   }
 
   throw error
+}
+
+function assertNever(value: never): never {
+  throw new Error(`Unexpected modal type: ${String(value)}`)
 }

@@ -8,8 +8,8 @@ export function ItemModalDetail(props: {
   const item = props.item
   return (
     <div className="detail-stack">
-      {item.type === "image_prompt" ? <ImagePreviewField item={item} readOnly /> : null}
       <p className="detail-body">{item.body ?? item.githubUrl ?? "본문 없음"}</p>
+      {item.type === "image_prompt" ? <ImagePreviewField item={item} readOnly /> : null}
       {item.type === "repo" && item.githubUrl !== null ? (
         <a
           className="detail-link"
@@ -23,6 +23,10 @@ export function ItemModalDetail(props: {
         </a>
       ) : null}
       {item.notes !== null ? <p className="detail-notes">{item.notes}</p> : null}
+      <div className="detail-divider" aria-hidden="true" />
+      <section className="detail-title-section" aria-label="제목">
+        <h3>{item.title}</h3>
+      </section>
       {item.tags.length > 0 ? (
         <div className="card-tags" aria-label="태그">
           {item.tags.map((tag) => (
@@ -32,6 +36,9 @@ export function ItemModalDetail(props: {
           ))}
         </div>
       ) : null}
+      <footer className="detail-meta">
+        <time dateTime={item.updatedAt}>수정일 {item.updatedAt.slice(0, 10)}</time>
+      </footer>
     </div>
   )
 }

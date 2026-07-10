@@ -2,7 +2,14 @@ export async function runFullRegression(baseUrl, output, scenarios) {
   const artifacts = []
   for (const [name, runner] of scenarios) {
     const scenarioOutput = output.replace(/\.md$/, `-${name}.md`)
-    artifacts.push({ scenario: name, artifacts: await runner(baseUrl, scenarioOutput) })
+    try {
+      artifacts.push({ scenario: name, artifacts: await runner(baseUrl, scenarioOutput) })
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(`${name}: ${error.message}`)
+      }
+      throw error
+    }
   }
   return artifacts
 }

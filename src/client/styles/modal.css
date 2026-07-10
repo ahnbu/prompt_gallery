@@ -34,11 +34,23 @@
   gap: var(--space-3);
 }
 
+.modal-title-block,
+.modal-header-actions {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.modal-header-actions {
+  flex: 0 0 auto;
+}
+
 .modal-header h2 {
   margin: 0;
   color: var(--text-primary);
-  font-size: 20px;
-  font-weight: 590;
+  font-size: 16px;
+  font-weight: 650;
   line-height: 1.25;
 }
 
@@ -49,6 +61,7 @@
 }
 
 .form-grid label,
+.form-field,
 .readonly-field {
   display: grid;
   gap: var(--space-2);
@@ -94,13 +107,39 @@
 .delete-warning {
   margin: 0;
   color: var(--text-secondary);
-  font-size: 13px;
-  line-height: 1.5;
+  font-size: var(--font-detail-body);
+  line-height: var(--line-detail-body);
   white-space: pre-wrap;
 }
 
 .detail-notes {
+  font-size: 13px;
+  line-height: 1.5;
   color: var(--text-muted);
+}
+
+.detail-divider {
+  height: 1px;
+  background: var(--border-subtle);
+}
+
+.detail-title-section h3 {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 590;
+  line-height: 1.4;
+}
+
+.detail-meta {
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.modal-toast {
+  width: fit-content;
+  justify-self: end;
 }
 
 .detail-link {
@@ -220,6 +259,19 @@
 .tag-management-row-heading strong {
   color: var(--text-primary);
   font-weight: 590;
+}
+
+.tag-source-badge {
+  display: inline-flex;
+  min-height: 22px;
+  align-items: center;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  background: var(--surface-raised);
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.4;
 }
 
 .tag-management-row-heading span:last-child,

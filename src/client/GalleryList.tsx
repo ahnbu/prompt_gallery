@@ -1,6 +1,6 @@
 import { Plus } from "lucide-react"
 import { GalleryCard } from "./GalleryCard"
-import type { Item, WorkflowItem } from "./gallery-data"
+import type { Item, Tag, WorkflowItem } from "./gallery-data"
 import { type CardEntry, entryId } from "./gallery-model"
 
 type SectionAction = {
@@ -16,16 +16,20 @@ export function GalleryResults(props: {
   readonly onAddRepo: () => void
   readonly onAddWorkflow: () => void
   readonly onFavoriteChange: (item: Item) => Promise<void>
+  readonly onTagsChange: (item: Item, tags: readonly string[]) => Promise<void>
   readonly onOpenItem: (item: Item) => void
   readonly onOpenWorkflow: (workflow: WorkflowItem) => void
   readonly showUnified: boolean
+  readonly tags: readonly Tag[]
 }) {
   return props.showUnified ? (
     <UnifiedList
       entries={props.filteredEntries}
       onFavoriteChange={props.onFavoriteChange}
+      onTagsChange={props.onTagsChange}
       onOpenItem={props.onOpenItem}
       onOpenWorkflow={props.onOpenWorkflow}
+      tags={props.tags}
     />
   ) : (
     <SectionedList
@@ -35,8 +39,10 @@ export function GalleryResults(props: {
       onAddRepo={props.onAddRepo}
       onAddWorkflow={props.onAddWorkflow}
       onFavoriteChange={props.onFavoriteChange}
+      onTagsChange={props.onTagsChange}
       onOpenItem={props.onOpenItem}
       onOpenWorkflow={props.onOpenWorkflow}
+      tags={props.tags}
     />
   )
 }
@@ -44,8 +50,10 @@ export function GalleryResults(props: {
 function UnifiedList(props: {
   readonly entries: readonly CardEntry[]
   readonly onFavoriteChange: (item: Item) => Promise<void>
+  readonly onTagsChange: (item: Item, tags: readonly string[]) => Promise<void>
   readonly onOpenItem: (item: Item) => void
   readonly onOpenWorkflow: (workflow: WorkflowItem) => void
+  readonly tags: readonly Tag[]
 }) {
   return (
     <section className="content-panel" data-qa="unified-results" aria-label="검색 결과">
@@ -57,8 +65,10 @@ function UnifiedList(props: {
         entries={props.entries}
         emptyLabel="조건에 맞는 항목이 없습니다"
         onFavoriteChange={props.onFavoriteChange}
+        onTagsChange={props.onTagsChange}
         onOpenItem={props.onOpenItem}
         onOpenWorkflow={props.onOpenWorkflow}
+        tags={props.tags}
       />
     </section>
   )
@@ -71,8 +81,10 @@ function SectionedList(props: {
   readonly onAddRepo: () => void
   readonly onAddWorkflow: () => void
   readonly onFavoriteChange: (item: Item) => Promise<void>
+  readonly onTagsChange: (item: Item, tags: readonly string[]) => Promise<void>
   readonly onOpenItem: (item: Item) => void
   readonly onOpenWorkflow: (workflow: WorkflowItem) => void
+  readonly tags: readonly Tag[]
 }) {
   const promptEntries = props.entries.filter(
     (entry) => entry.kind === "item" && entry.item.type === "prompt",
@@ -93,8 +105,10 @@ function SectionedList(props: {
         title="프롬프트"
         entries={promptEntries}
         onFavoriteChange={props.onFavoriteChange}
+        onTagsChange={props.onTagsChange}
         onOpenItem={props.onOpenItem}
         onOpenWorkflow={props.onOpenWorkflow}
+        tags={props.tags}
       />
       <GallerySection
         action={{ label: "이미지 프롬프트 추가", onClick: props.onAddImagePrompt }}
@@ -102,8 +116,10 @@ function SectionedList(props: {
         title="이미지 프롬프트"
         entries={imageEntries}
         onFavoriteChange={props.onFavoriteChange}
+        onTagsChange={props.onTagsChange}
         onOpenItem={props.onOpenItem}
         onOpenWorkflow={props.onOpenWorkflow}
+        tags={props.tags}
       />
       <GallerySection
         action={{ label: "Workflow 추가", onClick: props.onAddWorkflow }}
@@ -111,8 +127,10 @@ function SectionedList(props: {
         title="Workflow"
         entries={workflowEntries}
         onFavoriteChange={props.onFavoriteChange}
+        onTagsChange={props.onTagsChange}
         onOpenItem={props.onOpenItem}
         onOpenWorkflow={props.onOpenWorkflow}
+        tags={props.tags}
       />
       <GallerySection
         action={{ label: "레포 추가", onClick: props.onAddRepo }}
@@ -120,8 +138,10 @@ function SectionedList(props: {
         title="레포"
         entries={repoEntries}
         onFavoriteChange={props.onFavoriteChange}
+        onTagsChange={props.onTagsChange}
         onOpenItem={props.onOpenItem}
         onOpenWorkflow={props.onOpenWorkflow}
+        tags={props.tags}
       />
     </div>
   )
@@ -133,8 +153,10 @@ function GallerySection(props: {
   readonly title: string
   readonly entries: readonly CardEntry[]
   readonly onFavoriteChange: (item: Item) => Promise<void>
+  readonly onTagsChange: (item: Item, tags: readonly string[]) => Promise<void>
   readonly onOpenItem: (item: Item) => void
   readonly onOpenWorkflow: (workflow: WorkflowItem) => void
+  readonly tags: readonly Tag[]
 }) {
   return (
     <section className="content-panel" data-qa={props.qa} aria-label={props.title}>
@@ -157,8 +179,10 @@ function GallerySection(props: {
         entries={props.entries}
         emptyLabel="아직 항목이 없습니다"
         onFavoriteChange={props.onFavoriteChange}
+        onTagsChange={props.onTagsChange}
         onOpenItem={props.onOpenItem}
         onOpenWorkflow={props.onOpenWorkflow}
+        tags={props.tags}
       />
     </section>
   )
@@ -168,8 +192,10 @@ function CardGrid(props: {
   readonly entries: readonly CardEntry[]
   readonly emptyLabel: string
   readonly onFavoriteChange: (item: Item) => Promise<void>
+  readonly onTagsChange: (item: Item, tags: readonly string[]) => Promise<void>
   readonly onOpenItem: (item: Item) => void
   readonly onOpenWorkflow: (workflow: WorkflowItem) => void
+  readonly tags: readonly Tag[]
 }) {
   if (props.entries.length === 0) {
     return <p className="empty-copy">{props.emptyLabel}</p>
@@ -186,8 +212,10 @@ function CardGrid(props: {
           entry={entry}
           key={`${entry.kind}:${entryId(entry)}`}
           onFavoriteChange={props.onFavoriteChange}
+          onTagsChange={props.onTagsChange}
           onOpenItem={props.onOpenItem}
           onOpenWorkflow={props.onOpenWorkflow}
+          tags={props.tags}
         />
       ))}
     </div>

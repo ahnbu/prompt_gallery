@@ -116,7 +116,7 @@ async function runViewport(baseUrl, outputPath, viewport) {
     )
     artifacts.push(await screenshot(page, screenshotStem, viewport.name, "merged-filter"))
     const downloadPromise = page.waitForEvent("download")
-    await page.getByRole("button", { name: "Export", exact: true }).click()
+    await page.getByRole("button", { name: "내보내기", exact: true }).click()
     const download = await downloadPromise
     assert(
       download.suggestedFilename() === "prompt-gallery-export.json",

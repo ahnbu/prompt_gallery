@@ -189,7 +189,7 @@ export async function openEdit(page, title) {
     .click()
   await assertVisible(page.getByRole("dialog", { name: title }), "Detail modal missing")
   await page.getByRole("button", { name: "수정", exact: true }).click()
-  await assertVisible(page.getByRole("dialog", { name: "항목 수정" }), "Edit modal missing")
+  await assertVisible(page.getByRole("dialog", { name: "편집" }), "Edit modal missing")
 }
 
 function assetIdFromResponse(bodyText) {

@@ -129,7 +129,7 @@ async function createRepoThroughUi(
 ) {
   await page.getByRole("button", { name: "레포", exact: true }).click()
   await page.getByRole("button", { name: "추가", exact: true }).click()
-  await assertVisible(page.getByRole("dialog", { name: "항목 추가" }), "Repo add modal missing")
+  await assertVisible(page.getByRole("dialog", { name: "새 항목" }), "Repo add modal missing")
   await page.getByLabel("제목").fill(repoTitle)
   await page.getByLabel("GitHub URL").fill(githubUrl)
   await page.getByRole("button", { name: "저장", exact: true }).click()

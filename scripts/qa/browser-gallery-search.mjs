@@ -52,7 +52,7 @@ async function assertTypeBadges(page, fixture) {
   const expectedBadges = [
     { title: fixture.promptTitle, badge: "프롬프트" },
     { title: fixture.imageTitle, badge: "이미지" },
-    { title: fixture.workflowTitle, badge: "Workflow" },
+    { title: fixture.workflowTitle, badge: "워크플로우" },
     { title: fixture.repoTitle, badge: "레포" },
   ]
 
@@ -66,11 +66,23 @@ async function assertTypeBadges(page, fixture) {
   }
 }
 
-async function assertLatestSort(page, fixture) {
+async function assertLatestSort(page, baseUrl, fixture) {
   const titles = await page
     .locator('[data-qa="section-prompt"] [data-qa="gallery-card"] h3')
     .allTextContents()
-  const orderedTitles = [fixture.overflowTitle, fixture.researchOnlyTitle, fixture.promptTitle]
+  const promptItems = await Promise.all(
+    [fixture.overflowId, fixture.researchOnlyId, fixture.promptId].map((id) =>
+      getItem(baseUrl, id),
+    ),
+  )
+  const orderedTitles = promptItems
+    .toSorted(
+      (left, right) =>
+        right.updatedAt.localeCompare(left.updatedAt) ||
+        right.createdAt.localeCompare(left.createdAt) ||
+        right.id.localeCompare(left.id),
+    )
+    .map((item) => item.title)
   const positions = orderedTitles.map((title) => titles.indexOf(title))
 
   assert(
@@ -101,6 +113,70 @@ async function assertVisibleTagLimit(page, fixture) {
     `Tag chips should stay compact with ellipsis; got ${JSON.stringify(oversizedTag)}`,
   )
   await assertVisible(hiddenCount.filter({ hasText: "+2" }), "Hidden tag count should show +2")
+}
+
+async function getItem(baseUrl, id) {
+  const response = await fetch(new URL(`/api/items/${id}`, baseUrl))
+  const payload = await response.json()
+  assert(response.ok, `Item fetch failed: ${response.status} ${JSON.stringify(payload)}`)
+  return payload.item
+}
+
+async function waitForItemTag(baseUrl, itemId, tagName, expected) {
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    const item = await getItem(baseUrl, itemId)
+    const hasTag = item.tags.some((tag) => tag.name === tagName)
+    if (hasTag === expected) {
+      return item
+    }
+    await pageDelay(250)
+  }
+
+  throw new Error(`${tagName} tag did not become ${expected ? "present" : "absent"}`)
+}
+
+function pageDelay(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms)
+  })
+}
+
+async function assertCardInlineTagEditing(page, baseUrl, fixture) {
+  const researchCard = cardByTitle(page, fixture.researchOnlyTitle)
+  await assertVisible(
+    researchCard.getByText(fixture.tagResearch).first(),
+    "Research-only card should start with research tag",
+  )
+  await assertHidden(
+    researchCard.getByText(fixture.tagSlides).first(),
+    "Research-only card should not start with slides tag",
+  )
+
+  await researchCard.getByRole("button", { name: "Tag", exact: true }).click()
+  await researchCard
+    .getByRole("combobox", { name: "태그 추가", exact: true })
+    .selectOption(fixture.tagSlides)
+  await waitForItemTag(baseUrl, fixture.researchOnlyId, fixture.tagSlides, true)
+  await cardByTitle(page, fixture.researchOnlyTitle)
+    .getByText(fixture.tagSlides)
+    .first()
+    .waitFor({ state: "visible", timeout: 5000 })
+
+  await cardByTitle(page, fixture.researchOnlyTitle)
+    .getByRole("button", { name: `${fixture.tagSlides} 태그 삭제`, exact: true })
+    .click()
+  await waitForItemTag(baseUrl, fixture.researchOnlyId, fixture.tagSlides, false)
+  await page.reload({ waitUntil: "networkidle" })
+  const reloadedCard = cardByTitle(page, fixture.researchOnlyTitle)
+  await assertVisible(reloadedCard, "Research-only card should remain visible after reload")
+  await assertVisible(
+    reloadedCard.getByText(fixture.tagResearch).first(),
+    "Inline tag edit should preserve existing manual tags after reload",
+  )
+  await assertHidden(
+    reloadedCard.getByText(fixture.tagSlides).first(),
+    "Inline tag delete should persist after reload",
+  )
 }
 
 async function assertTabFiltering(page, fixture) {
@@ -199,8 +275,9 @@ async function runViewport(baseUrl, outputPath, fixture, viewport) {
     await assertShell(page)
     await assertAllView(page, fixture)
     await assertTypeBadges(page, fixture)
-    await assertLatestSort(page, fixture)
+    await assertLatestSort(page, baseUrl, fixture)
     await assertVisibleTagLimit(page, fixture)
+    await assertCardInlineTagEditing(page, baseUrl, fixture)
     await assertSectionAddActions(page)
     artifacts.push(await screenshot(page, screenshotStem, viewport.name, "all"))
 

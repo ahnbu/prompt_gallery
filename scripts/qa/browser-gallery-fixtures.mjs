@@ -104,21 +104,21 @@ export async function seedGalleryData(baseUrl) {
     favorite: true,
     tags: [tagResearch, tagSlides],
   })
-  await delay(25)
+  await delay(75)
   const researchOnly = await createItem(baseUrl, {
     type: "prompt",
     title: `Task11 Research Only ${suffix}`,
     body: "Research-only prompt that should disappear under AND filtering.",
     tags: [tagResearch],
   })
-  await delay(25)
+  await delay(75)
   const imagePrompt = await createItem(baseUrl, {
     type: "image_prompt",
     title: `Task11 Image Prompt ${suffix}`,
     body: "A compact image prompt without preview.",
     tags: [tagSlides],
   })
-  await delay(25)
+  await delay(75)
   const sampleImagePrompt = await createItem(baseUrl, {
     type: "image_prompt",
     title: `Task11 Sample Image Prompt ${suffix}`,
@@ -126,21 +126,21 @@ export async function seedGalleryData(baseUrl) {
     notes: "Actual sample data that can be deleted like any other saved image prompt.",
     tags: [tagResearch, tagSlides],
   })
-  await delay(25)
+  await delay(75)
   const repo = await createItem(baseUrl, {
     type: "repo",
     title: `Task11 Repo ${suffix}`,
     githubUrl: "https://github.com/example/prompt-gallery-task11",
     tags: [tagSlides],
   })
-  await delay(25)
+  await delay(75)
   const overflow = await createItem(baseUrl, {
     type: "prompt",
     title: `Task11 Many Tags ${suffix}`,
     body: "Prompt with more than ten visible tags.",
     tags: overflowTags,
   })
-  await delay(25)
+  await delay(75)
   const workflow = await createWorkflow(baseUrl, {
     name: `Task11 Workflow ${suffix}`,
     notes: "Workflow section fixture.",
@@ -164,6 +164,9 @@ export async function seedGalleryData(baseUrl) {
       repo.id,
       overflow.id,
     ],
+    promptId: prompt.id,
+    researchOnlyId: researchOnly.id,
+    overflowId: overflow.id,
     workflowIds: [workflow.id],
     promptTitle: prompt.title,
     researchOnlyTitle: researchOnly.title,

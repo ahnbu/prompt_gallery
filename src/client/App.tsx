@@ -1,15 +1,4 @@
-import {
-  Download,
-  FileText,
-  Github,
-  Image,
-  Layers,
-  Plus,
-  Search,
-  Star,
-  Tags,
-  Workflow,
-} from "lucide-react"
+import { Download, Plus, Search, Tags } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { GalleryResults } from "./GalleryList"
 import { ItemModal, type ItemModalState, defaultTypeForTab } from "./ItemModal"
@@ -30,23 +19,10 @@ import {
   filteredCardEntries,
   shouldShowUnifiedResults,
 } from "./gallery-model"
-import { updateItemFavorite } from "./item-mutations"
+import { tabs } from "./gallery-tabs"
+import { updateItem, updateItemFavorite } from "./item-mutations"
 
 type GalleryStatus = "loading" | "ready" | "error"
-
-const tabs: readonly {
-  readonly value: GalleryTab
-  readonly label: string
-  readonly shortLabel: string
-  readonly icon: typeof Layers
-}[] = [
-  { value: "favorite", label: "즐겨찾기", shortLabel: "즐겨찾기", icon: Star },
-  { value: "all", label: "All", shortLabel: "All", icon: Layers },
-  { value: "prompt", label: "프롬프트", shortLabel: "프롬프트", icon: FileText },
-  { value: "image_prompt", label: "이미지 프롬프트", shortLabel: "이미지", icon: Image },
-  { value: "workflow", label: "Workflow", shortLabel: "Workflow", icon: Workflow },
-  { value: "repo", label: "레포", shortLabel: "레포", icon: Github },
-]
 
 const emptyData: GalleryData = { items: [], tags: [], workflows: [] }
 
@@ -119,6 +95,24 @@ export function App() {
     )
   }
 
+  async function changeTags(item: Item, tags: readonly string[]): Promise<void> {
+    await updateItem(item.id, {
+      title: item.title,
+      body: item.body,
+      notes: item.notes,
+      githubUrl: item.githubUrl,
+      imageAssetId: item.imageAssetId,
+      tags,
+    })
+    const data = await refreshGalleryData()
+    const updatedItem = data.items.find((candidate) => candidate.id === item.id)
+    setModalState((current) =>
+      current?.kind === "detail" && updatedItem !== undefined && current.item.id === item.id
+        ? { kind: "detail", item: updatedItem }
+        : current,
+    )
+  }
+
   function openAddModal(): void {
     if (activeTab === "workflow") {
       openAddWorkflowModal()
@@ -164,21 +158,21 @@ export function App() {
           <h1 id="app-title">Prompt Gallery</h1>
         </div>
         <div className="topbar-actions">
-          <button className="add-button" onClick={openAddModal} type="button">
+          <button
+            className="primary-button topbar-primary-action"
+            onClick={openAddModal}
+            type="button"
+          >
             <Plus aria-hidden="true" size={17} strokeWidth={1.8} />
             <span>추가</span>
           </button>
-          <button
-            className="secondary-button"
-            onClick={() => setTagManagementOpen(true)}
-            type="button"
-          >
+          <button className="ghost-button" onClick={() => setTagManagementOpen(true)} type="button">
             <Tags aria-hidden="true" size={17} strokeWidth={1.8} />
             <span>태그 관리</span>
           </button>
-          <button className="secondary-button" onClick={() => void exportGallery()} type="button">
+          <button className="ghost-button" onClick={() => void exportGallery()} type="button">
             <Download aria-hidden="true" size={17} strokeWidth={1.8} />
-            <span>Export</span>
+            <span>내보내기</span>
           </button>
         </div>
         <label className="search-control">
@@ -203,11 +197,13 @@ export function App() {
               aria-current={active ? "page" : undefined}
               aria-label={tab.label}
               className={active ? "tab-button active" : "tab-button"}
+              data-tab-tone={tab.tone}
               key={tab.value}
               onClick={() => setActiveTab(tab.value)}
               title={tab.label}
               type="button"
             >
+              <span className="tab-dot" aria-hidden="true" />
               <Icon aria-hidden="true" size={17} strokeWidth={1.8} />
               <span>{tab.shortLabel}</span>
             </button>
@@ -249,9 +245,11 @@ export function App() {
           onAddRepo={() => openAddItemModal(ITEM_TYPES.REPO)}
           onAddWorkflow={openAddWorkflowModal}
           onFavoriteChange={toggleFavorite}
+          onTagsChange={changeTags}
           onOpenItem={openDetailModal}
           onOpenWorkflow={openWorkflowModal}
           showUnified={showUnified}
+          tags={galleryData.tags}
         />
       ) : null}
       {modalState !== null ? (

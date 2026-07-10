@@ -1,20 +1,30 @@
-@media (max-width: 680px) {
+@media (max-width: 860px) {
   .app-shell {
     padding: var(--space-4);
   }
 
   .topbar {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .search-control {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 680px) {
+  .topbar {
     grid-template-columns: 1fr;
   }
 
-  .add-button,
+  .primary-button,
   .topbar-actions,
   .search-control {
     width: 100%;
   }
 
-  .topbar-actions .add-button,
-  .topbar-actions .secondary-button {
+  .topbar-actions .primary-button,
+  .topbar-actions .ghost-button {
     flex: 1 1 140px;
   }
 
@@ -72,7 +82,8 @@
 @media (prefers-reduced-motion: reduce) {
   .tab-button,
   .tag-chip,
-  .card-open-button {
+  .card-open-button,
+  .gallery-card {
     transition: none;
   }
 }

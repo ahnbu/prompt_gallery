@@ -1,24 +1,31 @@
-import { Copy, Star } from "lucide-react"
+import { Check, Copy, Star } from "lucide-react"
 import { useState } from "react"
 import { ImagePreviewField } from "./ImagePreviewField"
-import type { Item, ItemTag, ItemType, WorkflowItem } from "./gallery-data"
+import { TagChipsEditor } from "./TagChipsEditor"
+import type { Item, ItemType, Tag, WorkflowItem } from "./gallery-data"
 import { type CardEntry, assertNever, visibleTags } from "./gallery-model"
 import { canCopyItemBody } from "./item-actions-model"
+import { automaticTagNames, manualTagNames } from "./tag-utils"
 
 type CopyStatus = "idle" | "copied" | "failed"
+type TagStatus = "idle" | "saving" | "saved" | "failed"
 
 export function GalleryCard(props: {
   readonly entry: CardEntry
   readonly onFavoriteChange: (item: Item) => Promise<void>
+  readonly onTagsChange: (item: Item, tags: readonly string[]) => Promise<void>
   readonly onOpenItem: (item: Item) => void
   readonly onOpenWorkflow: (workflow: WorkflowItem) => void
+  readonly tags: readonly Tag[]
 }) {
   switch (props.entry.kind) {
     case "item":
       return (
         <ItemCard
+          availableTags={props.tags}
           item={props.entry.item}
           onFavoriteChange={props.onFavoriteChange}
+          onTagsChange={props.onTagsChange}
           onOpenItem={props.onOpenItem}
         />
       )
@@ -30,15 +37,23 @@ export function GalleryCard(props: {
 }
 
 function ItemCard(props: {
+  readonly availableTags: readonly Tag[]
   readonly item: Item
   readonly onFavoriteChange: (item: Item) => Promise<void>
+  readonly onTagsChange: (item: Item, tags: readonly string[]) => Promise<void>
   readonly onOpenItem: (item: Item) => void
 }) {
   const item = props.item
-  const tags = visibleTags(item.tags)
-  const hiddenTagCount = item.tags.length - tags.length
+  const displayedTags = visibleTags(item.tags)
+  const hiddenTagCount = item.tags.length - displayedTags.length
+  const hiddenTags = item.tags.slice(displayedTags.length)
+  const hiddenManualTags = manualTagNames(hiddenTags)
+  const allManualTags = manualTagNames(item.tags)
+  const manualTags = manualTagNames(displayedTags)
+  const automaticTags = automaticTagNames(displayedTags)
   const preview = item.body ?? item.notes ?? item.githubUrl ?? ""
   const [copyStatus, setCopyStatus] = useState<CopyStatus>("idle")
+  const [tagStatus, setTagStatus] = useState<TagStatus>("idle")
   const favoriteLabel = item.favorite
     ? `${item.title} 즐겨찾기 해제`
     : `${item.title} 즐겨찾기 추가`
@@ -60,13 +75,27 @@ function ItemCard(props: {
     }
   }
 
+  async function changeTags(tags: readonly string[]): Promise<void> {
+    setTagStatus("saving")
+    try {
+      await props.onTagsChange(item, tags)
+      setTagStatus("saved")
+    } catch (error) {
+      if (error instanceof Error) {
+        setTagStatus("failed")
+        return
+      }
+      throw error
+    }
+  }
+
   return (
     <article className="gallery-card" data-card-type={item.type} data-qa="gallery-card">
       <div className="card-topline">
         <TypeBadge type={item.type} />
         <div className="card-actions">
           {copyStatus !== "idle" ? (
-            <output className="copy-status" data-qa="copy-status">
+            <output className="copy-status card-toast" data-qa="copy-status">
               {copyStatus === "copied" ? "복사됨" : "복사 실패"}
             </output>
           ) : null}
@@ -79,7 +108,11 @@ function ItemCard(props: {
               title="본문 복사"
               type="button"
             >
-              <Copy aria-hidden="true" size={16} strokeWidth={1.8} />
+              {copyStatus === "copied" ? (
+                <Check aria-hidden="true" size={16} strokeWidth={1.8} />
+              ) : (
+                <Copy aria-hidden="true" size={16} strokeWidth={1.8} />
+              )}
             </button>
           ) : null}
           <button
@@ -112,12 +145,24 @@ function ItemCard(props: {
         type="button"
       >
         {item.type === "image_prompt" ? <ImagePreviewField compact item={item} /> : null}
-        <h3>{item.title}</h3>
         <p className="card-preview">{preview}</p>
+        <h3>{item.title}</h3>
       </button>
-      <TagList hiddenTagCount={hiddenTagCount} tags={tags} />
-      <footer className="card-footer">
-        <time dateTime={item.updatedAt}>{item.updatedAt.slice(0, 10)}</time>
+      <TagChipsEditor
+        automaticTags={automaticTags}
+        availableTags={props.availableTags}
+        compact
+        hiddenTagCount={hiddenTagCount}
+        manualTags={manualTags}
+        onChange={(tags) => void changeTags([...tags, ...hiddenManualTags])}
+        selectedTags={allManualTags}
+      />
+      <footer className="card-footer card-status-footer">
+        {tagStatus !== "idle" ? (
+          <output className="copy-status" data-qa="card-tag-status">
+            {tagStatus === "saving" ? "저장 중" : tagStatus === "saved" ? "저장됨" : "저장 실패"}
+          </output>
+        ) : null}
         {item.type === "repo" && item.githubUrl !== null ? (
           <a
             data-qa="repo-card-github"
@@ -139,12 +184,48 @@ function WorkflowCard(props: {
   readonly onOpenWorkflow: (workflow: WorkflowItem) => void
 }) {
   const workflow = props.workflow
+  const [copyStatus, setCopyStatus] = useState<CopyStatus>("idle")
+
+  async function copySteps(): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(workflowStepsText(workflow))
+      setCopyStatus("copied")
+    } catch (error) {
+      if (error instanceof Error || error instanceof DOMException) {
+        setCopyStatus("failed")
+        return
+      }
+      throw error
+    }
+  }
+
   return (
     <article className="gallery-card" data-card-type="workflow" data-qa="gallery-card">
       <div className="card-topline">
         <span className="type-badge workflow" data-qa="type-badge" data-type="workflow">
-          Workflow
+          워크플로우
         </span>
+        <div className="card-actions">
+          {copyStatus !== "idle" ? (
+            <output className="copy-status card-toast" data-qa="copy-status">
+              {copyStatus === "copied" ? "복사됨" : "복사 실패"}
+            </output>
+          ) : null}
+          <button
+            aria-label={`${workflow.name} 스텝 복사`}
+            className="star-indicator"
+            data-qa="copy-workflow-button"
+            onClick={copySteps}
+            title="스텝 복사"
+            type="button"
+          >
+            {copyStatus === "copied" ? (
+              <Check aria-hidden="true" size={16} strokeWidth={1.8} />
+            ) : (
+              <Copy aria-hidden="true" size={16} strokeWidth={1.8} />
+            )}
+          </button>
+        </div>
       </div>
       <button
         aria-label={`${workflow.name} 상세 열기`}
@@ -153,17 +234,14 @@ function WorkflowCard(props: {
         onClick={() => props.onOpenWorkflow(workflow)}
         type="button"
       >
-        <h3>{workflow.name}</h3>
         <p className="card-preview">{workflow.notes ?? `${workflow.steps.length} steps`}</p>
+        <h3>{workflow.name}</h3>
       </button>
-      <footer className="card-footer">
-        <time dateTime={workflow.updatedAt}>{workflow.updatedAt.slice(0, 10)}</time>
-      </footer>
     </article>
   )
 }
 
-function TypeBadge({ type }: { readonly type: ItemType }) {
+export function TypeBadge({ type }: { readonly type: ItemType }) {
   switch (type) {
     case "prompt":
       return (
@@ -188,23 +266,11 @@ function TypeBadge({ type }: { readonly type: ItemType }) {
   }
 }
 
-function TagList(props: { readonly tags: readonly ItemTag[]; readonly hiddenTagCount: number }) {
-  if (props.tags.length === 0) {
-    return null
-  }
-
-  return (
-    <div className="card-tags" aria-label="태그">
-      {props.tags.map((tag) => (
-        <span className="card-tag" data-qa="card-tag" key={tag.id}>
-          {tag.name}
-        </span>
-      ))}
-      {props.hiddenTagCount > 0 ? (
-        <span className="card-tag" data-qa="hidden-tag-count">
-          +{props.hiddenTagCount}
-        </span>
-      ) : null}
-    </div>
-  )
+function workflowStepsText(workflow: WorkflowItem): string {
+  return workflow.steps
+    .map((step, index) => {
+      const text = step.memo ?? step.url ?? step.itemId ?? step.kind
+      return `${index + 1}. ${text}`
+    })
+    .join("\n")
 }

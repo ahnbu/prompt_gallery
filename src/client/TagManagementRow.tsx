@@ -1,4 +1,4 @@
-import { Tag as TagIcon } from "lucide-react"
+import { GitMerge, Save, Trash2 } from "lucide-react"
 import type { Tag } from "./gallery-data"
 import type {
   ConfirmDeleteById,
@@ -27,6 +27,7 @@ export function TagManagementRow(props: {
       <div className="tag-management-row-heading">
         <span className="tag-color-dot" style={{ backgroundColor: props.draft.color }} />
         <strong data-qa="tag-row-name">{props.tag.name}</strong>
+        <span className="tag-source-badge">{props.tag.keywords.length > 0 ? "자동" : "수동"}</span>
         <span>{props.tag.itemCount}개 항목</span>
       </div>
       <div className="tag-management-grid">
@@ -83,7 +84,7 @@ export function TagManagementRow(props: {
           onClick={() => props.onSave(props.tag)}
           type="button"
         >
-          <TagIcon aria-hidden="true" size={15} strokeWidth={1.8} />
+          <Save aria-hidden="true" size={15} strokeWidth={1.8} />
           저장
         </button>
         <button
@@ -93,6 +94,7 @@ export function TagManagementRow(props: {
           onClick={() => props.onMerge(props.tag)}
           type="button"
         >
+          <GitMerge aria-hidden="true" size={15} strokeWidth={1.8} />
           병합
         </button>
         <button
@@ -102,6 +104,7 @@ export function TagManagementRow(props: {
           onClick={() => props.onDelete(props.tag)}
           type="button"
         >
+          <Trash2 aria-hidden="true" size={15} strokeWidth={1.8} />
           {props.confirmDelete.get(props.tag.id) === true ? "삭제 확인" : "삭제"}
         </button>
         {props.statuses.get(props.tag.id) !== undefined ? (

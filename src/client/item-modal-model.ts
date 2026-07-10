@@ -1,5 +1,6 @@
 import { ITEM_TYPES, type Item, type ItemType } from "./gallery-data"
 import type { GalleryTab } from "./gallery-model"
+import { tagNamesFromText } from "./tag-utils"
 
 export type ItemModalState =
   | { readonly kind: "add"; readonly defaultType: ItemType | null }
@@ -108,20 +109,13 @@ function payloadFromDraft(draft: Draft): ItemPayload {
     notes: normalize(draft.notes),
     githubUrl: normalize(draft.githubUrl),
     ...(draft.imageAssetId !== undefined ? { imageAssetId: draft.imageAssetId } : {}),
-    tags: tagNames(draft.tagsText),
+    tags: tagNamesFromText(draft.tagsText),
   }
 }
 
 function normalize(value: string): string | null {
   const trimmed = value.trim()
   return trimmed.length === 0 ? null : trimmed
-}
-
-function tagNames(value: string): readonly string[] {
-  return value
-    .split(",")
-    .map((tag) => tag.trim().toLowerCase())
-    .filter((tag) => tag.length > 0)
 }
 
 function assertNever(value: never): never {

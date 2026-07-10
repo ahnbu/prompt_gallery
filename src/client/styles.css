@@ -2,5 +2,6 @@
 @import "./styles/layout.css";
 @import "./styles/actions.css";
 @import "./styles/cards.css";
+@import "./styles/image-preview.css";
 @import "./styles/modal.css";
 @import "./styles/responsive.css";

@@ -36,7 +36,7 @@ async function runViewport(baseUrl, outputPath, viewport) {
 
     await page.getByRole("button", { name: "이미지 프롬프트", exact: true }).click()
     await page.getByRole("button", { name: "추가", exact: true }).click()
-    await assertVisible(page.getByRole("dialog", { name: "항목 추가" }), "Add modal missing")
+    await assertVisible(page.getByRole("dialog", { name: "새 항목" }), "Add modal missing")
     await page.getByLabel("제목").fill(title)
     await page.getByRole("textbox", { name: "본문", exact: true }).fill(body)
     await page.getByRole("button", { name: "저장", exact: true }).click()

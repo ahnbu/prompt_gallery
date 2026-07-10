@@ -57,7 +57,7 @@ export async function assertSectionAddButton(page, sectionQa, label) {
 
 async function assertItemSectionAddAction(page, sectionQa, label, expectedType) {
   await page.locator(`[data-qa="${sectionQa}"]`).getByRole("button", { name: label }).click()
-  await assertVisible(page.getByRole("dialog", { name: "항목 추가" }), `${label} modal missing`)
+  await assertVisible(page.getByRole("dialog", { name: "새 항목" }), `${label} modal missing`)
   const selectedType = await page.locator('[data-qa="item-type-select"]').inputValue()
   assert(
     selectedType === expectedType,

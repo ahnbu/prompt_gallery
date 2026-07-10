@@ -57,6 +57,20 @@ thumbnail accents. They must not become structural fills or competing CTAs.
 | Decor/teal | `--decor-teal` | `#2a9d99` |
 | Decor/green | `--decor-green` | `#1aae39` |
 
+### Type Palette
+
+Type colors are semantic aliases for badges and tab dots. They reuse the
+existing accent/decorative direction rather than adding a second brand palette.
+
+| Item Type | Token | Soft Token | Usage |
+|-----------|-------|------------|-------|
+| Prompt | `--type-prompt` `#0075de` | `--type-prompt-soft` `#f2f9ff` | Prompt badges, tab dot |
+| Image Prompt | `--type-image` `#8a4edb` | `--type-image-soft` `#f7f0ff` | Image badges, tab dot |
+| Repo | `--type-repo` `#1aae39` | `--type-repo-soft` `#eefbf1` | Repo badges, tab dot |
+| Workflow | `--type-workflow` `#dd5b00` | `--type-workflow-soft` `#fff4ec` | Workflow badges, tab dot |
+| Favorite | `--type-favorite` `#d88a00` | `--type-favorite-soft` `#fff7e8` | Favorite tab dot |
+| All | `--type-all` `#615d59` | `--type-all-soft` `#f1efed` | All tab dot |
+
 ### Rules
 
 - Use light mode only for the primary shell. Do not keep the previous black
@@ -84,7 +98,9 @@ Inter/system stack. Do not depend on proprietary brand fonts.
 |-------|------|--------|-------------|----------|-------|
 | H1 | 30px | 700 | 1.12 | 0 | App title |
 | H2 | 18px | 650 | 1.3 | 0 | Section heading |
-| Card title | 15px | 650 | 1.35 | 0 | Gallery card title |
+| Card title | 15.5px | 700 | 1.35 | 0 | Gallery card title |
+| Card preview | 12.5px | 400 | 1.5 | 0 | Gallery card body preview |
+| Detail body | 14.5px | 400 | 1.65 | 0 | Modal detail primary content |
 | Body | 15px | 400 | 1.5 | 0 | Default content |
 | Label | 13px | 560 | 1.4 | 0 | Tabs, controls, badges |
 | Caption | 12px | 400 | 1.4 | 0 | Metadata and disabled text |
@@ -227,15 +243,20 @@ States:
   shell must remain square.
 - Desktop wide viewports show at most 4 cards per row. Tablet and mobile may
   reduce columns according to available width.
-- Content order: type badge/actions, media if relevant, title, preview text,
-  tags, footer metadata.
-- Footer metadata should be quiet and scannable.
+- Content order: type badge/actions, preview/media, title, tags. Date metadata
+  does not appear on gallery cards; it belongs in detail/edit surfaces.
+- Card title uses stronger weight while preview text is smaller and muted. This
+  keeps auto-derived titles visible without making title/body duplication feel
+  like two equal headings.
+- Manual tags may expose chip-level remove/add controls. Auto tags remain
+  readable chips with no delete affordance.
 
 States:
 
-- Hover/focus: border or soft shadow emphasis, not a loud color wash.
+- Hover/focus: border plus soft shadow lift, not a loud color wash.
 - Favorite: star icon uses accent color but does not dominate the card.
-- Copy status: short inline status, no toast required unless reused elsewhere.
+- Copy status: icon changes to a check and a compact toast/status appears near
+  the action.
 
 ### Image Prompt Card
 
@@ -262,7 +283,11 @@ States:
 
 - Modal surface uses `--surface-panel`, `--border-default`, and Level 2 shadow.
 - Form fields use white surfaces, 4px to 6px radius, and a visible focus ring.
-- Modal headers and actions remain compact.
+- Modal headers and actions remain compact. Detail headers show the type badge
+  and icon actions; edit/add footers keep destructive, cancel, and confirm
+  actions in a stable left-to-right order.
+- Detail body is the primary content, followed by a divider, subdued title,
+  tags, and quiet date metadata.
 - Destructive actions use text or border emphasis first; do not add a second
   saturated destructive palette unless the interaction requires it.
 
@@ -277,6 +302,8 @@ Rules:
 
 - Animate only color, border-color, background-color, opacity, and transform.
 - Motion must communicate interaction or state. Do not add decorative motion.
+- Card hover may use `translateY(-2px)` with a soft shadow. Copy and save
+  confirmations use compact status/toast feedback without shifting layout.
 - Respect `prefers-reduced-motion` by disabling non-essential transitions.
 - Avoid large press scaling from the reference. Use at most `scale(0.98)` for
   buttons.

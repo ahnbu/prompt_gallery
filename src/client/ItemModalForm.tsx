@@ -1,7 +1,9 @@
 import { ImagePreviewField } from "./ImagePreviewField"
+import { TagChipsEditor } from "./TagChipsEditor"
 import { ITEM_TYPES, type Tag } from "./gallery-data"
 import type { Item } from "./gallery-data"
 import { type Draft, readType } from "./item-modal-model"
+import { automaticTagNames, tagNamesFromText, tagNamesToText } from "./tag-utils"
 
 const typeOptions = [
   { value: ITEM_TYPES.PROMPT, label: "프롬프트" },
@@ -18,7 +20,8 @@ export function ItemModalForm(props: {
   readonly previewItem: Item | null
   readonly setDraft: (draft: Draft) => void
 }) {
-  const automaticTags = props.previewItem?.tags.filter((tag) => tag.sources.includes("auto")) ?? []
+  const automaticTags = props.previewItem === null ? [] : automaticTagNames(props.previewItem.tags)
+  const manualTags = tagNamesFromText(props.draft.tagsText)
   return (
     <div className="form-grid">
       {props.typeEditable ? (
@@ -39,12 +42,19 @@ export function ItemModalForm(props: {
             ))}
           </select>
         </label>
-      ) : (
-        <div className="readonly-field" data-qa="item-type-readonly">
-          <span>유형</span>
-          <strong>{labelForType(props.draft.type)}</strong>
-        </div>
-      )}
+      ) : null}
+      {props.promptLike ? (
+        <label>
+          본문
+          <textarea
+            onChange={(event) =>
+              props.setDraft({ ...props.draft, body: event.currentTarget.value })
+            }
+            rows={7}
+            value={props.draft.body}
+          />
+        </label>
+      ) : null}
       <label>
         제목
         <input
@@ -65,46 +75,15 @@ export function ItemModalForm(props: {
           />
         </label>
       ) : null}
-      {props.promptLike ? (
-        <label>
-          본문
-          <textarea
-            onChange={(event) =>
-              props.setDraft({ ...props.draft, body: event.currentTarget.value })
-            }
-            rows={7}
-            value={props.draft.body}
-          />
-        </label>
-      ) : null}
-      <label>
-        태그
-        <input
-          list="item-modal-tags"
-          onChange={(event) =>
-            props.setDraft({ ...props.draft, tagsText: event.currentTarget.value })
-          }
-          placeholder="쉼표로 구분"
-          value={props.draft.tagsText}
+      <div className="form-field">
+        <span>태그</span>
+        <TagChipsEditor
+          automaticTags={automaticTags}
+          availableTags={props.tags}
+          manualTags={manualTags}
+          onChange={(tags) => props.setDraft({ ...props.draft, tagsText: tagNamesToText(tags) })}
         />
-      </label>
-      <datalist id="item-modal-tags">
-        {props.tags.map((tag) => (
-          <option key={tag.id} value={tag.name} />
-        ))}
-      </datalist>
-      {automaticTags.length > 0 ? (
-        <div className="readonly-field" data-qa="automatic-tags-readonly">
-          <span>자동태그</span>
-          <div className="card-tags">
-            {automaticTags.map((tag) => (
-              <span className="card-tag" data-qa="automatic-tag" key={tag.id}>
-                {tag.name}
-              </span>
-            ))}
-          </div>
-        </div>
-      ) : null}
+      </div>
       {props.draft.type === ITEM_TYPES.IMAGE_PROMPT ? (
         <ImagePreviewField
           imageAssetId={props.draft.imageAssetId === undefined ? null : props.draft.imageAssetId}
@@ -122,8 +101,4 @@ export function ItemModalForm(props: {
       </label>
     </div>
   )
-}
-
-function labelForType(value: Draft["type"]): string {
-  return typeOptions.find((option) => option.value === value)?.label ?? "유형 선택"
 }

@@ -60,7 +60,7 @@ async function assertAddButtonFocused(page, message) {
 
 async function assertDialogCloseAndFocusReturn(page) {
   const addButton = page.getByRole("button", { name: "추가", exact: true })
-  const dialog = page.getByRole("dialog", { name: "항목 추가" })
+  const dialog = page.getByRole("dialog", { name: "새 항목" })
 
   await addButton.click()
   await assertVisible(dialog, "Add modal is missing before close-button test")
@@ -78,10 +78,7 @@ async function assertDialogCloseAndFocusReturn(page) {
 async function assertTabDefault(page, tabName, expectedType) {
   await page.getByRole("button", { name: tabName, exact: true }).click()
   await page.getByRole("button", { name: "추가", exact: true }).click()
-  await assertVisible(
-    page.getByRole("dialog", { name: "항목 추가" }),
-    `${tabName} add modal missing`,
-  )
+  await assertVisible(page.getByRole("dialog", { name: "새 항목" }), `${tabName} add modal missing`)
   const value = await page.getByLabel("유형").inputValue()
   assert(value === expectedType, `${tabName} should default to ${expectedType}, got ${value}`)
   await page.getByRole("button", { name: "닫기", exact: true }).click()
@@ -101,7 +98,7 @@ async function assertTypeDefaults(page) {
 
 async function addBodyOnlyPrompt(page, fixture, artifacts, screenshotStem, viewportName) {
   await page.getByRole("button", { name: "추가", exact: true }).click()
-  await assertVisible(page.getByRole("dialog", { name: "항목 추가" }), "Add modal is missing")
+  await assertVisible(page.getByRole("dialog", { name: "새 항목" }), "Add modal is missing")
   artifacts.push(await screenshot(page, screenshotStem, viewportName, "add"))
 
   await page.getByLabel("유형").selectOption("prompt")
@@ -122,10 +119,11 @@ async function editPrompt(page, fixture, artifacts, screenshotStem, viewportName
   artifacts.push(await screenshot(page, screenshotStem, viewportName, "detail"))
 
   await page.getByRole("button", { name: "수정", exact: true }).click()
-  await assertVisible(page.getByRole("dialog", { name: "항목 수정" }), "Edit modal is missing")
+  const editDialog = page.getByRole("dialog", { name: "편집" })
+  await assertVisible(editDialog, "Edit modal is missing")
   await assertVisible(
-    page.locator('[data-qa="item-type-readonly"]').filter({ hasText: "프롬프트" }),
-    "Edit mode should show read-only type",
+    editDialog.getByText("프롬프트").first(),
+    "Edit mode should show a type badge",
   )
   await assertHidden(
     page.locator('[data-qa="item-type-select"]'),
@@ -147,10 +145,14 @@ async function editPrompt(page, fixture, artifacts, screenshotStem, viewportName
 
   await itemOpenButton(page, fixture.bodyOnly).click()
   await page.getByRole("button", { name: "수정", exact: true }).click()
-  await assertVisible(page.getByRole("dialog", { name: "항목 수정" }), "Edit modal did not reopen")
+  const reopenedEditDialog = page.getByRole("dialog", { name: "편집" })
+  await assertVisible(reopenedEditDialog, "Edit modal did not reopen")
   await page.getByLabel("제목").fill(fixture.editedTitle)
   await page.getByLabel("메모").fill(fixture.editedNotes)
-  await page.getByRole("combobox", { name: "태그", exact: true }).fill(fixture.tagName)
+  await reopenedEditDialog.getByRole("button", { name: "Tag", exact: true }).click()
+  await reopenedEditDialog
+    .getByRole("combobox", { name: "태그 추가", exact: true })
+    .selectOption(fixture.tagName)
   await page.getByRole("button", { name: "저장", exact: true }).click()
   await assertVisible(itemCard(page, fixture.editedTitle), "Edited prompt title is missing")
   await assertVisible(
