@@ -62,6 +62,16 @@ function createRunner(remoteMigrationNames) {
   }
 }
 
+function createUnauthenticatedRunner() {
+  return async (args) => {
+    const command = args.join(" ")
+    if (command === "whoami") {
+      return { code: 1, stdout: "", stderr: "Not logged in" }
+    }
+    throw new Error(`Unexpected wrangler command after auth failure: ${command}`)
+  }
+}
+
 test("deploy check fails when remote D1 is missing a local migration", async () => {
   const fixture = await createDeployCheckFixture()
   try {
@@ -76,6 +86,24 @@ test("deploy check fails when remote D1 is missing a local migration", async () 
     assert.deepEqual(result.pendingMigrations, ["0002_source_aware_item_tags.sql"])
     const evidence = await readFile(fixture.outputPath, "utf8")
     assert.match(evidence, /Pending remote D1 migrations: 0002_source_aware_item_tags\.sql/)
+  } finally {
+    await fixture.cleanup()
+  }
+})
+
+test("deploy check fails when wrangler auth is unavailable", async () => {
+  const fixture = await createDeployCheckFixture()
+  try {
+    const result = await runDeployCheck({
+      rootDir: fixture.rootDir,
+      wranglerPath: fixture.wranglerPath,
+      outputPath: fixture.outputPath,
+      runner: createUnauthenticatedRunner(),
+    })
+
+    assert.equal(result.result, "FAIL")
+    const evidence = await readFile(fixture.outputPath, "utf8")
+    assert.match(evidence, /wrangler auth unavailable: Not logged in/)
   } finally {
     await fixture.cleanup()
   }

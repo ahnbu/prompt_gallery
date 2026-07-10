@@ -43,32 +43,24 @@ function stripJsonComments(text) {
 }
 
 function assert(condition, message) {
-  if (!condition) {
-    throw new DeployCheckError(message)
-  }
+  if (!condition) throw new DeployCheckError(message)
 }
 
-function findD1(config) {
-  return Array.isArray(config.d1_databases)
-    ? config.d1_databases.find((entry) => entry?.binding === "DB")
-    : undefined
-}
-
-function findR2(config) {
-  return Array.isArray(config.r2_buckets)
-    ? config.r2_buckets.find((entry) => entry?.binding === "PREVIEWS")
-    : undefined
+function findBinding(entries, binding) {
+  return Array.isArray(entries) ? entries.find((entry) => entry?.binding === binding) : undefined
 }
 
 function runWrangler(args, cwd = rootDir) {
   return new Promise((resolve) => {
-    const commandInfo = wranglerCommand()
-    const commandArgs = [...commandInfo.prefixArgs, ...wranglerArgs(args)]
-    const child = spawn(commandInfo.command, commandArgs, {
-      cwd,
-      env: { ...process.env, NO_UPDATE_NOTIFIER: "1" },
-      stdio: ["ignore", "pipe", "pipe"],
-    })
+    const child = spawn(
+      process.execPath,
+      [path.join(cwd, "node_modules/wrangler/bin/wrangler.js"), ...args],
+      {
+        cwd,
+        env: { ...process.env, NO_UPDATE_NOTIFIER: "1" },
+        stdio: ["ignore", "pipe", "pipe"],
+      },
+    )
     let stdout = ""
     let stderr = ""
     child.stdout.on("data", (chunk) => {
@@ -102,30 +94,6 @@ function outputContainsJsonName(output, name) {
   }
 }
 
-function quoteWindowsArg(value) {
-  if (/^[A-Za-z0-9_./:=@-]+$/.test(value)) {
-    return value
-  }
-
-  return `"${value.replace(/(["^%])/g, "^$1")}"`
-}
-
-function wranglerCommand() {
-  if (process.platform === "win32") {
-    return { command: "cmd.exe", prefixArgs: ["/d", "/c"] }
-  }
-
-  return { command: "pnpm", prefixArgs: ["exec", "wrangler"] }
-}
-
-function wranglerArgs(args) {
-  if (process.platform === "win32") {
-    return [["pnpm", "exec", "wrangler", ...args].map(quoteWindowsArg).join(" ")]
-  }
-
-  return args
-}
-
 async function localMigrationNames(migrationsPath = defaultMigrationsPath) {
   const entries = await readdir(migrationsPath, { withFileTypes: true })
   return entries
@@ -153,13 +121,9 @@ function remoteMigrationNames(output) {
   const names = new Set()
   for (const group of parsed) {
     const results = group?.results
-    if (!Array.isArray(results)) {
-      continue
-    }
+    if (!Array.isArray(results)) continue
     for (const row of results) {
-      if (typeof row?.name === "string") {
-        names.add(row.name)
-      }
+      if (typeof row?.name === "string") names.add(row.name)
     }
   }
 
@@ -203,8 +167,9 @@ async function checkRemoteMigrations(checks, runner, migrationsPath) {
 async function checkRemoteResources(checks, limitations, options) {
   const whoami = await options.runner(["whoami"])
   if (whoami.code !== 0) {
-    limitations.push(`wrangler auth unavailable: ${sanitizeOutput(whoami.stderr || whoami.stdout)}`)
-    return []
+    throw new DeployCheckError(
+      `wrangler auth unavailable: ${sanitizeOutput(whoami.stderr || whoami.stdout)}`,
+    )
   }
   checks.push("wrangler whoami succeeded")
 
@@ -251,8 +216,8 @@ export async function runDeployCheck(options = {}) {
     assert(!raw.includes("color-db"), "wrangler config must not reference color-db")
 
     const config = JSON.parse(stripJsonComments(raw))
-    const d1 = findD1(config)
-    const r2 = findR2(config)
+    const d1 = findBinding(config.d1_databases, "DB")
+    const r2 = findBinding(config.r2_buckets, "PREVIEWS")
 
     assert(d1 !== undefined, "D1 binding DB is missing")
     assert(d1.database_name === "prompt-gallery-db", "D1 database name must be prompt-gallery-db")

@@ -4,6 +4,7 @@
 
 | 일시 | 유형 | 범위 | 변경내용 | 변경사유 | 작성AI |
 |---|---|---|---|---|---|
+| 2026-07-10 14:09 | fix | deploy | 원격 D1 migration 누락 검사를 테스트 가능하게 보강하고 완료검수 보고서 추가 | - | Codex |
 | 2026-07-10 13:56 | fix | deploy | Windows 환경 wrangler 실행 인자 보정 | - | Antigravity |
 | 2026-07-10 13:56 | fix | deploy | 원격 D1 마이그레이션 누락 검증 로직 및 배포 스크립트 추가 — 배포 전 스키마 불일치 예방 | - | Antigravity |
 | 2026-07-10 13:55 | feat | client-ui | 갤러리 카드 GitHub 링크 아이콘화 및 액션 그룹 통합 사후 검증 반영 | - | Antigravity |
