@@ -112,7 +112,7 @@ function quoteWindowsArg(value) {
 
 function wranglerCommand() {
   if (process.platform === "win32") {
-    return { command: "cmd.exe", prefixArgs: ["/d", "/s", "/c"] }
+    return { command: "cmd.exe", prefixArgs: ["/d", "/c"] }
   }
 
   return { command: "pnpm", prefixArgs: ["exec", "wrangler"] }
