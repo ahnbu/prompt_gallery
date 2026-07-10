@@ -1,16 +1,24 @@
 import { spawn } from "node:child_process"
 import { existsSync } from "node:fs"
-import { mkdir, readFile, writeFile } from "node:fs/promises"
+import { mkdir, readFile, readdir, writeFile } from "node:fs/promises"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
 const rootDir = path.resolve(fileURLToPath(new URL("../..", import.meta.url)))
 const defaultWranglerPath = path.join(rootDir, "wrangler.jsonc")
 const defaultOutputPath = path.join(rootDir, ".omo/evidence/wave-4-deploy-check.txt")
+const defaultMigrationsPath = path.join(rootDir, "migrations")
 const expectedD1Id = "138200be-9d3b-4acf-bb71-42d5ca7e43b7"
 const allowedArgs = new Set(["--config", "--output"])
 
 class DeployCheckError extends Error {}
+
+class PendingMigrationsError extends DeployCheckError {
+  constructor(pendingMigrations) {
+    super(`Pending remote D1 migrations: ${pendingMigrations.join(", ")}`)
+    this.pendingMigrations = pendingMigrations
+  }
+}
 
 function parseArgs(argv) {
   const args = new Map()
@@ -52,15 +60,12 @@ function findR2(config) {
     : undefined
 }
 
-function runWrangler(args) {
+function runWrangler(args, cwd = rootDir) {
   return new Promise((resolve) => {
-    const command = process.platform === "win32" ? "cmd.exe" : "pnpm"
-    const commandArgs =
-      process.platform === "win32"
-        ? ["/d", "/s", "/c", ["pnpm", "exec", "wrangler", ...args].join(" ")]
-        : ["exec", "wrangler", ...args]
-    const child = spawn(command, commandArgs, {
-      cwd: rootDir,
+    const commandInfo = wranglerCommand()
+    const commandArgs = [...commandInfo.prefixArgs, ...wranglerArgs(args)]
+    const child = spawn(commandInfo.command, commandArgs, {
+      cwd,
       env: { ...process.env, NO_UPDATE_NOTIFIER: "1" },
       stdio: ["ignore", "pipe", "pipe"],
     })
@@ -74,6 +79,9 @@ function runWrangler(args) {
     })
     child.on("close", (code) => {
       resolve({ code: code ?? 1, stdout, stderr })
+    })
+    child.on("error", (error) => {
+      resolve({ code: 1, stdout, stderr: error.message })
     })
   })
 }
@@ -94,15 +102,113 @@ function outputContainsJsonName(output, name) {
   }
 }
 
-async function checkRemoteResources(checks, limitations) {
-  const whoami = await runWrangler(["whoami"])
+function quoteWindowsArg(value) {
+  if (/^[A-Za-z0-9_./:=@-]+$/.test(value)) {
+    return value
+  }
+
+  return `"${value.replace(/(["^%])/g, "^$1")}"`
+}
+
+function wranglerCommand() {
+  if (process.platform === "win32") {
+    return { command: "cmd.exe", prefixArgs: ["/d", "/s", "/c"] }
+  }
+
+  return { command: "pnpm", prefixArgs: ["exec", "wrangler"] }
+}
+
+function wranglerArgs(args) {
+  if (process.platform === "win32") {
+    return [["pnpm", "exec", "wrangler", ...args].map(quoteWindowsArg).join(" ")]
+  }
+
+  return args
+}
+
+async function localMigrationNames(migrationsPath = defaultMigrationsPath) {
+  const entries = await readdir(migrationsPath, { withFileTypes: true })
+  return entries
+    .filter((entry) => entry.isFile() && entry.name.endsWith(".sql"))
+    .map((entry) => entry.name)
+    .sort((left, right) => left.localeCompare(right))
+}
+
+function jsonSlice(output) {
+  const firstBracket = output.indexOf("[")
+  const lastBracket = output.lastIndexOf("]")
+  if (firstBracket === -1 || lastBracket === -1 || lastBracket < firstBracket) {
+    throw new DeployCheckError("Remote D1 migration output did not include JSON results")
+  }
+
+  return output.slice(firstBracket, lastBracket + 1)
+}
+
+function remoteMigrationNames(output) {
+  const parsed = JSON.parse(jsonSlice(output))
+  if (!Array.isArray(parsed)) {
+    throw new DeployCheckError("Remote D1 migration output was not an array")
+  }
+
+  const names = new Set()
+  for (const group of parsed) {
+    const results = group?.results
+    if (!Array.isArray(results)) {
+      continue
+    }
+    for (const row of results) {
+      if (typeof row?.name === "string") {
+        names.add(row.name)
+      }
+    }
+  }
+
+  return [...names].sort((left, right) => left.localeCompare(right))
+}
+
+function pendingMigrationNames(localNames, remoteNames) {
+  const remote = new Set(remoteNames)
+  return localNames.filter((name) => !remote.has(name))
+}
+
+async function checkRemoteMigrations(checks, runner, migrationsPath) {
+  const localNames = await localMigrationNames(migrationsPath)
+  const remoteResult = await runner([
+    "d1",
+    "execute",
+    "prompt-gallery-db",
+    "--remote",
+    "--command",
+    "SELECT name FROM d1_migrations ORDER BY id",
+  ])
+  if (remoteResult.code !== 0) {
+    throw new DeployCheckError(
+      `wrangler d1 migrations query failed: ${sanitizeOutput(
+        remoteResult.stderr || remoteResult.stdout,
+      )}`,
+    )
+  }
+
+  const pendingMigrations = pendingMigrationNames(
+    localNames,
+    remoteMigrationNames(remoteResult.stdout),
+  )
+  if (pendingMigrations.length > 0) {
+    throw new PendingMigrationsError(pendingMigrations)
+  }
+  checks.push("remote D1 migrations current")
+  return pendingMigrations
+}
+
+async function checkRemoteResources(checks, limitations, options) {
+  const whoami = await options.runner(["whoami"])
   if (whoami.code !== 0) {
     limitations.push(`wrangler auth unavailable: ${sanitizeOutput(whoami.stderr || whoami.stdout)}`)
-    return
+    return []
   }
   checks.push("wrangler whoami succeeded")
 
-  const d1 = await runWrangler(["d1", "list", "--json"])
+  const d1 = await options.runner(["d1", "list", "--json"])
   if (d1.code !== 0) {
     limitations.push(`wrangler d1 list unavailable: ${sanitizeOutput(d1.stderr || d1.stdout)}`)
   } else {
@@ -113,7 +219,7 @@ async function checkRemoteResources(checks, limitations) {
     checks.push("remote D1 prompt-gallery-db listed")
   }
 
-  const r2 = await runWrangler(["r2", "bucket", "list"])
+  const r2 = await options.runner(["r2", "bucket", "list"])
   if (r2.code !== 0) {
     limitations.push(
       `wrangler r2 bucket list unavailable: ${sanitizeOutput(r2.stderr || r2.stdout)}`,
@@ -125,15 +231,20 @@ async function checkRemoteResources(checks, limitations) {
     )
     checks.push("remote R2 prompt-gallery-previews listed")
   }
+
+  return checkRemoteMigrations(checks, options.runner, options.migrationsPath)
 }
 
-async function main() {
-  const args = parseArgs(process.argv.slice(2))
-  const wranglerPath = path.resolve(rootDir, args.get("--config") ?? defaultWranglerPath)
-  const outputPath = path.resolve(rootDir, args.get("--output") ?? defaultOutputPath)
+export async function runDeployCheck(options = {}) {
+  const checkRootDir = path.resolve(options.rootDir ?? rootDir)
+  const wranglerPath = path.resolve(checkRootDir, options.wranglerPath ?? defaultWranglerPath)
+  const outputPath = path.resolve(checkRootDir, options.outputPath ?? defaultOutputPath)
+  const migrationsPath = path.resolve(checkRootDir, options.migrationsPath ?? defaultMigrationsPath)
+  const runner = options.runner ?? ((args) => runWrangler(args, checkRootDir))
   let result = "PASS"
   const checks = []
   const limitations = []
+  let pendingMigrations = []
 
   try {
     const raw = await readFile(wranglerPath, "utf8")
@@ -168,11 +279,16 @@ async function main() {
       "color-db absent",
       "build output dist/client/index.html present",
     )
-    await checkRemoteResources(checks, limitations)
+    pendingMigrations = await checkRemoteResources(checks, limitations, {
+      migrationsPath,
+      runner,
+    })
   } catch (error) {
     result = "FAIL"
+    if (error instanceof PendingMigrationsError) {
+      pendingMigrations = error.pendingMigrations
+    }
     checks.push(error instanceof Error ? error.message : String(error))
-    process.exitCode = 1
   }
 
   await mkdir(path.dirname(outputPath), { recursive: true })
@@ -192,12 +308,29 @@ async function main() {
       "",
     ].join("\n"),
   )
-  console.log(`${result} deploy check: ${outputPath}`)
+  return { result, outputPath, checks, limitations, pendingMigrations }
 }
 
-try {
-  await main()
-} catch (error) {
-  console.error(`FAIL deploy check: ${error instanceof Error ? error.message : String(error)}`)
-  process.exitCode = 1
+async function main() {
+  const args = parseArgs(process.argv.slice(2))
+  const check = await runDeployCheck({
+    wranglerPath: args.get("--config") ?? defaultWranglerPath,
+    outputPath: args.get("--output") ?? defaultOutputPath,
+  })
+  if (check.result === "FAIL") {
+    process.exitCode = 1
+  }
+  console.log(`${check.result} deploy check: ${check.outputPath}`)
+}
+
+if (
+  process.argv[1] !== undefined &&
+  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+) {
+  try {
+    await main()
+  } catch (error) {
+    console.error(`FAIL deploy check: ${error instanceof Error ? error.message : String(error)}`)
+    process.exitCode = 1
+  }
 }

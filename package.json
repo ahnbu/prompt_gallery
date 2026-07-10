@@ -18,7 +18,8 @@
     "verify:plan": "node scripts/qa/verify-plan.mjs",
     "verify:scope": "node scripts/qa/verify-scope.mjs",
     "verify:cleanup": "node scripts/qa/verify-cleanup.mjs",
-    "deploy:check": "node scripts/qa/deploy-check.mjs"
+    "deploy:check": "node scripts/qa/deploy-check.mjs",
+    "deploy:prod": "pnpm build && pnpm exec wrangler d1 migrations apply prompt-gallery-db --remote && pnpm deploy:check && pnpm exec wrangler deploy"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
