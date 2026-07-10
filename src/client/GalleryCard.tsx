@@ -1,4 +1,4 @@
-import { Check, Copy, Star } from "lucide-react"
+import { Check, Copy, ExternalLink, Star } from "lucide-react"
 import { useState } from "react"
 import { ImagePreviewField } from "./ImagePreviewField"
 import { TagChipsEditor } from "./TagChipsEditor"
@@ -115,6 +115,20 @@ function ItemCard(props: {
               )}
             </button>
           ) : null}
+          {item.type === "repo" && item.githubUrl !== null ? (
+            <a
+              aria-label={`${item.title} GitHub 열기`}
+              className="star-indicator"
+              data-qa="repo-card-github"
+              href={item.githubUrl}
+              onClick={(event) => event.stopPropagation()}
+              rel="noreferrer"
+              target="_blank"
+              title="GitHub 열기"
+            >
+              <ExternalLink aria-hidden="true" size={16} strokeWidth={1.8} />
+            </a>
+          ) : null}
           <button
             aria-label={favoriteLabel}
             aria-pressed={item.favorite}
@@ -157,24 +171,13 @@ function ItemCard(props: {
         onChange={(tags) => void changeTags([...tags, ...hiddenManualTags])}
         selectedTags={allManualTags}
       />
-      <footer className="card-footer card-status-footer">
-        {tagStatus !== "idle" ? (
+      {tagStatus !== "idle" ? (
+        <footer className="card-footer card-status-footer">
           <output className="copy-status" data-qa="card-tag-status">
             {tagStatus === "saving" ? "저장 중" : tagStatus === "saved" ? "저장됨" : "저장 실패"}
           </output>
-        ) : null}
-        {item.type === "repo" && item.githubUrl !== null ? (
-          <a
-            data-qa="repo-card-github"
-            href={item.githubUrl}
-            onClick={(event) => event.stopPropagation()}
-            rel="noreferrer"
-            target="_blank"
-          >
-            GitHub 열기
-          </a>
-        ) : null}
-      </footer>
+        </footer>
+      ) : null}
     </article>
   )
 }

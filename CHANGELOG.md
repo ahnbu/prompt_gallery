@@ -4,6 +4,7 @@
 
 | 일시 | 유형 | 범위 | 변경내용 | 변경사유 | 작성AI |
 |---|---|---|---|---|---|
+| 2026-07-10 13:55 | feat | client-ui | 갤러리 카드 GitHub 링크 아이콘화 및 액션 그룹 통합 사후 검증 반영 | - | Antigravity |
 | 2026-07-10 13:34 | docs | plan-check | 카드 상세 수정 UI 변경계획 검수보고서 추가 — 기획 리스크 및 검증 누락 지적 | - | Antigravity |
 | 2026-07-10 13:23 | feat | client-ui | 통합 카드·모달·헤더 UI와 태그 편집 QA 보강 | - | Unknown |
 | 2026-07-09 19:51 | chore | backlog | 프로젝트 백로그(BACKLOG.md) 업데이트 | - | Antigravity |

@@ -211,7 +211,7 @@ export function App() {
         })}
       </nav>
       {exportStatus === "failed" ? (
-        <p className="form-error">Export 파일을 만들지 못했습니다</p>
+        <p className="form-error">내보내기 파일을 만들지 못했습니다</p>
       ) : null}
 
       <section className="tag-filter" aria-label="태그 필터">
