@@ -13,7 +13,6 @@ export type GalleryTabDefinition = {
 }
 
 export const tabs: readonly GalleryTabDefinition[] = [
-  { value: "favorite", label: "즐겨찾기", shortLabel: "즐겨찾기", icon: Star, tone: "favorite" },
   { value: "all", label: "All", shortLabel: "All", icon: Layers, tone: "all" },
   { value: "prompt", label: "프롬프트", shortLabel: "프롬프트", icon: FileText, tone: "prompt" },
   {
@@ -31,4 +30,5 @@ export const tabs: readonly GalleryTabDefinition[] = [
     tone: "workflow",
   },
   { value: "repo", label: "레포", shortLabel: "레포", icon: Github, tone: "repo" },
+  { value: "favorite", label: "즐겨찾기", shortLabel: "즐겨찾기", icon: Star, tone: "favorite" },
 ]

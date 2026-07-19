@@ -27,7 +27,7 @@ export function ItemModal(props: {
   readonly tags: readonly Tag[]
   readonly onClose: () => void
   readonly onFavoriteChange: (item: Item) => Promise<void>
-  readonly onSaved: () => Promise<void>
+  readonly onSaved: (updatedItem?: Item) => Promise<void>
   readonly onDeleted: () => Promise<void>
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null)
@@ -90,10 +90,11 @@ export function ItemModal(props: {
     try {
       if (props.state.kind === "add") {
         await createItem({ type: parsed.type, ...parsed.payload })
+        await props.onSaved()
       } else {
-        await updateItem(props.state.item.id, parsed.payload)
+        const updated = await updateItem(props.state.item.id, parsed.payload)
+        await props.onSaved(updated)
       }
-      await props.onSaved()
       props.onClose()
     } catch (saveError) {
       handleError(saveError, setError)
@@ -139,14 +140,11 @@ export function ItemModal(props: {
     if (props.state.kind !== "detail") {
       return
     }
-    setSaving(true)
     setError(null)
     try {
       await props.onFavoriteChange(props.state.item)
     } catch (favoriteError) {
       handleError(favoriteError, setError)
-    } finally {
-      setSaving(false)
     }
   }
 
@@ -208,7 +206,6 @@ export function ItemModal(props: {
                 className={detailItem.favorite ? "icon-button active" : "icon-button"}
                 data-qa="favorite-toggle"
                 data-state={detailItem.favorite ? "favorite" : "not-favorite"}
-                disabled={saving}
                 onClick={() => void toggleFavorite()}
                 title={favoriteLabel}
                 type="button"
@@ -231,9 +228,9 @@ export function ItemModal(props: {
             </button>
           </div>
         </header>
-        {copyStatus !== "idle" ? (
+        {copyStatus === "failed" ? (
           <output className="copy-status modal-toast" data-qa="copy-status">
-            {copyStatus === "copied" ? "복사됨" : "복사 실패"}
+            복사 실패
           </output>
         ) : null}
 

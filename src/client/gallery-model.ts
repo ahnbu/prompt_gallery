@@ -134,14 +134,38 @@ export function filteredCardEntries(request: FilterRequest): readonly CardEntry[
   )
 }
 
-export function shouldShowUnifiedResults(request: UnifiedRequest): boolean {
-  return (
-    request.activeTab !== "all" ||
-    request.searchText.trim().length > 0 ||
-    request.selectedTags.length > 0
-  )
+export function shouldShowUnifiedResults(_request: UnifiedRequest): boolean {
+  return true
 }
 
 export function visibleTags(tags: readonly ItemTag[]): readonly ItemTag[] {
   return tags.slice(0, 10)
+}
+
+export function columnCountForWidth(width: number): number {
+  if (width >= 1536) {
+    return 4
+  }
+  if (width >= 1024) {
+    return 3
+  }
+  if (width >= 768) {
+    return 2
+  }
+  return 1
+}
+
+export function distributeIntoColumns(
+  entries: readonly CardEntry[],
+  columnCount: number,
+): readonly (readonly CardEntry[])[] {
+  const safeCount = Math.max(1, columnCount)
+  const columns: CardEntry[][] = Array.from({ length: safeCount }, () => [])
+  entries.forEach((entry, index) => {
+    const column = columns[index % safeCount]
+    if (column !== undefined) {
+      column.push(entry)
+    }
+  })
+  return columns
 }

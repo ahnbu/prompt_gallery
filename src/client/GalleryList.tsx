@@ -1,7 +1,30 @@
 import { Plus } from "lucide-react"
+import { useEffect, useState } from "react"
 import { GalleryCard } from "./GalleryCard"
 import type { Item, Tag, WorkflowItem } from "./gallery-data"
-import { type CardEntry, entryId } from "./gallery-model"
+import {
+  type CardEntry,
+  columnCountForWidth,
+  distributeIntoColumns,
+  entryId,
+} from "./gallery-model"
+
+function useColumnCount(): number {
+  const [columnCount, setColumnCount] = useState(() =>
+    columnCountForWidth(typeof window === "undefined" ? 1280 : window.innerWidth),
+  )
+
+  useEffect(() => {
+    function update(): void {
+      setColumnCount(columnCountForWidth(window.innerWidth))
+    }
+    update()
+    window.addEventListener("resize", update)
+    return () => window.removeEventListener("resize", update)
+  }, [])
+
+  return columnCount
+}
 
 type SectionAction = {
   readonly label: string
@@ -61,7 +84,7 @@ function UnifiedList(props: {
         <h2>결과</h2>
         <span>{props.entries.length}개</span>
       </div>
-      <CardGrid
+      <MasonryGrid
         entries={props.entries}
         emptyLabel="조건에 맞는 항목이 없습니다"
         onFavoriteChange={props.onFavoriteChange}
@@ -71,6 +94,48 @@ function UnifiedList(props: {
         tags={props.tags}
       />
     </section>
+  )
+}
+
+function MasonryGrid(props: {
+  readonly entries: readonly CardEntry[]
+  readonly emptyLabel: string
+  readonly onFavoriteChange: (item: Item) => Promise<void>
+  readonly onTagsChange: (item: Item, tags: readonly string[]) => Promise<void>
+  readonly onOpenItem: (item: Item) => void
+  readonly onOpenWorkflow: (workflow: WorkflowItem) => void
+  readonly tags: readonly Tag[]
+}) {
+  const columnCount = useColumnCount()
+
+  if (props.entries.length === 0) {
+    return <p className="empty-copy">{props.emptyLabel}</p>
+  }
+
+  const columns = distributeIntoColumns(props.entries, columnCount)
+
+  return (
+    <div className="card-masonry" data-qa="card-masonry">
+      {columns.map((column, columnIndex) => (
+        <div
+          className="masonry-column"
+          // biome-ignore lint/suspicious/noArrayIndexKey: columns are positional, not data-keyed
+          key={`column-${columnIndex}`}
+        >
+          {column.map((entry) => (
+            <GalleryCard
+              entry={entry}
+              key={`${entry.kind}:${entryId(entry)}`}
+              onFavoriteChange={props.onFavoriteChange}
+              onTagsChange={props.onTagsChange}
+              onOpenItem={props.onOpenItem}
+              onOpenWorkflow={props.onOpenWorkflow}
+              tags={props.tags}
+            />
+          ))}
+        </div>
+      ))}
+    </div>
   )
 }
 

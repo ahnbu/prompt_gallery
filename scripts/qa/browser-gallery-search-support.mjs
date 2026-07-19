@@ -4,7 +4,7 @@ export const viewports = [
   { name: "desktop", width: 1280, height: 800 },
 ]
 
-const expectedTabs = ["즐겨찾기", "All", "프롬프트", "이미지 프롬프트", "Workflow", "레포"]
+const expectedTabs = ["All", "프롬프트", "이미지 프롬프트", "Workflow", "레포", "즐겨찾기"]
 
 export class GallerySearchError extends Error {}
 
@@ -55,39 +55,38 @@ export async function assertSectionAddButton(page, sectionQa, label) {
   assert(visibleText.length === 0, `Section add button should be icon-only: ${label}`)
 }
 
-async function assertItemSectionAddAction(page, sectionQa, label, expectedType) {
-  await page.locator(`[data-qa="${sectionQa}"]`).getByRole("button", { name: label }).click()
-  await assertVisible(page.getByRole("dialog", { name: "새 항목" }), `${label} modal missing`)
+async function selectTab(page, tabName) {
+  await page.getByRole("button", { name: tabName, exact: true }).click()
+}
+
+async function assertHeaderAddAction(page, tabName, expectedType) {
+  await selectTab(page, tabName)
+  await page.getByRole("button", { name: "추가", exact: true }).click()
+  await assertVisible(page.getByRole("dialog", { name: "새 항목" }), `${tabName} add modal missing`)
   const selectedType = await page.locator('[data-qa="item-type-select"]').inputValue()
   assert(
     selectedType === expectedType,
-    `${label} selected ${selectedType}, expected ${expectedType}`,
+    `${tabName} add selected ${selectedType}, expected ${expectedType}`,
   )
   await page.getByRole("button", { name: "닫기", exact: true }).click()
 }
 
-async function assertWorkflowSectionAddAction(page) {
-  await page
-    .locator('[data-qa="section-workflow"]')
-    .getByRole("button", { name: "Workflow 추가" })
-    .click()
+// After the masonry unification the per-section add buttons were removed; the
+// header "추가" button now opens a create modal defaulted to the active tab type.
+export async function assertSectionAddActions(page) {
+  await assertHeaderAddAction(page, "프롬프트", "prompt")
+  await assertHeaderAddAction(page, "이미지 프롬프트", "image_prompt")
+
+  await selectTab(page, "Workflow")
+  await page.getByRole("button", { name: "추가", exact: true }).click()
   await assertVisible(
     page.getByRole("dialog", { name: "Workflow 추가" }),
     "Workflow add modal missing",
   )
   await page.getByRole("button", { name: "닫기", exact: true }).click()
-}
 
-export async function assertSectionAddActions(page) {
-  await assertItemSectionAddAction(page, "section-prompt", "프롬프트 추가", "prompt")
-  await assertItemSectionAddAction(
-    page,
-    "section-image_prompt",
-    "이미지 프롬프트 추가",
-    "image_prompt",
-  )
-  await assertWorkflowSectionAddAction(page)
-  await assertItemSectionAddAction(page, "section-repo", "레포 추가", "repo")
+  await assertHeaderAddAction(page, "레포", "repo")
+  await selectTab(page, "All")
 }
 
 export async function assertBoundedImagePreview(page, title) {
@@ -108,10 +107,13 @@ export async function screenshot(page, screenshotStem, viewportName, stateName) 
 }
 
 export async function assertShell(page) {
-  await assertVisible(
-    page.getByRole("heading", { name: "Prompt Gallery" }),
-    "Prompt Gallery heading is missing",
-  )
+  const width = page.viewportSize()?.width ?? 1280
+  if (width > 680) {
+    await assertVisible(
+      page.getByRole("heading", { name: "Prompt Gallery" }),
+      "Prompt Gallery heading is missing",
+    )
+  }
   for (const tabName of expectedTabs) {
     await assertVisible(
       page.getByRole("button", { name: tabName, exact: true }),

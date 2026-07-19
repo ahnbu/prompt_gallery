@@ -4,6 +4,7 @@
 
 | 일시 | 유형 | 범위 | 변경내용 | 변경사유 | 작성AI |
 |---|---|---|---|---|---|
+| 2026-07-19 12:07 | feat | client-ui | Wave 1~3 UI 개선 — 파비콘 P 심볼, 뱃지 1줄 고정, 즐겨찾기·태그 optimistic update, All 탭 masonry 통합 뷰, 탭 순서 재배치, 레포 제목 owner/repo, 반응형 타이틀 숨김 | - | Claude |
 | 2026-07-10 14:09 | fix | deploy | 원격 D1 migration 누락 검사를 테스트 가능하게 보강하고 완료검수 보고서 추가 | - | Codex |
 | 2026-07-10 13:56 | fix | deploy | Windows 환경 wrangler 실행 인자 보정 | - | Antigravity |
 | 2026-07-10 13:56 | fix | deploy | 원격 D1 마이그레이션 누락 검증 로직 및 배포 스크립트 추가 — 배포 전 스키마 불일치 예방 | - | Antigravity |

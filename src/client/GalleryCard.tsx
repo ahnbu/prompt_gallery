@@ -5,6 +5,7 @@ import { TagChipsEditor } from "./TagChipsEditor"
 import type { Item, ItemType, Tag, WorkflowItem } from "./gallery-data"
 import { type CardEntry, assertNever, visibleTags } from "./gallery-model"
 import { canCopyItemBody } from "./item-actions-model"
+import { repoDisplayTitle } from "./repo-title"
 import { automaticTagNames, manualTagNames } from "./tag-utils"
 
 type CopyStatus = "idle" | "copied" | "failed"
@@ -54,6 +55,7 @@ function ItemCard(props: {
   const preview = item.body ?? item.notes ?? item.githubUrl ?? ""
   const [copyStatus, setCopyStatus] = useState<CopyStatus>("idle")
   const [tagStatus, setTagStatus] = useState<TagStatus>("idle")
+  const [favoriteFailed, setFavoriteFailed] = useState(false)
   const favoriteLabel = item.favorite
     ? `${item.title} 즐겨찾기 해제`
     : `${item.title} 즐겨찾기 추가`
@@ -94,6 +96,11 @@ function ItemCard(props: {
       <div className="card-topline">
         <TypeBadge type={item.type} />
         <div className="card-actions">
+          {favoriteFailed ? (
+            <output className="copy-status card-toast" data-qa="favorite-status">
+              즐겨찾기 실패
+            </output>
+          ) : null}
           {copyStatus !== "idle" ? (
             <output className="copy-status card-toast" data-qa="copy-status">
               {copyStatus === "copied" ? "복사됨" : "복사 실패"}
@@ -137,7 +144,12 @@ function ItemCard(props: {
             data-state={item.favorite ? "favorite" : "not-favorite"}
             onClick={async (event) => {
               event.stopPropagation()
-              await props.onFavoriteChange(item)
+              setFavoriteFailed(false)
+              try {
+                await props.onFavoriteChange(item)
+              } catch {
+                setFavoriteFailed(true)
+              }
             }}
             title={favoriteLabel}
             type="button"
@@ -160,7 +172,7 @@ function ItemCard(props: {
       >
         {item.type === "image_prompt" ? <ImagePreviewField compact item={item} /> : null}
         <p className="card-preview">{preview}</p>
-        <h3>{item.title}</h3>
+        <h3>{item.type === "repo" ? repoDisplayTitle(item.title, item.githubUrl) : item.title}</h3>
       </button>
       <TagChipsEditor
         automaticTags={automaticTags}

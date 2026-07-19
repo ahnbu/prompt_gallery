@@ -23,9 +23,18 @@
   transition: border-color 160ms ease-out, box-shadow 160ms ease-out, transform 160ms ease-out;
 }
 
-.gallery-card:not([data-card-type="image_prompt"]) {
-  aspect-ratio: 1 / 1;
-  min-height: 0;
+.card-masonry {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.masonry-column {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 0;
+  flex-direction: column;
+  gap: var(--space-3);
 }
 
 .gallery-card[data-card-type="image_prompt"] {
@@ -80,6 +89,7 @@
 
 .type-badge {
   display: inline-flex;
+  flex: 0 0 auto;
   min-height: 24px;
   align-items: center;
   gap: var(--space-1);
@@ -90,6 +100,7 @@
   font-size: 12px;
   font-weight: 510;
   line-height: 1.4;
+  white-space: nowrap;
 }
 
 .type-badge::before {
@@ -179,7 +190,7 @@
   font-weight: 700;
   line-height: 1.35;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
 }
 
 .card-preview {

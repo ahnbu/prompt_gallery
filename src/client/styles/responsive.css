@@ -17,15 +17,24 @@
     grid-template-columns: 1fr;
   }
 
+  .title-block {
+    display: none;
+  }
+
   .primary-button,
   .topbar-actions,
   .search-control {
     width: 100%;
   }
 
+  .topbar-actions {
+    flex-wrap: nowrap;
+  }
+
   .topbar-actions .primary-button,
   .topbar-actions .ghost-button {
-    flex: 1 1 140px;
+    flex: 1 1 0;
+    min-width: 0;
   }
 
   .tab-button {

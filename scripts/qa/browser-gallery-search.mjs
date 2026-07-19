@@ -19,18 +19,13 @@ export { renderGallerySearchEvidence } from "./browser-gallery-evidence.mjs"
 
 async function assertAllView(page, fixture) {
   await assertVisible(
-    page.locator('[data-qa="section-prompt"]'),
-    "All view prompt section is missing",
+    page.locator('[data-qa="unified-results"]'),
+    "All view should show unified results",
   )
   await assertVisible(
-    page.locator('[data-qa="section-image_prompt"]'),
-    "All view image prompt section is missing",
+    page.locator('[data-qa="card-masonry"]'),
+    "All view should render the masonry grid",
   )
-  await assertVisible(
-    page.locator('[data-qa="section-workflow"]'),
-    "All view workflow section is missing",
-  )
-  await assertVisible(page.locator('[data-qa="section-repo"]'), "All view repo section is missing")
   await assertVisible(page.getByText(fixture.promptTitle), "Seeded prompt card is missing")
   await assertVisible(page.getByText(fixture.imageTitle), "Seeded image prompt card is missing")
   await assertVisible(
@@ -39,13 +34,12 @@ async function assertAllView(page, fixture) {
   )
   await assertVisible(page.getByText(fixture.workflowTitle), "Seeded workflow card is missing")
   await assertVisible(page.getByText(fixture.repoTitle), "Seeded repo card is missing")
-  await assertSectionAddButton(page, "section-prompt", "프롬프트 추가")
-  await assertSectionAddButton(page, "section-image_prompt", "이미지 프롬프트 추가")
-  await assertSectionAddButton(page, "section-workflow", "Workflow 추가")
-  await assertSectionAddButton(page, "section-repo", "레포 추가")
   await assertBoundedImagePreview(page, fixture.imageTitle)
   await assertBoundedImagePreview(page, fixture.sampleImageTitle)
-  await assertCardWithinSection(page, "section-prompt", fixture.overflowTitle)
+  await assertVisible(
+    cardByTitle(page, fixture.overflowTitle),
+    "Overflow prompt card should appear in the unified All view",
+  )
 }
 
 async function assertTypeBadges(page, fixture) {
@@ -66,10 +60,30 @@ async function assertTypeBadges(page, fixture) {
   }
 }
 
+async function readMasonryOrder(page) {
+  const columnTitles = await page
+    .locator('[data-qa="card-masonry"] .masonry-column')
+    .evaluateAll((columns) =>
+      columns.map((column) =>
+        Array.from(column.querySelectorAll('[data-qa="gallery-card"] h3')).map(
+          (heading) => heading.textContent ?? "",
+        ),
+      ),
+    )
+  const interleaved = []
+  const maxLength = Math.max(0, ...columnTitles.map((column) => column.length))
+  for (let row = 0; row < maxLength; row += 1) {
+    for (const column of columnTitles) {
+      if (row < column.length) {
+        interleaved.push(column[row])
+      }
+    }
+  }
+  return interleaved
+}
+
 async function assertLatestSort(page, baseUrl, fixture) {
-  const titles = await page
-    .locator('[data-qa="section-prompt"] [data-qa="gallery-card"] h3')
-    .allTextContents()
+  const titles = await readMasonryOrder(page)
   const promptItems = await Promise.all(
     [fixture.overflowId, fixture.researchOnlyId, fixture.promptId].map((id) =>
       getItem(baseUrl, id),
@@ -87,11 +101,11 @@ async function assertLatestSort(page, baseUrl, fixture) {
 
   assert(
     positions.every((position) => position !== -1),
-    `Prompt section is missing seeded titles: ${titles.join(", ")}`,
+    `Unified All view is missing seeded prompt titles: ${titles.join(", ")}`,
   )
   assert(
     positions[0] < positions[1] && positions[1] < positions[2],
-    `Prompt cards are not latest-first: ${titles.join(" > ")}`,
+    `Prompt cards are not latest-first in DOM order: ${titles.join(" > ")}`,
   )
 }
 
@@ -278,10 +292,10 @@ async function runViewport(baseUrl, outputPath, fixture, viewport) {
     await assertLatestSort(page, baseUrl, fixture)
     await assertVisibleTagLimit(page, fixture)
     await assertCardInlineTagEditing(page, baseUrl, fixture)
-    await assertSectionAddActions(page)
     artifacts.push(await screenshot(page, screenshotStem, viewport.name, "all"))
 
     await assertTabFiltering(page, fixture)
+    await assertSectionAddActions(page)
     await assertSearchView(page, fixture)
     artifacts.push(await screenshot(page, screenshotStem, viewport.name, "search"))
 

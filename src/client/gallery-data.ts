@@ -178,6 +178,11 @@ function parseTagSource(value: unknown): TagSource {
   }
 }
 
+export function parseItemResponse(payload: unknown): Item {
+  const record = requireRecord(payload, "item response")
+  return parseItem(getField(record, "item"))
+}
+
 function parseItem(value: unknown): Item {
   const record = requireRecord(value, "item")
   return {

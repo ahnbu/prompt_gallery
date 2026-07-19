@@ -1,5 +1,5 @@
 import { Download, Plus, Search, Tags } from "lucide-react"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { GalleryResults } from "./GalleryList"
 import { ItemModal, type ItemModalState, defaultTypeForTab } from "./ItemModal"
 import { TagManagementModal } from "./TagManagementModal"
@@ -9,6 +9,7 @@ import {
   type GalleryData,
   ITEM_TYPES,
   type Item,
+  type ItemTag,
   type ItemType,
   type WorkflowItem,
   fetchGalleryData,
@@ -36,6 +37,17 @@ export function App() {
   const [workflowModalState, setWorkflowModalState] = useState<WorkflowModalState | null>(null)
   const [tagManagementOpen, setTagManagementOpen] = useState(false)
   const [exportStatus, setExportStatus] = useState<"idle" | "failed">("idle")
+  const tagRequestSeq = useRef<Map<string, number>>(new Map())
+
+  function nextTagRequestId(itemId: string): number {
+    const next = (tagRequestSeq.current.get(itemId) ?? 0) + 1
+    tagRequestSeq.current.set(itemId, next)
+    return next
+  }
+
+  function isLatestTagRequest(itemId: string, requestId: number): boolean {
+    return tagRequestSeq.current.get(itemId) === requestId
+  }
 
   useEffect(() => {
     const controller = new AbortController()
@@ -84,33 +96,91 @@ export function App() {
     await refreshGalleryData()
   }
 
-  async function toggleFavorite(item: Item): Promise<void> {
-    await updateItemFavorite(item.id, !item.favorite)
-    const data = await refreshGalleryData()
-    const updatedItem = data.items.find((candidate) => candidate.id === item.id)
+  async function refreshAfterItemSave(updatedItem?: Item): Promise<void> {
+    if (updatedItem !== undefined) {
+      replaceItemInState(updatedItem)
+      return
+    }
+    await refreshGalleryData()
+  }
+
+  function replaceItemInState(updated: Item): void {
+    setGalleryData((current) => ({
+      ...current,
+      items: current.items.map((candidate) => (candidate.id === updated.id ? updated : candidate)),
+    }))
     setModalState((current) =>
-      current?.kind === "detail" && updatedItem !== undefined && current.item.id === item.id
-        ? { kind: "detail", item: updatedItem }
+      current?.kind === "detail" && current.item.id === updated.id
+        ? { kind: "detail", item: updated }
         : current,
     )
   }
 
-  async function changeTags(item: Item, tags: readonly string[]): Promise<void> {
-    await updateItem(item.id, {
-      title: item.title,
-      body: item.body,
-      notes: item.notes,
-      githubUrl: item.githubUrl,
-      imageAssetId: item.imageAssetId,
-      tags,
-    })
-    const data = await refreshGalleryData()
-    const updatedItem = data.items.find((candidate) => candidate.id === item.id)
+  function applyItemPatch(itemId: string, patch: Partial<Item>): void {
+    setGalleryData((current) => ({
+      ...current,
+      items: current.items.map((candidate) =>
+        candidate.id === itemId ? { ...candidate, ...patch } : candidate,
+      ),
+    }))
     setModalState((current) =>
-      current?.kind === "detail" && updatedItem !== undefined && current.item.id === item.id
-        ? { kind: "detail", item: updatedItem }
+      current?.kind === "detail" && current.item.id === itemId
+        ? { kind: "detail", item: { ...current.item, ...patch } }
         : current,
     )
+  }
+
+  async function toggleFavorite(item: Item): Promise<void> {
+    const nextFavorite = !item.favorite
+    applyItemPatch(item.id, { favorite: nextFavorite })
+    try {
+      const updated = await updateItemFavorite(item.id, nextFavorite)
+      replaceItemInState(updated)
+    } catch (error) {
+      applyItemPatch(item.id, { favorite: item.favorite })
+      throw error
+    }
+  }
+
+  function optimisticTagsFor(item: Item, tagNames: readonly string[]): readonly ItemTag[] {
+    const existing = new Map(item.tags.map((tag) => [tag.name, tag]))
+    return tagNames.map((name) => {
+      const known = existing.get(name)
+      if (known !== undefined) {
+        return known
+      }
+      const definition = galleryData.tags.find((tag) => tag.name === name)
+      return {
+        id: definition?.id ?? `pending:${name}`,
+        name,
+        color: definition?.color ?? "var(--surface-control)",
+        sources: ["manual"] as const,
+      }
+    })
+  }
+
+  async function changeTags(item: Item, tags: readonly string[]): Promise<void> {
+    const requestId = nextTagRequestId(item.id)
+    const previousTags = item.tags
+    applyItemPatch(item.id, { tags: optimisticTagsFor(item, tags) })
+    try {
+      const updated = await updateItem(item.id, {
+        title: item.title,
+        body: item.body,
+        notes: item.notes,
+        githubUrl: item.githubUrl,
+        imageAssetId: item.imageAssetId,
+        tags,
+      })
+      if (isLatestTagRequest(item.id, requestId)) {
+        replaceItemInState(updated)
+      }
+    } catch (error) {
+      if (isLatestTagRequest(item.id, requestId)) {
+        applyItemPatch(item.id, { tags: previousTags })
+        throw error
+      }
+    }
   }
 
   function openAddModal(): void {
@@ -257,7 +327,7 @@ export function App() {
           onClose={() => setModalState(null)}
           onDeleted={refreshAfterMutation}
           onFavoriteChange={toggleFavorite}
-          onSaved={refreshAfterMutation}
+          onSaved={refreshAfterItemSave}
           state={modalState}
           tags={galleryData.tags}
         />
