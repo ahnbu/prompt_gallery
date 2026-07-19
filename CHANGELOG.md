@@ -4,6 +4,7 @@
 
 | 일시 | 유형 | 범위 | 변경내용 | 변경사유 | 작성AI |
 |---|---|---|---|---|---|
+| 2026-07-19 12:51 | docs | rules | CLAUDE.md 파일 추가(@AGENTS.md 포인터) — 이전 CHANGELOG 행의 실제 파일 커밋 | - | Claude |
 | 2026-07-19 12:47 | refactor | client-ui | 탭바·카드·모달 타입 뱃지를 점에서 아이콘으로 통일 — 카테고리/뷰 식별성 개선, 탭과 카드가 동일 아이콘 사용 | - | Claude |
 | 2026-07-19 12:47 | docs | rules | CLAUDE.md를 @AGENTS.md 포인터로 통일 — Claude Code의 AGENTS.md 인식 확보 | - | Claude |
 | 2026-07-19 12:35 | feat | brand | 브랜드 로크업 개편 — Fraunces 세리프 타이틀 self-host 번들, 타이틀 30→24px 축소, 파비콘 P를 세리프로 통일 | - | Claude |
