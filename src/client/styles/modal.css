@@ -124,11 +124,15 @@
 }
 
 .detail-title-section h3 {
+  display: -webkit-box;
+  overflow: hidden;
   margin: 0;
   color: var(--text-secondary);
   font-size: 13px;
   font-weight: 590;
   line-height: 1.4;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
 }
 
 .detail-meta {

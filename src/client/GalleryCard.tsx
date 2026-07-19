@@ -170,9 +170,9 @@ function ItemCard(props: {
         onClick={() => props.onOpenItem(item)}
         type="button"
       >
+        <h3>{item.type === "repo" ? repoDisplayTitle(item.title, item.githubUrl) : item.title}</h3>
         {item.type === "image_prompt" ? <ImagePreviewField compact item={item} /> : null}
         <p className="card-preview">{preview}</p>
-        <h3>{item.type === "repo" ? repoDisplayTitle(item.title, item.githubUrl) : item.title}</h3>
       </button>
       <TagChipsEditor
         automaticTags={automaticTags}
@@ -250,8 +250,8 @@ function WorkflowCard(props: {
         onClick={() => props.onOpenWorkflow(workflow)}
         type="button"
       >
-        <p className="card-preview">{workflow.notes ?? `${workflow.steps.length} steps`}</p>
         <h3>{workflow.name}</h3>
+        <p className="card-preview">{workflow.notes ?? `${workflow.steps.length} steps`}</p>
       </button>
     </article>
   )
