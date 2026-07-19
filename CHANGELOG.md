@@ -4,6 +4,7 @@
 
 | 일시 | 유형 | 범위 | 변경내용 | 변경사유 | 작성AI |
 |---|---|---|---|---|---|
+| 2026-07-19 18:49 | test | qa | browser-wave36.mjs 신규(DC-A~F headless assertion), Wave 3.6 계획/검수 문서 | - | Claude |
 | 2026-07-19 18:49 | fix | favicon | favicon.ico 폴백 링크 제거, DESIGN.md 모달 규칙 갱신 | - | Claude |
 | 2026-07-19 18:48 | feat | modal | 편집 폼 필드 순서 재배치, '본문'→'프롬프트' 라벨 통일 | - | Claude |
 | 2026-07-19 18:48 | feat | modal | 상세/편집 모달 헤더 재구성, 상세 뷰 순서 재배치, 복사 버튼 확장 | - | Claude |

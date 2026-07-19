@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wave 3.6 모달 재정비 — 미리보기 초안 (시각 참고용)</title>
+<style>
+  :root {
+    --surface-2: #ffffff; --surface-1: #f4f2ec; --border: rgba(0,0,0,0.1);
+    --border-accent: #378add; --text-primary: #1a1a18; --text-secondary: #5f5e5a;
+    --text-muted: #888780; --text-accent: #185fa5;
+    --bg-accent: #e6f1fb; --bg-success: #eaf3de; --text-success: #3b6d11; --bg-pro: #eeedfe; --text-pro: #534ab7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --surface-2: #2c2c2a; --surface-1: #222220; --border: rgba(255,255,255,0.14);
+      --text-primary: #f1efe8; --text-secondary: #b4b2a9; --text-muted: #888780; --text-accent: #85b7eb;
+      --bg-accent: #0c447c; --text-accent: #b5d4f4; --bg-success: #27500a; --text-success: #c0dd97; --bg-pro: #3c3489; --text-pro: #cecbf6;
+    }
+    body { background: #1a1a18; }
+  }
+  * { box-sizing: border-box; }
+  body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; margin: 0; padding: 24px; color: var(--text-primary); }
+  .note { max-width: 900px; margin: 0 auto 20px; padding: 12px 16px; border-left: 3px solid var(--border-accent); background: var(--surface-1); border-radius: 0 8px 8px 0; font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+  .note b { color: var(--text-primary); }
+  h2 { max-width: 900px; margin: 24px auto 12px; font-size: 16px; font-weight: 500; }
+  .grid { max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .card { background: var(--surface-2); border: 0.5px solid var(--border-accent); border-radius: 12px; overflow: hidden; }
+  .head { padding: 12px 14px 10px; border-bottom: 0.5px solid var(--border); }
+  .headrow { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .badge { font-size: 10px; padding: 2px 7px; border-radius: 6px; }
+  .b-prompt { background: var(--bg-accent); color: var(--text-accent); }
+  .b-repo { background: var(--bg-success); color: var(--text-success); }
+  .b-image { background: var(--bg-pro); color: var(--text-pro); }
+  .icons { display: flex; gap: 6px; font-size: 13px; color: var(--text-muted); }
+  .title { font-size: 13px; font-weight: 700; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .body { padding: 12px 14px; }
+  .prompt-text { font-size: 12px; color: var(--text-secondary); line-height: 1.6; margin: 0 0 8px; }
+  .memo { font-size: 11px; color: var(--text-secondary); line-height: 1.5; margin: 0 0 10px; background: var(--surface-1); border-radius: 6px; padding: 7px 9px; }
+  .link { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-accent); text-decoration: none; margin-bottom: 10px; }
+  .tags { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; }
+  .tag { font-size: 10px; background: var(--surface-1); border-radius: 5px; padding: 2px 7px; color: var(--text-secondary); }
+  .divider { height: 0.5px; background: var(--border); margin: 10px 0; }
+  .meta { display: flex; align-items: center; justify-content: space-between; }
+  .meta.right { justify-content: flex-end; }
+  .date { font-size: 10px; color: var(--text-muted); }
+  .src { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text-accent); text-decoration: none; }
+  .imgbox { height: 64px; border-radius: 8px; background: var(--surface-1); display: flex; align-items: center; justify-content: center; margin-bottom: 10px; color: var(--text-muted); font-size: 18px; }
+  .form-field { display: flex; flex-direction: column; gap: 3px; }
+  .form-label { font-size: 11px; color: var(--text-secondary); }
+  .form-input { border: 0.5px solid var(--border); border-radius: 6px; padding: 6px 9px; font-size: 12px; background: var(--surface-1); color: var(--text-primary); }
+  .form-input.ph { color: var(--text-muted); }
+  .form-area { border: 0.5px solid var(--border); border-radius: 6px; padding: 6px 9px; background: var(--surface-1); height: 40px; }
+  .form-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 9px; }
+  .form-imgbox { height: 52px; border-radius: 6px; background: var(--surface-1); border: 0.5px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 16px; }
+  .tag-btn { font-size: 10px; background: var(--surface-1); border-radius: 5px; padding: 3px 8px; color: var(--text-muted); display: inline-block; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<div class="note">
+  <b>미리보기 초안 — 시각 참고용입니다.</b> 이 파일은 Wave 3.6 상세/편집 모달 재정비의 <b>레이아웃 합의를 시각적으로 남긴 목업</b>입니다.
+  실제 완료검수(done-check)의 판정 정본은 <b>계획서(20260719_07)의 DC-A~F 기준(텍스트)</b>이며, 이 HTML은 근사 목업이라 픽셀·클래스 단위 대조 대상이 아닙니다.
+  아이콘은 텍스트 기호로 대체했습니다(실제는 lucide 아이콘).
+</div>
+
+<h2>상세 보기 (detail) — 6 케이스</h2>
+<div class="grid">
+  <div class="card">
+    <div class="head"><div class="headrow"><span class="badge b-prompt">프롬프트</span><span class="icons">⧉ ☆ ✕</span></div><h3 class="title">내가 매주 하는 [업무]를...</h3></div>
+    <div class="body">
+      <p class="prompt-text">내가 매주 하는 [업무]를 자동화하고 싶어. 근데 자동화하기 전에...</p>
+      <p class="memo">메모: 스킬 폴더 정리 예정</p>
+      <div class="tags"><span class="tag">research-task11-1</span></div>
+      <div class="divider"></div>
+      <div class="meta"><span class="date">2026-07-19 수정</span><a class="src">🔗 출처 열기</a></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="head"><div class="headrow"><span class="badge b-repo">레포</span><span class="icons">⧉ ☆ ✕</span></div><h3 class="title">Canine89/hwpxskill</h3></div>
+    <div class="body">
+      <a class="link">↗ GitHub 열기</a>
+      <p class="memo">메모: hwpx 다루는 스킬</p>
+      <div class="tags"><span class="tag">slides-task11-178</span></div>
+      <div class="divider"></div>
+      <div class="meta"><span class="date">2026-07-19 수정</span><a class="src">🔗 출처 열기</a></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="head"><div class="headrow"><span class="badge b-image">이미지</span><span class="icons">⧉ ☆ ✕</span></div><h3 class="title">Task11 Sample Image...</h3></div>
+    <div class="body">
+      <p class="prompt-text">Create a square editorial card...</p>
+      <div class="imgbox">▦</div>
+      <p class="memo">메모: 카드뉴스용</p>
+      <div class="tags"><span class="tag">research-task11-1</span></div>
+      <div class="divider"></div>
+      <div class="meta"><span class="date">2026-07-19 수정</span><a class="src">🔗 출처 열기</a></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="head"><div class="headrow"><span class="badge b-prompt">프롬프트</span><span class="icons">⧉ ☆ ✕</span></div><h3 class="title">Research prompt</h3></div>
+    <div class="body">
+      <p class="prompt-text">Research prompt</p>
+      <div class="divider"></div>
+      <div class="meta right"><span class="date">2026-07-19 수정</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="head"><div class="headrow"><span class="badge b-repo">레포</span><span class="icons">⧉ ☆ ✕</span></div><h3 class="title">Repo</h3></div>
+    <div class="body">
+      <a class="link">↗ GitHub 열기</a>
+      <div class="divider"></div>
+      <div class="meta right"><span class="date">2026-07-19 수정</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="head"><div class="headrow"><span class="badge b-image">이미지</span><span class="icons">⧉ ☆ ✕</span></div><h3 class="title">Task11 Image Prompt</h3></div>
+    <div class="body">
+      <p class="prompt-text">A compact image prompt without preview.</p>
+      <div class="divider"></div>
+      <div class="meta right"><span class="date">2026-07-19 수정</span></div>
+    </div>
+  </div>
+</div>
+
+<h2>편집 폼 (edit) — 3 케이스 · 헤더 제목 처리는 계획서 결정에 따름</h2>
+<div class="grid">
+  <div class="card">
+    <div class="head"><span class="badge b-prompt">프롬프트</span></div>
+    <div class="form-body">
+      <div class="form-field"><span class="form-label">제목</span><input class="form-input" value="내가 매주 하는 [업무]를..." readonly></div>
+      <div class="form-field"><span class="form-label">프롬프트</span><div class="form-area"></div></div>
+      <div class="form-field"><span class="form-label">메모</span><div class="form-area" style="height:28px"></div></div>
+      <div class="form-field"><span class="form-label">출처 링크</span><input class="form-input ph" placeholder="https://..." readonly></div>
+      <div><span class="form-label">태그</span><span class="tag-btn">+ Tag</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="head"><span class="badge b-repo">레포</span></div>
+    <div class="form-body">
+      <div class="form-field"><span class="form-label">제목</span><input class="form-input ph" placeholder="비워두면 프롬프트를 제목으로 사용" readonly></div>
+      <div class="form-field"><span class="form-label">GitHub URL</span><input class="form-input" value="https://github.com/Canine89/hwpxskill" readonly></div>
+      <div class="form-field"><span class="form-label">메모</span><div class="form-area" style="height:28px"></div></div>
+      <div class="form-field"><span class="form-label">출처 링크</span><input class="form-input ph" placeholder="https://..." readonly></div>
+      <div><span class="form-label">태그</span><span class="tag-btn">+ Tag</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="head"><span class="badge b-image">이미지</span></div>
+    <div class="form-body">
+      <div class="form-field"><span class="form-label">제목</span><input class="form-input ph" placeholder="비워두면 프롬프트를 제목으로 사용" readonly></div>
+      <div class="form-field"><span class="form-label">프롬프트</span><div class="form-area"></div></div>
+      <div class="form-imgbox">▦ 이미지 업로드</div>
+      <div class="form-field"><span class="form-label">메모</span><div class="form-area" style="height:28px"></div></div>
+      <div class="form-field"><span class="form-label">출처 링크</span><input class="form-input ph" placeholder="https://..." readonly></div>
+      <div><span class="form-label">태그</span><span class="tag-btn">+ Tag</span></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
