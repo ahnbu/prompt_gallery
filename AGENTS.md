@@ -98,6 +98,8 @@ pnpm deploy:prod
 ## NOTES
 
 - 이 repo에는 GitHub Actions 워크플로가 없다.
+- 하위 폴더에 범위별 규칙 문서가 있다: client 세부 규칙은 `src/client/AGENTS.md`,
+  worker 세부 규칙은 `src/worker/AGENTS.md`. 해당 폴더 작업 시 함께 참조한다.
 - `DESIGN.md`는 UI 변경에 대한 강한 제약이며, 선택적 참고가 아니다.
 - 영속 데이터 형태나 생성물 저장 동작을 건드리는 변경이면, 구현 전에 마이그레이션/재처리와
   검증 세부사항을 계획에 갱신한다.
