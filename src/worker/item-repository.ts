@@ -15,7 +15,7 @@ type ItemListFilter = {
 }
 
 const SELECT_ITEM = `
-  SELECT id, type, title, body, notes, github_url, image_key,
+  SELECT id, type, title, body, notes, github_url, source_url, image_key,
     (SELECT assets.id FROM assets WHERE assets.object_key = items.image_key LIMIT 1) AS image_asset_id,
     favorite, created_at, updated_at
   FROM items
@@ -91,8 +91,8 @@ export class ItemRepository {
 
     await this.db
       .prepare(`
-        INSERT INTO items (id, type, title, body, notes, github_url, image_key, favorite)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO items (id, type, title, body, notes, github_url, source_url, image_key, favorite)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       `)
       .bind(
         id,
@@ -101,6 +101,7 @@ export class ItemRepository {
         input.body,
         input.notes,
         input.githubUrl,
+        input.sourceUrl,
         null,
         favoriteValue(input.favorite),
       )
@@ -138,6 +139,7 @@ export class ItemRepository {
     addStringField(fields, values, { column: "body", value: input.body })
     addStringField(fields, values, { column: "notes", value: input.notes })
     addStringField(fields, values, { column: "github_url", value: input.githubUrl })
+    addStringField(fields, values, { column: "source_url", value: input.sourceUrl })
     if (input.imageAssetId !== undefined) {
       let objectKey: string | null = null
       if (input.imageAssetId !== null) {

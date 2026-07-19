@@ -15,6 +15,7 @@ export type Item = {
   readonly body: string | null
   readonly notes: string | null
   readonly githubUrl: string | null
+  readonly sourceUrl: string | null
   readonly imageKey: string | null
   readonly imageAssetId: string | null
   readonly favorite: boolean
@@ -41,6 +42,7 @@ export type ItemRow = {
   readonly body: string | null
   readonly notes: string | null
   readonly github_url: string | null
+  readonly source_url: string | null
   readonly image_key: string | null
   readonly image_asset_id: string | null
   readonly favorite: number
@@ -54,6 +56,7 @@ export type CreateItemInput = {
   readonly body: string | null
   readonly notes: string | null
   readonly githubUrl: string | null
+  readonly sourceUrl: string | null
   readonly favorite: boolean
   readonly tagNames: readonly string[] | null
 }
@@ -63,6 +66,7 @@ export type PatchItemInput = {
   readonly body?: string | null
   readonly notes?: string | null
   readonly githubUrl?: string | null
+  readonly sourceUrl?: string | null
   readonly favorite?: boolean
   readonly tagNames?: readonly string[]
   readonly imageAssetId?: string | null
@@ -99,6 +103,7 @@ export function rowToItem(row: ItemRow): Item {
     body: row.body,
     notes: row.notes,
     githubUrl: row.github_url,
+    sourceUrl: row.source_url,
     imageKey: row.image_key,
     imageAssetId: row.image_asset_id,
     favorite: row.favorite === 1,
@@ -116,6 +121,7 @@ export function itemResponse(item: Item): ItemResponse {
     body: item.body,
     notes: item.notes,
     githubUrl: item.githubUrl,
+    sourceUrl: item.sourceUrl,
     imageAssetId: item.imageAssetId,
     contentUrl: item.imageAssetId === null ? null : `/api/assets/${item.imageAssetId}/content`,
     favorite: item.favorite,

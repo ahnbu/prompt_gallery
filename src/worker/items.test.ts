@@ -181,4 +181,64 @@ describe("items API", () => {
       item: { title: "Updated without direct image", imageAssetId: null },
     })
   })
+
+  it("stores and returns a valid sourceUrl on create and patch", async () => {
+    // Given: a prompt created with a source link
+    const createResponse = await itemRequest("POST", "/api/items", {
+      type: "prompt",
+      body: "Prompt with a source",
+      sourceUrl: "https://example.com/origin",
+    })
+
+    // Then: the source link round-trips through the create response
+    expect(createResponse.status).toBe(201)
+    const createPayload: unknown = await createResponse.json()
+    const id = readNestedString(createPayload, "item", "id")
+    if (id === undefined) {
+      throw new Error("Created item response did not include item.id")
+    }
+    expect(createPayload).toMatchObject({
+      item: { sourceUrl: "https://example.com/origin" },
+    })
+
+    // When: the source link is updated through patch
+    const patchResponse = await itemRequest("PATCH", `/api/items/${id}`, {
+      sourceUrl: "https://example.com/updated",
+    })
+
+    // Then: the updated value is persisted and returned
+    expect(patchResponse.status).toBe(200)
+    await expect(patchResponse.json()).resolves.toMatchObject({
+      item: { sourceUrl: "https://example.com/updated" },
+    })
+  })
+
+  it("allows sourceUrl to be omitted or null", async () => {
+    // Given: a prompt created without a source link
+    const id = await createItem({ type: "prompt", body: "Prompt without a source" })
+
+    // Then: the item reports a null sourceUrl
+    const getResponse = await itemRequest("GET", `/api/items/${id}`)
+    await expect(getResponse.json()).resolves.toMatchObject({
+      item: { sourceUrl: null },
+    })
+  })
+
+  it("rejects an invalid sourceUrl", async () => {
+    // Given: a create request with a malformed source link
+    const response = await itemRequest("POST", "/api/items", {
+      type: "prompt",
+      body: "Prompt with a bad source",
+      sourceUrl: "not-a-url",
+    })
+
+    // Then: a typed validation error is returned
+    expect(response.status).toBe(400)
+    await expect(response.json()).resolves.toEqual({
+      error: {
+        code: "invalid_item",
+        message: "sourceUrl must be a valid URL.",
+      },
+    })
+  })
 })

@@ -89,6 +89,30 @@ function requireGitHubUrl(value: string | null): string {
   return value
 }
 
+function isValidSourceUrl(value: string): boolean {
+  try {
+    const url = new URL(value)
+    return url.protocol === "https:" || url.protocol === "http:"
+  } catch (error) {
+    if (error instanceof TypeError) {
+      return false
+    }
+    throw error
+  }
+}
+
+function readOptionalSourceUrl(value: unknown): string | null | undefined {
+  const sourceUrl = readOptionalString(value, "sourceUrl")
+  if (sourceUrl === undefined || sourceUrl === null) {
+    return sourceUrl
+  }
+  if (!isValidSourceUrl(sourceUrl)) {
+    throw new ApiError("invalid_item", "sourceUrl must be a valid URL.", 400)
+  }
+
+  return sourceUrl
+}
+
 function readOptionalTags(value: unknown): readonly string[] | null | undefined {
   const field = getField(value, "tags")
   if (field === undefined) {
@@ -179,6 +203,7 @@ export function parseCreateItem(value: unknown): CreateItemInput {
     body,
     notes: readOptionalString(value, "notes") ?? null,
     githubUrl,
+    sourceUrl: readOptionalSourceUrl(value) ?? null,
     favorite: readOptionalBoolean(value, "favorite") ?? false,
     tagNames: readOptionalTags(value) ?? null,
   }
@@ -189,6 +214,7 @@ export function parsePatchItem(value: unknown, current: Item): PatchItemInput {
   const body = readOptionalString(value, "body")
   const notes = readOptionalString(value, "notes")
   const githubUrl = readOptionalString(value, "githubUrl")
+  const sourceUrl = readOptionalSourceUrl(value)
   const favorite = readOptionalBoolean(value, "favorite")
   const tagNames = readOptionalTags(value)
   const imageAssetId = readOptionalNullableId(value, "imageAssetId")
@@ -205,6 +231,7 @@ export function parsePatchItem(value: unknown, current: Item): PatchItemInput {
     ...(body !== undefined ? { body } : {}),
     ...(notes !== undefined ? { notes } : {}),
     ...(githubUrl !== undefined ? { githubUrl } : {}),
+    ...(sourceUrl !== undefined ? { sourceUrl } : {}),
     ...(favorite !== undefined ? { favorite } : {}),
     ...(tagNames !== undefined ? { tagNames: tagNames ?? [] } : {}),
     ...(imageAssetId !== undefined ? { imageAssetId } : {}),
