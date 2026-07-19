@@ -312,13 +312,10 @@ function ModalTypeBadge(props: { readonly type: Draft["type"] }) {
 }
 
 async function cleanupCurrentStagedAsset(state: ItemModalState, draft: Draft): Promise<void> {
-  if (state.kind !== "detail") {
-    return
-  }
   if (draft.imageAssetId === undefined || draft.imageAssetId === null) {
     return
   }
-  if (draft.imageAssetId === state.item.imageAssetId) {
+  if (state.kind === "detail" && draft.imageAssetId === state.item.imageAssetId) {
     return
   }
 

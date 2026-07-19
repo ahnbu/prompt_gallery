@@ -1,9 +1,11 @@
 import { Image, Trash2, Upload } from "lucide-react"
-import { useRef, useState } from "react"
+import { type DragEvent, useRef, useState } from "react"
 import type { Item } from "./gallery-data"
 import { deleteImageAsset, preparePreviewFile, uploadImageAsset } from "./image-assets"
 
 type UploadStatus = "idle" | "uploading" | "removing"
+
+const ACCEPTED_TYPES = ["image/png", "image/jpeg", "image/webp"]
 
 export function ImagePreviewField(props: {
   readonly item: Item | null
@@ -18,29 +20,31 @@ export function ImagePreviewField(props: {
   const [status, setStatus] = useState<UploadStatus>("idle")
   const [progress, setProgress] = useState(0)
   const [error, setError] = useState<string | null>(null)
+  const [dragging, setDragging] = useState(false)
   const imageAssetId =
     props.imageAssetId === undefined ? (props.item?.imageAssetId ?? null) : props.imageAssetId
   const originalAssetId = props.item?.imageAssetId ?? null
   const hasImage = imageAssetId !== null
-  const canUpload = selectedFile !== null && status === "idle" && props.item !== null
+  const isDraftMode = props.onDraftChange !== undefined
+  const canUploadTarget = props.item !== null || isDraftMode
+  const canUpload = selectedFile !== null && status === "idle" && canUploadTarget
   const disabledReason =
-    props.item === null && props.readOnly !== true
-      ? "항목 저장 후 이미지를 추가할 수 있습니다."
-      : null
+    !canUploadTarget && props.readOnly !== true ? "항목 저장 후 이미지를 추가할 수 있습니다." : null
 
   async function uploadSelected(): Promise<void> {
-    if (selectedFile === null || props.item === null) {
+    if (selectedFile === null || !canUploadTarget) {
       return
     }
 
+    const boundItem = props.item
     setStatus("uploading")
     setProgress(5)
     setError(null)
     try {
       const preparedFile = await preparePreviewFile(selectedFile)
       const asset = await uploadImageAsset(
-        props.onDraftChange === undefined
-          ? { itemId: props.item.id, file: preparedFile, onProgress: setProgress }
+        props.onDraftChange === undefined && boundItem !== null
+          ? { itemId: boundItem.id, file: preparedFile, onProgress: setProgress }
           : { file: preparedFile, onProgress: setProgress },
       )
       const previousDraftAssetId =
@@ -51,7 +55,9 @@ export function ImagePreviewField(props: {
         fileInputRef.current.value = ""
       }
       if (props.onDraftChange === undefined) {
-        await props.onChanged?.(props.item.id)
+        if (boundItem !== null) {
+          await props.onChanged?.(boundItem.id)
+        }
       } else {
         props.onDraftChange(asset.id)
         if (previousDraftAssetId !== null) {
@@ -63,6 +69,26 @@ export function ImagePreviewField(props: {
     } finally {
       setStatus("idle")
     }
+  }
+
+  const canDrop = canUploadTarget && props.compact !== true && props.readOnly !== true
+
+  function handleDrop(event: DragEvent<HTMLDivElement>): void {
+    event.preventDefault()
+    setDragging(false)
+    if (!canDrop || status !== "idle") {
+      return
+    }
+    const file = event.dataTransfer.files.item(0)
+    if (file === null) {
+      return
+    }
+    if (!ACCEPTED_TYPES.includes(file.type)) {
+      setError("PNG, JPEG, WebP 이미지만 추가할 수 있습니다.")
+      return
+    }
+    setError(null)
+    setSelectedFile(file)
   }
 
   async function removeImage(): Promise<void> {
@@ -91,7 +117,20 @@ export function ImagePreviewField(props: {
 
   return (
     <div className={props.compact ? "image-preview compact" : "image-preview"}>
-      <div className="image-preview-frame">
+      <div
+        className={dragging ? "image-preview-frame dragging" : "image-preview-frame"}
+        data-qa="image-preview-frame"
+        onDragLeave={canDrop ? () => setDragging(false) : undefined}
+        onDragOver={
+          canDrop
+            ? (event) => {
+                event.preventDefault()
+                setDragging(true)
+              }
+            : undefined
+        }
+        onDrop={canDrop ? handleDrop : undefined}
+      >
         {hasImage ? (
           <img
             alt={`${props.item?.title ?? "이미지 프롬프트"} 미리보기`}
@@ -113,7 +152,7 @@ export function ImagePreviewField(props: {
               accept="image/png,image/jpeg,image/webp"
               aria-label="이미지 파일 선택"
               data-qa="image-preview-file"
-              disabled={props.item === null || status !== "idle"}
+              disabled={!canUploadTarget || status !== "idle"}
               onChange={(event) => setSelectedFile(event.currentTarget.files?.item(0) ?? null)}
               ref={fileInputRef}
               type="file"

@@ -16,6 +16,11 @@
   background: var(--surface-control);
 }
 
+.image-preview-frame.dragging {
+  border-color: color-mix(in srgb, var(--accent-primary) 60%, transparent);
+  background: color-mix(in srgb, var(--accent-primary) 8%, var(--surface-control));
+}
+
 .image-preview.compact .image-preview-frame {
   min-height: 0;
 }
