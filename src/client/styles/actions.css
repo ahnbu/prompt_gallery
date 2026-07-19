@@ -114,7 +114,7 @@
 .secondary-button:disabled,
 .ghost-button:disabled,
 .danger-button:disabled {
-  cursor: wait;
+  cursor: not-allowed;
   opacity: 0.62;
 }
 

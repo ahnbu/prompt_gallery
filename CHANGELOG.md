@@ -4,6 +4,7 @@
 
 | 일시 | 유형 | 범위 | 변경내용 | 변경사유 | 작성AI |
 |---|---|---|---|---|---|
+| 2026-07-19 13:39 | fix | ui | 비활성 버튼 커서 wait→not-allowed — 로딩 오인 스피너 제거 | - | Claude |
 | 2026-07-19 13:38 | feat | ui | 카드·모달 제목 정리 — 모달 제목 1줄, 카드 제목을 본문 위로 이동(제목 y축 정렬) | - | Claude |
 | 2026-07-19 13:01 | docs | agents-rules | AGENTS.md에 DEPLOYMENT 섹션 추가 — AI 직접 배포 절차(인증·마이그레이션 확인 포함), 낡은 'deploy 스크립트 없음' 서술 수정 | - | Claude |
 | 2026-07-19 12:51 | docs | rules | CLAUDE.md 파일 추가(@AGENTS.md 포인터) — 이전 CHANGELOG 행의 실제 파일 커밋 | - | Claude |
