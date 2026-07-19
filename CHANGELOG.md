@@ -4,6 +4,7 @@
 
 | 일시 | 유형 | 범위 | 변경내용 | 변경사유 | 작성AI |
 |---|---|---|---|---|---|
+| 2026-07-19 18:47 | docs | backlog | 저우선 상태 표기 규칙 추가 | - | Claude |
 | 2026-07-19 18:47 | docs | agents | AGENTS.md·src/client/AGENTS.md 한국어 번역 | - | Claude |
 | 2026-07-19 16:55 | docs | plan | Wave 3.5·4 원격 배포 완료 기록 (D1 백업·마이그레이션·deploy) | - | Claude |
 | 2026-07-19 16:51 | style | qa | browser-wave4.mjs 포맷 정리·디버그 로그 제거 | - | Claude |
