@@ -17,7 +17,7 @@ async function createPromptWithSource(page, baseUrl) {
   const typeSelect = page.locator('[data-qa="item-type-select"]')
   await typeSelect.waitFor({ state: "visible" })
   await typeSelect.selectOption("prompt")
-  await page.locator('textarea').first().fill("Wave4 source url test body")
+  await page.locator("textarea").first().fill("Wave4 source url test body")
   await page.locator('[data-qa="item-source-url"]').fill(SOURCE_URL)
   await page.getByRole("button", { name: "저장" }).click()
   await page.locator('[data-qa="gallery-card"]').first().waitFor()
@@ -52,13 +52,9 @@ async function assertNoSourceLinkWhenAbsent(page, baseUrl) {
   await page.locator('[data-qa="gallery-card"]').first().waitFor()
   const cards = page.locator('[data-qa="gallery-card"]')
   const count = await cards.count()
-  console.log(`debug: card count = ${count}`)
   let sawCardWithoutSource = false
   for (let i = 0; i < count; i += 1) {
-    const hasSource = await cards
-      .nth(i)
-      .locator('[data-qa="item-card-source"]')
-      .count()
+    const hasSource = await cards.nth(i).locator('[data-qa="item-card-source"]').count()
     if (hasSource === 0) {
       sawCardWithoutSource = true
       break
