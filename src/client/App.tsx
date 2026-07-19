@@ -229,6 +229,7 @@ export function App() {
         </div>
         <div className="topbar-actions">
           <button
+            aria-label="추가"
             className="primary-button topbar-primary-action"
             onClick={openAddModal}
             type="button"
@@ -236,11 +237,21 @@ export function App() {
             <Plus aria-hidden="true" size={17} strokeWidth={1.8} />
             <span>추가</span>
           </button>
-          <button className="ghost-button" onClick={() => setTagManagementOpen(true)} type="button">
+          <button
+            aria-label="태그 관리"
+            className="ghost-button"
+            onClick={() => setTagManagementOpen(true)}
+            type="button"
+          >
             <Tags aria-hidden="true" size={17} strokeWidth={1.8} />
             <span>태그 관리</span>
           </button>
-          <button className="ghost-button" onClick={() => void exportGallery()} type="button">
+          <button
+            aria-label="내보내기"
+            className="ghost-button"
+            onClick={() => void exportGallery()}
+            type="button"
+          >
             <Download aria-hidden="true" size={17} strokeWidth={1.8} />
             <span>내보내기</span>
           </button>
@@ -259,7 +270,6 @@ export function App() {
 
       <nav className="tabbar" aria-label="Prompt Gallery sections">
         {tabs.map((tab) => {
-          const Icon = tab.icon
           const active = tab.value === activeTab
 
           return (
@@ -274,7 +284,6 @@ export function App() {
               type="button"
             >
               <span className="tab-dot" aria-hidden="true" />
-              <Icon aria-hidden="true" size={17} strokeWidth={1.8} />
               <span>{tab.shortLabel}</span>
             </button>
           )

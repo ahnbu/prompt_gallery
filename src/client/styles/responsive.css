@@ -14,32 +14,40 @@
 
 @media (max-width: 680px) {
   .topbar {
-    grid-template-columns: 1fr;
+    grid-template-columns: auto 1fr;
+    align-items: center;
   }
 
-  .title-block {
-    display: none;
+  .topbar h1 {
+    font-size: 20px;
   }
 
-  .primary-button,
-  .topbar-actions,
   .search-control {
+    grid-column: 1 / -1;
     width: 100%;
   }
 
   .topbar-actions {
     flex-wrap: nowrap;
+    justify-content: flex-end;
+    gap: var(--space-2);
+  }
+
+  .topbar-actions .primary-button span,
+  .topbar-actions .ghost-button span {
+    display: none;
   }
 
   .topbar-actions .primary-button,
   .topbar-actions .ghost-button {
-    flex: 1 1 0;
-    min-width: 0;
+    width: 40px;
+    padding: 0;
   }
 
   .tab-button {
-    flex: 1 1 30%;
+    flex: 0 1 auto;
     justify-content: center;
+    white-space: nowrap;
   }
 
   .tag-chip {
