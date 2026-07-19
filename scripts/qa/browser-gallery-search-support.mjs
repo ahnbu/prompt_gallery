@@ -120,4 +120,26 @@ export async function assertShell(page) {
       `Tab is missing: ${tabName}`,
     )
   }
+  await assertSingleRow(page, ".topbar-actions", "추가·태그 관리·내보내기 액션")
+}
+
+// Guards against action buttons or labels wrapping onto a second row at any
+// viewport width. Buttons on the same row share (approximately) the same top.
+export async function assertSingleRow(page, selector, label) {
+  const tops = await page
+    .locator(`${selector} > *`)
+    .evaluateAll((elements) =>
+      elements
+        .filter((element) => element.getClientRects().length > 0)
+        .map((element) => Math.round(element.getBoundingClientRect().top)),
+    )
+  if (tops.length <= 1) {
+    return
+  }
+  const rows = new Set(tops)
+  const span = Math.max(...tops) - Math.min(...tops)
+  assert(
+    rows.size === 1 || span <= 4,
+    `${label} wraps onto multiple rows (tops: ${tops.join(", ")})`,
+  )
 }
