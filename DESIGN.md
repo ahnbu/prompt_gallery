@@ -283,11 +283,17 @@ States:
 
 - Modal surface uses `--surface-panel`, `--border-default`, and Level 2 shadow.
 - Form fields use white surfaces, 4px to 6px radius, and a visible focus ring.
-- Modal headers and actions remain compact. Detail headers show the type badge
-  and icon actions; edit/add footers keep destructive, cancel, and confirm
-  actions in a stable left-to-right order.
-- Detail body is the primary content, followed by a divider, subdued title,
-  tags, and quiet date metadata.
+- Modal headers and actions remain compact. Detail headers stack two rows: a
+  first row with the type badge and icon actions, then the item title (`h2`,
+  single-line clamp) as the second row so the title sits at the top like a card.
+  Edit/add headers show only the badge and icon actions with no title text and
+  no "편집"/"새 항목" label; the title is owned by the form's title input to avoid
+  duplicating it. Edit/add footers keep destructive, cancel, and confirm actions
+  in a stable left-to-right order.
+- Detail content leads with the title header, then the primary content in card
+  order: prompt body (repo shows a GitHub open link instead), image preview,
+  notes, tags, a divider, and finally a quiet metadata row with the update date
+  on the left and the optional source link on the right.
 - Destructive actions use text or border emphasis first; do not add a second
   saturated destructive palette unless the interaction requires it.
 
