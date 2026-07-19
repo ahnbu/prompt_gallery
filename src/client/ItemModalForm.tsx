@@ -43,9 +43,17 @@ export function ItemModalForm(props: {
           </select>
         </label>
       ) : null}
+      <label>
+        제목
+        <input
+          onChange={(event) => props.setDraft({ ...props.draft, title: event.currentTarget.value })}
+          placeholder="비워두면 프롬프트를 제목으로 사용"
+          value={props.draft.title}
+        />
+      </label>
       {props.promptLike ? (
         <label>
-          본문
+          프롬프트
           <textarea
             onChange={(event) =>
               props.setDraft({ ...props.draft, body: event.currentTarget.value })
@@ -55,14 +63,13 @@ export function ItemModalForm(props: {
           />
         </label>
       ) : null}
-      <label>
-        제목
-        <input
-          onChange={(event) => props.setDraft({ ...props.draft, title: event.currentTarget.value })}
-          placeholder="비워두면 본문을 제목으로 사용"
-          value={props.draft.title}
+      {props.draft.type === ITEM_TYPES.IMAGE_PROMPT ? (
+        <ImagePreviewField
+          imageAssetId={props.draft.imageAssetId === undefined ? null : props.draft.imageAssetId}
+          item={props.previewItem}
+          onDraftChange={(imageAssetId) => props.setDraft({ ...props.draft, imageAssetId })}
         />
-      </label>
+      ) : null}
       {props.repoLike ? (
         <label>
           GitHub URL
@@ -75,6 +82,14 @@ export function ItemModalForm(props: {
           />
         </label>
       ) : null}
+      <label>
+        메모
+        <textarea
+          onChange={(event) => props.setDraft({ ...props.draft, notes: event.currentTarget.value })}
+          rows={4}
+          value={props.draft.notes}
+        />
+      </label>
       <label>
         출처 링크
         <input
@@ -96,21 +111,6 @@ export function ItemModalForm(props: {
           onChange={(tags) => props.setDraft({ ...props.draft, tagsText: tagNamesToText(tags) })}
         />
       </div>
-      {props.draft.type === ITEM_TYPES.IMAGE_PROMPT ? (
-        <ImagePreviewField
-          imageAssetId={props.draft.imageAssetId === undefined ? null : props.draft.imageAssetId}
-          item={props.previewItem}
-          onDraftChange={(imageAssetId) => props.setDraft({ ...props.draft, imageAssetId })}
-        />
-      ) : null}
-      <label>
-        메모
-        <textarea
-          onChange={(event) => props.setDraft({ ...props.draft, notes: event.currentTarget.value })}
-          rows={4}
-          value={props.draft.notes}
-        />
-      </label>
     </div>
   )
 }
