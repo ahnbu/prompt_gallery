@@ -1,2 +1,2 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" aria-label="Prompt Gallery"><rect x="2" y="2" width="28" height="28" rx="7" fill="#0075de" />
-<path d="M11.5 8.5 H18 a5.5 5.5 0 0 1 0 11 H14.5 V24.5 H11.5 Z M14.5 11.3 V16.7 H18 a2.7 2.7 0 0 0 0-5.4 Z" fill="#ffffff" /></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" aria-label="Prompt Gallery"><rect x="2" y="2" width="28" height="28" rx="7.5" fill="#0075de" />
+<text x="16" y="23.5" font-family="Fraunces, Georgia, 'Times New Roman', serif" font-size="21" font-weight="600" fill="#ffffff" text-anchor="middle">P</text></svg>

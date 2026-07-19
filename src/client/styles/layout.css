@@ -27,18 +27,21 @@
 }
 
 .brand-favicon {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   flex: 0 0 auto;
-  border-radius: 7px;
+  border-radius: 8px;
 }
 
 h1 {
   margin: 0;
   color: var(--text-primary);
-  font-size: 30px;
-  font-weight: 700;
-  line-height: 1.12;
+  font-family: var(--font-brand);
+  font-size: 24px;
+  font-weight: 600;
+  font-optical-sizing: auto;
+  letter-spacing: -0.015em;
+  line-height: 1.1;
 }
 
 .section-stack {

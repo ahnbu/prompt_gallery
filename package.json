@@ -22,6 +22,7 @@
     "deploy:prod": "pnpm build && pnpm exec wrangler d1 migrations apply prompt-gallery-db --remote && pnpm deploy:check && pnpm exec wrangler deploy"
   },
   "dependencies": {
+    "@fontsource-variable/fraunces": "^5.2.9",
     "lucide-react": "^0.468.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
