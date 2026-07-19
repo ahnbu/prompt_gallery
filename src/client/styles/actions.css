@@ -142,37 +142,38 @@
   transition: background-color 120ms ease-out, border-color 120ms ease-out, color 120ms ease-out;
 }
 
-.tab-dot {
-  width: 7px;
-  height: 7px;
+.tab-button svg {
   flex: 0 0 auto;
-  border-radius: 999px;
-  background: var(--type-all);
+  color: var(--type-all);
 }
 
-.tab-button[data-tab-tone="favorite"] .tab-dot {
-  background: var(--type-favorite);
+.tab-button[data-tab-tone="favorite"] svg {
+  color: var(--type-favorite);
 }
 
-.tab-button[data-tab-tone="prompt"] .tab-dot {
-  background: var(--type-prompt);
+.tab-button[data-tab-tone="prompt"] svg {
+  color: var(--type-prompt);
 }
 
-.tab-button[data-tab-tone="image"] .tab-dot {
-  background: var(--type-image);
+.tab-button[data-tab-tone="image"] svg {
+  color: var(--type-image);
 }
 
-.tab-button[data-tab-tone="workflow"] .tab-dot {
-  background: var(--type-workflow);
+.tab-button[data-tab-tone="workflow"] svg {
+  color: var(--type-workflow);
 }
 
-.tab-button[data-tab-tone="repo"] .tab-dot {
-  background: var(--type-repo);
+.tab-button[data-tab-tone="repo"] svg {
+  color: var(--type-repo);
 }
 
 .tab-button.active {
   border-color: color-mix(in srgb, var(--accent-primary) 44%, transparent);
   background: var(--accent-soft);
+  color: var(--accent-hover);
+}
+
+.tab-button.active svg {
   color: var(--accent-hover);
 }
 

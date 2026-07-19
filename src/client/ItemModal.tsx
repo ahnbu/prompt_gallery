@@ -1,4 +1,4 @@
-import { Check, Copy, Star, X } from "lucide-react"
+import { Check, Copy, FileText, Github, Image, Star, X } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { DetailActions, EditActions } from "./ItemModalActions"
 import { ItemModalDetail } from "./ItemModalDetail"
@@ -284,11 +284,26 @@ export function ItemModal(props: {
 function ModalTypeBadge(props: { readonly type: Draft["type"] }) {
   switch (props.type) {
     case ITEM_TYPES.PROMPT:
-      return <span className="type-badge prompt">프롬프트</span>
+      return (
+        <span className="type-badge prompt">
+          <FileText aria-hidden="true" size={13} strokeWidth={1.8} />
+          프롬프트
+        </span>
+      )
     case ITEM_TYPES.IMAGE_PROMPT:
-      return <span className="type-badge image">이미지</span>
+      return (
+        <span className="type-badge image">
+          <Image aria-hidden="true" size={13} strokeWidth={1.8} />
+          이미지
+        </span>
+      )
     case ITEM_TYPES.REPO:
-      return <span className="type-badge repo">레포</span>
+      return (
+        <span className="type-badge repo">
+          <Github aria-hidden="true" size={13} strokeWidth={1.8} />
+          레포
+        </span>
+      )
     case "":
       return <span className="type-badge neutral">새 항목</span>
     default:

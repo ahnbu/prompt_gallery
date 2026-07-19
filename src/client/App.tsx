@@ -270,6 +270,7 @@ export function App() {
 
       <nav className="tabbar" aria-label="Prompt Gallery sections">
         {tabs.map((tab) => {
+          const Icon = tab.icon
           const active = tab.value === activeTab
 
           return (
@@ -283,7 +284,7 @@ export function App() {
               title={tab.label}
               type="button"
             >
-              <span className="tab-dot" aria-hidden="true" />
+              <Icon aria-hidden="true" size={16} strokeWidth={1.8} />
               <span>{tab.shortLabel}</span>
             </button>
           )

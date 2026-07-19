@@ -103,12 +103,8 @@
   white-space: nowrap;
 }
 
-.type-badge::before {
-  width: 7px;
-  height: 7px;
-  border-radius: 999px;
-  background: currentColor;
-  content: "";
+.type-badge svg {
+  flex: 0 0 auto;
 }
 
 .type-badge.prompt {

@@ -1,4 +1,4 @@
-import { Check, Copy, ExternalLink, Star } from "lucide-react"
+import { Check, Copy, ExternalLink, FileText, Github, Image, Star, Workflow } from "lucide-react"
 import { useState } from "react"
 import { ImagePreviewField } from "./ImagePreviewField"
 import { TagChipsEditor } from "./TagChipsEditor"
@@ -218,6 +218,7 @@ function WorkflowCard(props: {
     <article className="gallery-card" data-card-type="workflow" data-qa="gallery-card">
       <div className="card-topline">
         <span className="type-badge workflow" data-qa="type-badge" data-type="workflow">
+          <Workflow aria-hidden="true" size={13} strokeWidth={1.8} />
           워크플로우
         </span>
         <div className="card-actions">
@@ -261,18 +262,21 @@ export function TypeBadge({ type }: { readonly type: ItemType }) {
     case "prompt":
       return (
         <span className="type-badge prompt" data-qa="type-badge" data-type="prompt">
+          <FileText aria-hidden="true" size={13} strokeWidth={1.8} />
           프롬프트
         </span>
       )
     case "image_prompt":
       return (
         <span className="type-badge image" data-qa="type-badge" data-type="image_prompt">
+          <Image aria-hidden="true" size={13} strokeWidth={1.8} />
           이미지
         </span>
       )
     case "repo":
       return (
         <span className="type-badge repo" data-qa="type-badge" data-type="repo">
+          <Github aria-hidden="true" size={13} strokeWidth={1.8} />
           레포
         </span>
       )
