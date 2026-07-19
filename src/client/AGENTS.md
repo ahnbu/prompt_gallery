@@ -2,47 +2,47 @@
 
 ## OVERVIEW
 
-React workspace UI for browsing, filtering, editing, copying, and previewing gallery items.
+갤러리 아이템을 탐색, 필터링, 편집, 복사, 프리뷰하는 React 작업 UI다.
 
 ## WHERE TO LOOK
 
-| Task | Location | Notes |
+| 작업 | 위치 | 비고 |
 | --- | --- | --- |
-| App state and data refresh | `App.tsx` | Owns gallery fetch, modal state, tabs, tags, favorite refresh. |
-| React bootstrap | `main.tsx` | Checks `#root` and renders `<App />`. |
-| Gallery card rendering | `GalleryCard.tsx` | Card-level copy/favorite/open behavior. |
-| Sectioned vs unified lists | `GalleryList.tsx` | Search/filter switches to unified results. |
-| Item modal | `ItemModal*.tsx`, `item-modal-model.ts` | Prompt/image/repo create/edit/detail model. |
-| Workflow modal | `WorkflowModal*.tsx`, `workflow-modal-model.ts` | Workflow fields and step editing. |
-| Tag management | `TagManagement*.tsx`, `tag-management-model.ts` | Rename, merge, keyword/color management. |
-| API parsing | `gallery-data.ts` | Runtime validation of Worker JSON payloads. |
-| Styling | `styles.css`, `styles/*.css` | Tokenized CSS split by base/layout/cards/modal/actions. |
-| Export | `export-data.ts` | Calls `/api/export` and downloads the result. |
+| 앱 상태와 데이터 갱신 | `App.tsx` | 갤러리 fetch, 모달 상태, 탭, 태그, 즐겨찾기 갱신을 소유. |
+| React 부트스트랩 | `main.tsx` | `#root`를 확인하고 `<App />`을 렌더. |
+| 갤러리 카드 렌더링 | `GalleryCard.tsx` | 카드 단위 복사/즐겨찾기/열기 동작. |
+| 섹션형 vs 통합 리스트 | `GalleryList.tsx` | 검색/필터 시 통합 결과로 전환. |
+| 아이템 모달 | `ItemModal*.tsx`, `item-modal-model.ts` | 프롬프트/이미지/레포 생성/편집/상세 모델. |
+| 워크플로 모달 | `WorkflowModal*.tsx`, `workflow-modal-model.ts` | 워크플로 필드와 스텝 편집. |
+| 태그 관리 | `TagManagement*.tsx`, `tag-management-model.ts` | 이름변경, 병합, 키워드/색상 관리. |
+| API 파싱 | `gallery-data.ts` | Worker JSON payload의 런타임 검증. |
+| 스타일링 | `styles.css`, `styles/*.css` | base/layout/cards/modal/actions로 분리된 토큰화 CSS. |
+| Export | `export-data.ts` | `/api/export`를 호출하고 결과를 다운로드. |
 
 ## CONVENTIONS
 
-- UI files use PascalCase for components and lower-kebab-ish model/mutation filenames.
-- Keep business decisions in `*-model.ts`; keep network writes in `*-mutations.ts`.
-- Preserve readonly data shapes and explicit parser checks in `gallery-data.ts`.
-- Use Lucide icons for actions. Icon-only controls need accessible labels/titles.
-- Korean labels are normal UI copy; ensure they fit on mobile.
-- Section add buttons must set the matching default type.
+- UI 파일은 컴포넌트에 PascalCase, model/mutation 파일명에 lower-kebab 계열을 쓴다.
+- 비즈니스 결정은 `*-model.ts`에, 네트워크 쓰기는 `*-mutations.ts`에 둔다.
+- `gallery-data.ts`에서 readonly 데이터 형태와 명시적 파서 검사를 유지한다.
+- 액션에는 Lucide 아이콘을 쓴다. 아이콘 전용 컨트롤에는 접근성 레이블/타이틀이 필요하다.
+- 한국어 레이블은 정상 UI 문구다. 모바일에서 잘리지 않게 맞춘다.
+- 섹션 추가 버튼은 해당하는 기본 타입을 설정해야 한다.
 
 ## DESIGN RULES
 
-- `DESIGN.md` controls visual direction: warm paper canvas, white cards, restrained blue action.
-- First viewport stays the working app surface: search, filters, tabs, sections, cards.
-- No hero sections, pricing-style cards, decorative landing bands, or marketing composition.
-- Max content width is `1180px`; prompt, Workflow, and Repo cards use a square
-  card grid capped at 4 columns on desktop wide viewports.
-- Image prompt cards use natural-ratio masonry. Do not force compact gallery
-  thumbnails to `aspect-ratio: 1 / 1`; long images should produce taller cards.
-- Keep cards scan-friendly and avoid nested card shells.
-- Raw colors should not be introduced outside the design tokens.
+- `DESIGN.md`가 시각 방향을 통제한다: 따뜻한 종이 캔버스, 흰 카드, 절제된 블루 액션.
+- 첫 뷰포트는 작업 앱 표면으로 유지한다: 검색, 필터, 탭, 섹션, 카드.
+- 히어로 섹션, 가격표형 카드, 장식성 랜딩 밴드, 마케팅 구성은 쓰지 않는다.
+- 최대 콘텐츠 폭은 `1180px`다. 프롬프트, Workflow, Repo 카드는 데스크톱 와이드 뷰포트에서
+  4열로 제한된 정사각 카드 그리드를 쓴다.
+- 이미지 프롬프트 카드는 자연 비율 masonry를 쓴다. 컴팩트 갤러리 썸네일을
+  `aspect-ratio: 1 / 1`로 강제하지 않는다. 긴 이미지는 더 높은 카드를 만들어야 한다.
+- 카드는 스캔하기 좋게 유지하고 중첩 카드 셸을 피한다.
+- 디자인 토큰 밖에서 raw 색상을 도입하지 않는다.
 
 ## ANTI-PATTERNS
 
-- Do not add fake example cards that cannot be edited or deleted through the normal flow.
-- Do not replace tab text with icon-only controls unless tooltip/accessibility support exists.
-- Do not add decorative motion; motion must communicate interaction or state.
-- Do not move saved-item semantics into DOM-only UI state.
+- 정상 흐름으로 편집/삭제할 수 없는 가짜 예시 카드를 추가하지 않는다.
+- 툴팁/접근성 지원이 없으면 탭 텍스트를 아이콘 전용 컨트롤로 대체하지 않는다.
+- 장식성 모션을 추가하지 않는다. 모션은 상호작용이나 상태를 전달해야 한다.
+- 저장 아이템의 의미를 DOM에만 존재하는 UI 상태로 옮기지 않는다.

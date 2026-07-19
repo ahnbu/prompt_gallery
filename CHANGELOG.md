@@ -4,6 +4,8 @@
 
 | 일시 | 유형 | 범위 | 변경내용 | 변경사유 | 작성AI |
 |---|---|---|---|---|---|
+| 2026-07-19 18:47 | docs | agents | AGENTS.md·src/client/AGENTS.md 한국어 번역 | - | Claude |
+| 2026-07-19 16:55 | docs | plan | Wave 3.5·4 원격 배포 완료 기록 (D1 백업·마이그레이션·deploy) | - | Claude |
 | 2026-07-19 16:51 | style | qa | browser-wave4.mjs 포맷 정리·디버그 로그 제거 | - | Claude |
 | 2026-07-19 16:46 | docs | plan | Wave 4 구현계획·플랜검수·완료검수 문서 기록 | - | Claude |
 | 2026-07-19 16:45 | style | qa | browser-wave35.mjs 포맷 정리 (biome 재포맷 잔여) | - | Claude |
