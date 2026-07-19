@@ -81,10 +81,19 @@ pnpm test
 pnpm qa:api
 pnpm qa:browser
 pnpm deploy:check
+pnpm deploy:prod
 ```
 
-There is no `deploy` package script. After `pnpm build` and `pnpm deploy:check`, deployment is
-expected to use Wrangler directly, for example `pnpm exec wrangler deploy`.
+## DEPLOYMENT
+
+- 사용자가 배포를 요청하면 AI가 직접 `pnpm deploy:prod`로 배포한다.
+  (`build` → 원격 D1 `migrations apply --remote` → `deploy:check` → `wrangler deploy` 순서)
+- 배포 전 필수 통과: `pnpm typecheck && pnpm lint && pnpm test:worker && pnpm qa:browser && pnpm build`.
+- 배포 전 확인:
+  - Wrangler 인증 — `pnpm exec wrangler whoami`. 미인증이면 배포를 중단하고 사용자에게 로그인을 요청한다.
+  - 원격 D1 미적용 마이그레이션 — `pnpm exec wrangler d1 migrations list prompt-gallery-db --remote`.
+    미적용 마이그레이션이 있으면 스키마/데이터 영향을 먼저 사용자에게 보고한 뒤 진행한다.
+- 배포 후 프로덕션 URL(`https://prompt-gallery.byungwook-an.workers.dev`)을 열어 반영을 확인한다.
 
 ## NOTES
 
