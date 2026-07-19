@@ -3,8 +3,8 @@ title: gitignore-OMO임시파일-제외계획
 date: 2026-07-09 19:22
 tags:
   - plan
-session_id: 16203191-8429-4cbf-9bec-9a5caea59b14
-session_path: C:/Users/ahnbu/.antigravity/export/conversations_export.json
+session_id: agy:16203191-8429-4cbf-9bec-9a5caea59b14
+session_path: C:/Users/ahnbu/.gemini/antigravity-cli/conversations/16203191-8429-4cbf-9bec-9a5caea59b14.db
 ai: antigravity
 status: 완료
 next_resume: 없음
