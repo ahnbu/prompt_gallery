@@ -107,7 +107,9 @@ async function run() {
     await openNewImageModal(page, app.baseUrl)
     await assertNewImageFileEnabled(page)
     await assertDisabledCursorNotWait(page)
-    artifacts.push(await screenshot(page, OUTPUT.replace(/\.md$/, ""), "desktop", "new-image-modal"))
+    artifacts.push(
+      await screenshot(page, OUTPUT.replace(/\.md$/, ""), "desktop", "new-image-modal"),
+    )
 
     await page.close()
     console.log(`PASS wave-3.5 browser: ${artifacts.length} artifacts`)
