@@ -6,9 +6,10 @@ export function ItemModalDetail(props: {
   readonly item: Item
 }) {
   const item = props.item
+  const showBody = item.type === "prompt" || item.type === "image_prompt"
   return (
     <div className="detail-stack">
-      <p className="detail-body">{item.body ?? item.githubUrl ?? "본문 없음"}</p>
+      {showBody && item.body !== null ? <p className="detail-body">{item.body}</p> : null}
       {item.type === "image_prompt" ? <ImagePreviewField item={item} readOnly /> : null}
       {item.type === "repo" && item.githubUrl !== null ? (
         <a
@@ -22,23 +23,7 @@ export function ItemModalDetail(props: {
           <span>GitHub 열기</span>
         </a>
       ) : null}
-      {item.sourceUrl !== null ? (
-        <a
-          className="detail-link"
-          data-qa="item-detail-source"
-          href={item.sourceUrl}
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          <Link aria-hidden="true" size={15} strokeWidth={1.8} />
-          <span>출처 열기</span>
-        </a>
-      ) : null}
       {item.notes !== null ? <p className="detail-notes">{item.notes}</p> : null}
-      <div className="detail-divider" aria-hidden="true" />
-      <section className="detail-title-section" aria-label="제목">
-        <h3>{item.title}</h3>
-      </section>
       {item.tags.length > 0 ? (
         <div className="card-tags" aria-label="태그">
           {item.tags.map((tag) => (
@@ -48,8 +33,21 @@ export function ItemModalDetail(props: {
           ))}
         </div>
       ) : null}
+      <div className="detail-divider" aria-hidden="true" />
       <footer className="detail-meta">
-        <time dateTime={item.updatedAt}>수정일 {item.updatedAt.slice(0, 10)}</time>
+        <time dateTime={item.updatedAt}>{item.updatedAt.slice(0, 10)} 수정</time>
+        {item.sourceUrl !== null ? (
+          <a
+            className="detail-link"
+            data-qa="item-detail-source"
+            href={item.sourceUrl}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            <Link aria-hidden="true" size={15} strokeWidth={1.8} />
+            <span>출처 열기</span>
+          </a>
+        ) : null}
       </footer>
     </div>
   )

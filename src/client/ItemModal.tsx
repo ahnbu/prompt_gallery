@@ -5,7 +5,7 @@ import { ItemModalDetail } from "./ItemModalDetail"
 import { ItemModalForm } from "./ItemModalForm"
 import { ITEM_TYPES, type Item, type Tag } from "./gallery-data"
 import { deleteImageAsset } from "./image-assets"
-import { canCopyItemBody } from "./item-actions-model"
+import { copyableText } from "./item-actions-model"
 import {
   type Draft,
   type ItemModalState,
@@ -70,8 +70,10 @@ export function ItemModal(props: {
     }
   }, [])
 
-  const title =
-    props.state.kind === "add" ? "새 항목" : mode === "edit" ? "편집" : props.state.item.title
+  const detailTitle =
+    mode === "detail" && props.state.kind === "detail" ? props.state.item.title : null
+  const editAccessibleLabel =
+    props.state.kind === "add" ? "새 항목" : `${props.state.item.title} 편집`
   const detailItem = props.state.kind === "detail" ? props.state.item : null
   const favoriteLabel =
     detailItem?.favorite === true
@@ -122,17 +124,22 @@ export function ItemModal(props: {
   }
 
   async function copyBody(): Promise<void> {
-    if (props.state.kind === "detail" && canCopyItemBody(props.state.item)) {
-      try {
-        await navigator.clipboard.writeText(props.state.item.body ?? "")
-        setCopyStatus("copied")
-      } catch (copyError) {
-        if (copyError instanceof Error || copyError instanceof DOMException) {
-          setCopyStatus("failed")
-          return
-        }
-        throw copyError
+    if (props.state.kind !== "detail") {
+      return
+    }
+    const text = copyableText(props.state.item)
+    if (text === null) {
+      return
+    }
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopyStatus("copied")
+    } catch (copyError) {
+      if (copyError instanceof Error || copyError instanceof DOMException) {
+        setCopyStatus("failed")
+        return
       }
+      throw copyError
     }
   }
 
@@ -156,7 +163,8 @@ export function ItemModal(props: {
   return (
     <div className="modal-backdrop" data-qa="item-modal-backdrop">
       <dialog
-        aria-labelledby="item-modal-title"
+        aria-label={detailTitle === null ? editAccessibleLabel : undefined}
+        aria-labelledby={detailTitle === null ? undefined : "item-modal-title"}
         aria-modal="true"
         className="item-modal"
         data-qa="item-modal"
@@ -178,55 +186,55 @@ export function ItemModal(props: {
         ref={dialogRef}
       >
         <header className="modal-header">
-          <div className="modal-title-block">
+          <div className="modal-header-top">
             <ModalTypeBadge type={draft.type} />
-            <h2 id="item-modal-title">{title}</h2>
-          </div>
-          <div className="modal-header-actions">
-            {mode === "detail" && detailItem !== null && canCopyItemBody(detailItem) ? (
+            <div className="modal-header-actions">
+              {mode === "detail" && detailItem !== null && copyableText(detailItem) !== null ? (
+                <button
+                  aria-label={`${detailItem.title} 복사`}
+                  className="icon-button"
+                  data-qa="copy-body-button"
+                  onClick={() => void copyBody()}
+                  title="복사"
+                  type="button"
+                >
+                  {copyStatus === "copied" ? (
+                    <Check aria-hidden="true" size={17} strokeWidth={1.8} />
+                  ) : (
+                    <Copy aria-hidden="true" size={17} strokeWidth={1.8} />
+                  )}
+                </button>
+              ) : null}
+              {mode === "detail" && detailItem !== null ? (
+                <button
+                  aria-label={favoriteLabel}
+                  aria-pressed={detailItem.favorite}
+                  className={detailItem.favorite ? "icon-button active" : "icon-button"}
+                  data-qa="favorite-toggle"
+                  data-state={detailItem.favorite ? "favorite" : "not-favorite"}
+                  onClick={() => void toggleFavorite()}
+                  title={favoriteLabel}
+                  type="button"
+                >
+                  <Star
+                    aria-hidden="true"
+                    fill={detailItem.favorite ? "currentColor" : "none"}
+                    size={17}
+                    strokeWidth={1.8}
+                  />
+                </button>
+              ) : null}
               <button
-                aria-label={`${detailItem.title} 본문 복사`}
+                aria-label="닫기"
                 className="icon-button"
-                data-qa="copy-body-button"
-                onClick={() => void copyBody()}
-                title="본문 복사"
+                onClick={() => void closeModal()}
                 type="button"
               >
-                {copyStatus === "copied" ? (
-                  <Check aria-hidden="true" size={17} strokeWidth={1.8} />
-                ) : (
-                  <Copy aria-hidden="true" size={17} strokeWidth={1.8} />
-                )}
+                <X aria-hidden="true" size={17} strokeWidth={1.8} />
               </button>
-            ) : null}
-            {mode === "detail" && detailItem !== null ? (
-              <button
-                aria-label={favoriteLabel}
-                aria-pressed={detailItem.favorite}
-                className={detailItem.favorite ? "icon-button active" : "icon-button"}
-                data-qa="favorite-toggle"
-                data-state={detailItem.favorite ? "favorite" : "not-favorite"}
-                onClick={() => void toggleFavorite()}
-                title={favoriteLabel}
-                type="button"
-              >
-                <Star
-                  aria-hidden="true"
-                  fill={detailItem.favorite ? "currentColor" : "none"}
-                  size={17}
-                  strokeWidth={1.8}
-                />
-              </button>
-            ) : null}
-            <button
-              aria-label="닫기"
-              className="icon-button"
-              onClick={() => void closeModal()}
-              type="button"
-            >
-              <X aria-hidden="true" size={17} strokeWidth={1.8} />
-            </button>
+            </div>
           </div>
+          {detailTitle !== null ? <h2 id="item-modal-title">{detailTitle}</h2> : null}
         </header>
         {copyStatus === "failed" ? (
           <output className="copy-status modal-toast" data-qa="copy-status">

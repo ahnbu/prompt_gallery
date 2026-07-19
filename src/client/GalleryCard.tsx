@@ -14,7 +14,7 @@ import { ImagePreviewField } from "./ImagePreviewField"
 import { TagChipsEditor } from "./TagChipsEditor"
 import type { Item, ItemType, Tag, WorkflowItem } from "./gallery-data"
 import { type CardEntry, assertNever, visibleTags } from "./gallery-model"
-import { canCopyItemBody } from "./item-actions-model"
+import { copyableText } from "./item-actions-model"
 import { repoDisplayTitle } from "./repo-title"
 import { automaticTagNames, manualTagNames } from "./tag-utils"
 
@@ -71,12 +71,13 @@ function ItemCard(props: {
     : `${item.title} 즐겨찾기 추가`
 
   async function copyBody(): Promise<void> {
-    if (item.body === null) {
+    const text = copyableText(item)
+    if (text === null) {
       return
     }
 
     try {
-      await navigator.clipboard.writeText(item.body)
+      await navigator.clipboard.writeText(text)
       setCopyStatus("copied")
     } catch (error) {
       if (error instanceof Error || error instanceof DOMException) {
@@ -116,13 +117,13 @@ function ItemCard(props: {
               {copyStatus === "copied" ? "복사됨" : "복사 실패"}
             </output>
           ) : null}
-          {canCopyItemBody(item) ? (
+          {copyableText(item) !== null ? (
             <button
-              aria-label={`${item.title} 본문 복사`}
+              aria-label={`${item.title} 복사`}
               className="star-indicator"
               data-qa="copy-body-button"
               onClick={copyBody}
-              title="본문 복사"
+              title="복사"
               type="button"
             >
               {copyStatus === "copied" ? (
