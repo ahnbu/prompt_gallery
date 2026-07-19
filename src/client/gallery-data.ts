@@ -21,6 +21,7 @@ export type Item = {
   readonly body: string | null
   readonly notes: string | null
   readonly githubUrl: string | null
+  readonly sourceUrl: string | null
   readonly imageAssetId: string | null
   readonly contentUrl: string | null
   readonly favorite: boolean
@@ -192,6 +193,7 @@ function parseItem(value: unknown): Item {
     body: readNullableString(record, "body"),
     notes: readNullableString(record, "notes"),
     githubUrl: readNullableString(record, "githubUrl"),
+    sourceUrl: readNullableString(record, "sourceUrl"),
     imageAssetId: readNullableString(record, "imageAssetId"),
     contentUrl: readOptionalNullableString(record, "contentUrl"),
     favorite: readBoolean(record, "favorite"),

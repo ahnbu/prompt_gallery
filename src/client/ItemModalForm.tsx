@@ -75,6 +75,18 @@ export function ItemModalForm(props: {
           />
         </label>
       ) : null}
+      <label>
+        출처 링크
+        <input
+          data-qa="item-source-url"
+          onChange={(event) =>
+            props.setDraft({ ...props.draft, sourceUrl: event.currentTarget.value })
+          }
+          placeholder="https://... (출처·소개 링크, 선택)"
+          type="url"
+          value={props.draft.sourceUrl}
+        />
+      </label>
       <div className="form-field">
         <span>태그</span>
         <TagChipsEditor

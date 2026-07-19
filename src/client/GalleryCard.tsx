@@ -1,4 +1,14 @@
-import { Check, Copy, ExternalLink, FileText, Github, Image, Star, Workflow } from "lucide-react"
+import {
+  Check,
+  Copy,
+  ExternalLink,
+  FileText,
+  Github,
+  Image,
+  Link,
+  Star,
+  Workflow,
+} from "lucide-react"
 import { useState } from "react"
 import { ImagePreviewField } from "./ImagePreviewField"
 import { TagChipsEditor } from "./TagChipsEditor"
@@ -134,6 +144,20 @@ function ItemCard(props: {
               title="GitHub 열기"
             >
               <ExternalLink aria-hidden="true" size={16} strokeWidth={1.8} />
+            </a>
+          ) : null}
+          {item.sourceUrl !== null ? (
+            <a
+              aria-label={`${item.title} 출처 열기`}
+              className="star-indicator"
+              data-qa="item-card-source"
+              href={item.sourceUrl}
+              onClick={(event) => event.stopPropagation()}
+              rel="noopener noreferrer"
+              target="_blank"
+              title="출처 열기"
+            >
+              <Link aria-hidden="true" size={16} strokeWidth={1.8} />
             </a>
           ) : null}
           <button

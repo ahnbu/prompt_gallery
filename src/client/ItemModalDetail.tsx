@@ -1,4 +1,4 @@
-import { ExternalLink } from "lucide-react"
+import { ExternalLink, Link } from "lucide-react"
 import { ImagePreviewField } from "./ImagePreviewField"
 import type { Item } from "./gallery-data"
 
@@ -20,6 +20,18 @@ export function ItemModalDetail(props: {
         >
           <ExternalLink aria-hidden="true" size={15} strokeWidth={1.8} />
           <span>GitHub 열기</span>
+        </a>
+      ) : null}
+      {item.sourceUrl !== null ? (
+        <a
+          className="detail-link"
+          data-qa="item-detail-source"
+          href={item.sourceUrl}
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          <Link aria-hidden="true" size={15} strokeWidth={1.8} />
+          <span>출처 열기</span>
         </a>
       ) : null}
       {item.notes !== null ? <p className="detail-notes">{item.notes}</p> : null}
