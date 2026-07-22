@@ -4,6 +4,7 @@
 
 | 일시 | 유형 | 범위 | 변경내용 | 변경사유 | 작성AI |
 |---|---|---|---|---|---|
+| 2026-07-22 17:05 | chore | pnpm-policy | packageManager 고정 및 preinstall 가드 추가 — npm/yarn 혼용 차단 | - | Claude |
 | 2026-07-22 15:52 | docs | readme | README 신규 생성 - 배포 정보(D1+R2), QA 스크립트, 배포 파이프라인 절차 기록 | - | Claude |
 | 2026-07-19 20:44 | fix | agy-session | agy CLI 문서 session_id에 agy: prefix·정본 경로 정정 (1건 백필) | - | Claude |
 | 2026-07-19 19:03 | docs | 규칙 문서 | AGENTS.md(루트/client/worker)·DESIGN.md 한국어화, Wave 5 규칙 반영(square→auto-fit 정합성, api-client/optimistic/assertSingleRow 규칙 추가, 하위 AGENTS.md 상호 참조) | - | Claude |
