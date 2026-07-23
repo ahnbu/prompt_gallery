@@ -4,6 +4,7 @@
 
 | 일시 | 유형 | 범위 | 변경내용 | 변경사유 | 작성AI |
 |---|---|---|---|---|---|
+| 2026-07-23 10:02 | docs | _docs | 문서 5건 frontmatter 세션필드 backfill (session_id/session_path/title/ai 삽입) | - | Claude |
 | 2026-07-22 17:56 | fix | pnpm-policy | preinstall 가드가 pnpm 자신을 차단하던 버그 수정 — npm_execpath 폴백 검사 추가 | - | Claude |
 | 2026-07-22 17:05 | chore | pnpm-policy | packageManager 고정 및 preinstall 가드 추가 — npm/yarn 혼용 차단 | - | Claude |
 | 2026-07-22 15:52 | docs | readme | README 신규 생성 - 배포 정보(D1+R2), QA 스크립트, 배포 파이프라인 절차 기록 | - | Claude |
